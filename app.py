@@ -1,4 +1,4 @@
-from flask import Flask,render_template,request
+from flask import Flask,render_template,request,redirect
 import sqlalchemy as sq
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import Column, String, Integer
@@ -20,16 +20,18 @@ def index():
   return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
-def index():
+def login():
     if request.method == 'POST':
-        # Handle login form submission
-        username = request.form['username']
+        username = request.form['email']
         password = request.form['password']
+        print(username, password)
         session=connect()
         if session.query(User).filter_by(email=username, pssw=password).first():
-          return render_template('index.html')
+          return redirect('/')
         else:
-            return render_template('login.html', error='Invalid username or password')
+          print('NO')
+          return redirect('/')
+        
 
     else:
         # Handle GET request (display login page)
