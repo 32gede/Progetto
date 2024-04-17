@@ -36,3 +36,18 @@ def login():
     else:
         # Handle GET request (display login page)
         return render_template('login.html')
+    
+
+@app.route('/registration', methods=['GET', 'POST'])
+def registration():
+   if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        user = User(email=email, pssw=password)
+        session = connect()
+        session.add(user)
+        session.commit()
+        return redirect('/')
+   else:
+      # Handle GET request (display registration page)
+       return render_template('registration.html')
