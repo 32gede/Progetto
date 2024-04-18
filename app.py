@@ -1,4 +1,4 @@
-from flask import Flask, make_response,render_template,request,redirect
+from flask import Flask, make_response,render_template,redirect,request
 import requests
 from flask_session import Session
 import sqlalchemy as sq
@@ -35,9 +35,6 @@ def login():
         result=session.query(User).filter_by(email=username, pssw=password)
         if result.first():
           user_id = result.first().id
-          url = 'http://localhost:5000/set_data'
-          data = {'id': user_id}
-          requests.post(url, json=data)
           return redirect('/')
         else:
           print('NO')
@@ -51,6 +48,7 @@ def set_data():
       user_id = request.json['id']
       response=make_response('')
       response.set_cookie('id', str(user_id))
+      print("prova")
       return response
     else:
       return render_template('login.html')
