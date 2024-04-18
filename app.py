@@ -1,7 +1,7 @@
-from flask import Flask,render_template,request,redirect
+from flask import Flask, make_response,render_template,request,redirect
 import sqlalchemy as sq
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, String, Integer, select
 from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 class User(Base):
@@ -26,7 +26,9 @@ def login():
         password = request.form['password']
         print(username, password)
         session=connect()
-        if session.query(User).filter_by(email=username, pssw=password).first():
+        result=session.query(User).filter_by(email=username, pssw=password)
+        if result:
+          setcookie(result.first().id)
           return redirect('/')
         else:
           print('NO')
@@ -38,6 +40,12 @@ def login():
         return render_template('login.html')
     
 
+@app.route('/setcookie') 
+def setcookie(id): 
+    resp = make_response('Setting the cookie')  
+    resp.set_cookie('id',id) 
+    return resp 
+
 @app.route('/registration', methods=['GET', 'POST'])
 def registration():
    if request.method == 'POST':
@@ -45,9 +53,12 @@ def registration():
         password = request.form['password']
         user = User(email=email, pssw=password)
         session = connect()
-        session.add(user)
-        session.commit()
-        return redirect('/')
+        result=session.query(User).filter_by(email=email)
+        if not result.first():
+            session.add(user)
+            session.commit()
+            return redirect('/login')
+        else:
+            return render_template('registration.html', error='User already exists')
    else:
-      # Handle GET request (display registration page)
        return render_template('registration.html')
