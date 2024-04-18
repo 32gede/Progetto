@@ -21,30 +21,33 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        username = request.form['email']
-        password = request.form['password']
-        print(username, password)
-        session=connect()
-        result=session.query(User).filter_by(email=username, pssw=password)
-        if result:
-          setcookie(result.first().id)
-          return redirect('/')
-        else:
-          print('NO')
-          return redirect('/')
-        
-
+    if getcookie() is None:
+      if request.method == 'POST':
+          username = request.form['email']
+          password = request.form['password']
+          print(username, password)
+          session=connect()
+          result=session.query(User).filter_by(email=username, pssw=password)
+          if result:
+            return setcookie(result.first.id)
+            return redirect('/')
+          else:
+            print('NO')
+            
+            return render_template('login.html', error='Invalid username or password')
+      else:
+          return render_template('login.html')
     else:
-        # Handle GET request (display login page)
-        return render_template('login.html')
+      return redirect('/')
     
 
-@app.route('/setcookie') 
+def getcookie():
+    return request.cookies.get('id')
+
 def setcookie(id): 
-    resp = make_response('Setting the cookie')  
-    resp.set_cookie('id',id) 
-    return resp 
+    resp = make_response()  
+    resp.set_cookie(id) 
+    return resp
 
 @app.route('/registration', methods=['GET', 'POST'])
 def registration():
