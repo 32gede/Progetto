@@ -1,4 +1,6 @@
 from flask import Flask, make_response,render_template,request,redirect
+import requests
+from flask_session import Session
 import sqlalchemy as sq
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import Column, String, Integer, select
@@ -17,6 +19,10 @@ def connect():
 app=Flask(__name__,template_folder='templates')
 @app.route('/')
 def index():
+  if request.cookies.get('id') :
+     print (request.cookies.get('id'))
+  else:
+    print('NO')
   return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -27,24 +33,32 @@ def login():
         print(username, password)
         session=connect()
         result=session.query(User).filter_by(email=username, pssw=password)
-        if result:
-          setcookie(result.first().id)
+        if result.first():
+          user_id = result.first().id
+          url = 'http://localhost:5000/set_data'
+          data = {'id': user_id}
+          requests.post(url, json=data)
           return redirect('/')
         else:
           print('NO')
-          return redirect('/')
-        
-
+          return render_template('login.html', error='Invalid username or password')
     else:
-        # Handle GET request (display login page)
         return render_template('login.html')
-    
 
-@app.route('/setcookie') 
-def setcookie(id): 
-    resp = make_response('Setting the cookie')  
-    resp.set_cookie('id',id) 
-    return resp 
+@app.route('/set_data',methods=['POST']) 
+def set_data(): 
+    if request.method == 'POST':
+      user_id = request.json['id']
+      response=make_response('')
+      response.set_cookie('id', str(user_id))
+      return response
+    else:
+      return render_template('login.html')
+
+def getcookie(): 
+    id = request.cookies.get('id') 
+    return id 
+
 
 @app.route('/registration', methods=['GET', 'POST'])
 def registration():
