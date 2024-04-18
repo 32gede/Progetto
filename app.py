@@ -47,7 +47,6 @@ def registration():
         session = connect()
         session.add(user)
         session.commit()
-        print('ciao')
         return redirect('/')
    else:
       # Handle GET request (display registration page)
