@@ -47,6 +47,7 @@ l’esperienza utente, ma non à richiesto e non influirà sulla valutazione fin
 4. Implementazione di un back-end basato su Flask e SQLAlchemy (o Flask-SQLAlchemy).
    
 Per migliorare il progetto e la relativa valutazione `e raccomandato gestire anche i seguenti aspetti:
+
 1. **Integrità dei dati**: definizione di vincoli, trigger, transazioni per garantire l’integrit`a dei dati gestiti
 dall’applicazione.
 2. **Sicurezza**: definizione di opportuni ruoli e politiche di autorizzazione, oltre che di ulteriori meccanismi
@@ -65,36 +66,41 @@ Il progetto deve essere corredato da una relazione in formato PDF opportunamente
 nel dettaglio le principali scelte progettuali ed implementative. La documentazione deve anche chiarire (in
 appendice) il contributo al progetto di ciascun componente del gruppo. Viene raccomandata la seguente
 struttura per la relazione:
-1. Introduzione: descrizione ad alto livello dell’applicazione e struttura del documento.
-2. Funzionalità principali: una descrizione delle principali funzionalit`a fornite dall’applicazione, che aiuti
+
+1. **Introduzione**: descrizione ad alto livello dell’applicazione e struttura del documento.
+2. **Funzionalità principali**: una descrizione delle principali funzionalit`a fornite dall’applicazione, che aiuti
 a comprendere come avete declinato lo spunto di partenza relativo al tema scelto per il progetto.
-3. Progettazione concettuale e logica della basi di dati, opportunamente spiegate e motivate. La presentazione deve seguire la notazione grafica introdotta nel Modulo 1 del corso.
-4. Query principali: una descrizione di una selezione delle query pi`u interessanti che sono state implementate all’interno dell’applicazione, utilizzando una sintassi SQL opportuna.
-5. Principali scelte progettuali: politiche di integrit`a e come sono state garantite in pratica (es. trigger),
+3. **Progettazione concettuale e logica della basi di dati**, opportunamente spiegate e motivate. La **presentazione** deve seguire la **notazione grafica** introdotta nel **Modulo 1** del corso.
+4. **Query principali**: una descrizione di una selezione delle query pi`u interessanti che sono state implementate all’interno dell’applicazione, utilizzando una sintassi SQL opportuna.
+5. **Principali scelte progettuali**: politiche di integrit`a e come sono state garantite in pratica (es. trigger),
 definizione di ruoli e politiche di autorizzazione, uso di indici, ecc. Tutte le principali scelte progettuali
 devono essere opportunamente commentate e motivate.
-6. Ulteriori informazioni: scelte tecnologiche specifiche (es. librerie usate) e qualsiasi altra informazione
+6. **Ulteriori informazioni**: scelte tecnologiche specifiche (es. librerie usate) e qualsiasi altra informazione
 sia necessaria per apprezzare il progetto.
-7. Contributo al progetto (appendice): una spiegazione di come i diversi membri del gruppo hanno
+7. **Contributo al progetto (appendice)**: una spiegazione di come i diversi membri del gruppo hanno
 contribuito al design ed allo sviluppo.
+
 Il codice del progetto deve essere inoltre opportunamente strutturato e commentato per favorirne la manutenzione e la leggibilità.
 
 ## Consegna e valutazione
 
-Ciascun gruppo deve consegnare il progetto all’interno di un unico file ZIP caricato tramite Moodle nelle
+Ciascun gruppo deve consegnare il progetto all’interno di un unico **file ZIP** caricato tramite Moodle nelle
 finestre dedicate, tipicamente in prossimità delle sessioni di esame. Il file ZIP deve contenere:
-+ Il codice sorgente del progetto e le relative risorse (immagini, fogli di stile...). Non è richiesto un dump
+
++ Il **codice sorgente del progetto e le relative risorse** (immagini, fogli di stile...). Non è richiesto un dump
 del database usato in fase di sviluppo e testing.
-+ La documentazione, in un unico file in formato PDF. Assicuratevi che la documentazione rispetti le
++ La **documentazione**, in un unico file in formato **PDF**. Assicuratevi che la documentazione rispetti le
 indicazioni della sezione precedente.
-+ Un video della durata indicativa di 10 minuti in cui viene fatta una demo dell’applicazione. Il video
++ Un **video** della durata indicativa di **10 minuti** in cui viene fatta una **demo dell’applicazione**. Il video
 deve mostrare uno screen capture che faccia vedere l’applicazione funzionante, fornendo una panoramica
 delle principali funzionalità implementate. Il video deve essere opportunatamente commentato tramite
 una voce fuori campo.
+
 Il progetto verrà valutato rispetto ai seguenti quattro parametri:
-1. Documentazione: qualità, correttezza e completezza della documentazione allegata.
-2. Database: qualità della progettazione ed uso appropriato degli strumenti presentati nel corso.
-3. Funzionalità: quantità e qualità delle funzionalità implementate dall’applicazione.
-4. Codice: qualità complessiva del codice prodotto (robustezza, leggibilità, generalità, riuso...).
-Si noti che eventuali progetti artificiosamente complicati potrebbero essere penalizzati: implementare funzionalità complesse, ma non appropriatamente pensate o motivate, non è una buona strategia per migliorare
-la valutazione del proprio progetto.
+
+1. **Documentazione**: qualità, correttezza e completezza della documentazione allegata.
+2. **Database**: qualità della progettazione ed uso appropriato degli strumenti presentati nel corso.
+3. **Funzionalità**: quantità e qualità delle funzionalità implementate dall’applicazione.
+4. **Codice**: qualità complessiva del codice prodotto (robustezza, leggibilità, generalità, riuso...).
+   
+Si noti che eventuali progetti artificiosamente complicati potrebbero essere penalizzati: implementare funzionalità complesse, ma non appropriatamente pensate o motivate, non è una buona strategia per migliorare la valutazione del proprio progetto.
