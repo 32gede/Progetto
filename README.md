@@ -2,7 +2,7 @@
 ## Piattaforma di E-commerce
 Si richiede di curare il design e l’implementazione di un portale di e-commerce, dove gli utenti possono
 comprare e vendere i prodotti online. Il sistema include le seguenti funzionalità:  
-• Gestione degli utenti: Implementare funzionalità di autenticazione e autorizzazione degli utenti. Gli
+• $Gestione degli utenti$: Implementare funzionalità di autenticazione e autorizzazione degli utenti. Gli
 utenti dovrebbero poter registrarsi, accedere e gestire i propri profili. Inoltre, dovrebbero esserci ruoli
 utente differenti come acquirenti e venditori, ognuno con il proprio insieme di permessi.  
 • Gestione dei prodotti: Creare un database per memorizzare informazioni sui prodotti, inclusi nome,
