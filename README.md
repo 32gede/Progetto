@@ -1,5 +1,5 @@
 # Progetto
-Progetto sql
+Progetto sql  
 Piattaforma di E-commerce
 Si richiede di curare il design e l’implementazione di un portale di e-commerce, dove gli utenti possono
 comprare e vendere i prodotti online. Il sistema include le seguenti funzionalità:
