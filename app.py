@@ -1,23 +1,26 @@
 from flask import Flask, make_response, render_template, request, redirect, session
-import requests
 from flask_session import Session
 import sqlalchemy as sq
 from sqlalchemy.orm import sessionmaker, declarative_base
-from sqlalchemy import Column, String, Integer, select
+from sqlalchemy import Column, String, Integer
 
+# Definisci il modello User
 Base = declarative_base()
 
 class User(Base):
-    __tablename__ = 'login'  # Specify the table name
+    __tablename__ = 'login'
     id = Column(Integer, primary_key=True, nullable=False)
     email = Column(String(255), nullable=False)
     pssw = Column(String(255), nullable=False)
 
+# Funzione per connettersi al database
 def connect():
-  engine = sq.create_engine('postgresql+psycopg2://Prova:1234@localhost/Prova')  
-  session= sessionmaker(bind=engine)
-  return session()
+    engine = sq.create_engine('postgresql+psycopg2://prova:1234@localhost/Prova')
+    Base.metadata.create_all(engine)  # Crea le tabelle se non esistono
+    Session = sessionmaker(bind=engine)
+    return Session()
 
+# Configurazione dell'app Flask
 app = Flask(__name__, template_folder='templates')
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
@@ -35,7 +38,6 @@ def login():
     if request.method == 'POST':
         username = request.form['email']
         password = request.form['password']
-        print(username, password)
         db_session = connect()
         result = db_session.query(User).filter_by(email=username, pssw=password)
         if result.first():
@@ -43,25 +45,16 @@ def login():
             session['id'] = user_id
             return redirect('/')
         else:
-            print('NO')
             return render_template('login.html', error='Invalid username or password')
     else:
         return render_template('login.html')
 
-##@app.route('/set_data',methods=['POST']) 
-##def set_data(): 
-   ## if request.method == 'POST':
-  #    user_id = request.json['id']
-   #   session['id']=user_id
-  #  else:
-   #   return render_template('login.html')##
-@app.route('/set_data',methods=['POST']) 
-def set_data(): 
+@app.route('/set_data', methods=['POST'])
+def set_data():
     if request.method == 'POST':
         user_id = request.json['id']
         response = make_response('')
         response.set_cookie('id', str(user_id))
-        print("prova")
         return response
     else:
         return render_template('login.html')
@@ -76,11 +69,11 @@ def registration():
         email = request.form['email']
         password = request.form['password']
         user = User(email=email, pssw=password)
-        session = connect()
-        result = session.query(User).filter_by(email=email)
+        db_session = connect()
+        result = db_session.query(User).filter_by(email=email)
         if not result.first():
-            session.add(user)
-            session.commit()
+            db_session.add(user)
+            db_session.commit()
             return redirect('/login')
         else:
             return render_template('registration.html', error='User already exists')
