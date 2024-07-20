@@ -13,28 +13,28 @@
   </head>
   <body class=email, passwordt-center>
     <main class="form-signin">
-      <form action="{{url_for('login')}}" method="POST">
+      <form action="{{ url_for('main.login') }}" method="POST">
         <img class="mb-4" src="./logo.png" alt="" height="300">
         <h1 class="h3 mb-3 fw-normal"><b>My App</b> - Login</h1>
-    
+
         <div class="form-floating">
-          <input name="email" type="email" class="form-control" id="username" placeholder="name@example.com" value="{{request.form['email']}}" >
+          <input name="email" type="email" class="form-control" id="username" placeholder="name@example.com" value="{{ request.form['email'] }}" >
           <label for="floatingInput">Email address</label>
         </div>
         <div class="form-floating">
-          <input name="password"type="password" class="form-control" id="password" placeholder="Password" value="{{request.form['password']}}" >
+          <input name="password"type="password" class="form-control" id="password" placeholder="Password" value="{{ request.form['password'] }}" >
           <label for="floatingPassword">Password</label>
         </div>
-      
+
         {% if error %}
           <div class="error-message">{{ error }}</div>
         {% endif %}
         <button class="w-100 btn btn-lg btn-primary mt-3" type="submit">Login</button>
-        <a href="registration" >Registrazione</a>
+        <a href="{{ url_for('main.registration') }}">Registrazione</a>
       </form>
     </main>
 
-    <script src="login.js"></script>    
+    <script src="login.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.16/dist/sweetalert2.all.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
   </body>
