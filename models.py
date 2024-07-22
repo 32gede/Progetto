@@ -19,6 +19,7 @@ class UserSeller(Base):
     id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), primary_key=True)
     seller_rating: Mapped[int] = mapped_column(Integer, nullable=False)
     user: Mapped["User"] = relationship("User", back_populates="seller")
+    products: Mapped["Product"] = relationship("Product", back_populates="user_sellers")
 
 class UserBuyer(Base):
     __tablename__ = 'user_buyers'
@@ -41,6 +42,8 @@ class Product(Base):
     brand : Mapped["Brand"] = relationship("Brand", back_populates="products")
     category_id: Mapped[int] = mapped_column(Integer, ForeignKey('category.id'), nullable=True)
     category: Mapped["category"] = relationship("Category", back_populates="products")
+    seller_id: Mapped[int] = mapped_column(Integer, ForeignKey('user_sellers.id'), nullable=True)
+    seller: Mapped["user_sellers"] = relationship("UserSeller", back_populates="user_sellers")
 
 class Brand(Base):
     __tablename__ = 'brands'
