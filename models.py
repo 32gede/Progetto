@@ -1,5 +1,6 @@
-from sqlalchemy import Column, String, Integer, ForeignKey
+from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, event
 from sqlalchemy.orm import relationship, declarative_base, Mapped, mapped_column
+from datetime import datetime
 
 Base = declarative_base()
 
@@ -12,6 +13,8 @@ class User(Base):
     role: Mapped[str] = mapped_column(String(255), nullable=False)
     seller: Mapped["UserSeller"] = relationship("UserSeller", uselist=False, back_populates="user")
     buyer: Mapped["UserBuyer"] = relationship("UserBuyer", uselist=False, back_populates="user")
+    reviews: Mapped["Review"] = relationship("Review", back_populates="user")
+    cart_items: Mapped["CartItem"] = relationship("CartItem", back_populates="user")
 
 class UserSeller(Base):
     __tablename__ = 'user_sellers'
@@ -19,7 +22,7 @@ class UserSeller(Base):
     id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), primary_key=True)
     seller_rating: Mapped[int] = mapped_column(Integer, nullable=False)
     user: Mapped["User"] = relationship("User", back_populates="seller")
-    products: Mapped["Product"] = relationship("Product", back_populates="user_sellers")
+    products: Mapped["Product"] = relationship("Product", back_populates="seller")
 
 class UserBuyer(Base):
     __tablename__ = 'user_buyers'
@@ -39,11 +42,13 @@ class Product(Base):
     price: Mapped[int] = mapped_column(Integer, nullable=False)
     quantity: Mapped[int] = mapped_column(Integer, nullable=False)
     brand_id: Mapped[int] = mapped_column(Integer, ForeignKey('brands.id'), nullable=True)
-    brand : Mapped["Brand"] = relationship("Brand", back_populates="products")
-    category_id: Mapped[int] = mapped_column(Integer, ForeignKey('category.id'), nullable=True)
-    category: Mapped["category"] = relationship("Category", back_populates="products")
+    brand: Mapped["Brand"] = relationship("Brand", back_populates="products")
+    category_id: Mapped[int] = mapped_column(Integer, ForeignKey('categories.id'), nullable=True)
+    category: Mapped["Category"] = relationship("Category", back_populates="products")
     seller_id: Mapped[int] = mapped_column(Integer, ForeignKey('user_sellers.id'), nullable=True)
-    seller: Mapped["user_sellers"] = relationship("UserSeller", back_populates="user_sellers")
+    seller: Mapped["UserSeller"] = relationship("UserSeller", back_populates="products")
+    reviews: Mapped["Review"] = relationship("Review", back_populates="product")
+    cart_items: Mapped["CartItem"] = relationship("CartItem", back_populates="product")
 
 class Brand(Base):
     __tablename__ = 'brands'
@@ -53,8 +58,32 @@ class Brand(Base):
     products: Mapped["Product"] = relationship("Product", back_populates="brand")
 
 class Category(Base):
-    __tablename__ = 'category'
+    __tablename__ = 'categories'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     products: Mapped["Product"] = relationship("Product", back_populates="category")
+
+class Review(Base):
+    __tablename__ = 'reviews'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
+    product_id: Mapped[int] = mapped_column(Integer, ForeignKey('products.id'), nullable=False)
+    rating: Mapped[int] = mapped_column(Integer, nullable=False)
+    comment: Mapped[str] = mapped_column(String(255), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+
+    user: Mapped["User"] = relationship("User", back_populates="reviews")
+    product: Mapped["Product"] = relationship("Product", back_populates="reviews")
+
+class CartItem(Base):
+    __tablename__ = 'cart_items'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
+    product_id: Mapped[int] = mapped_column(Integer, ForeignKey('products.id'), nullable=False)
+    quantity: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    user: Mapped["User"] = relationship("User", back_populates="cart_items")
+    product: Mapped["Product"] = relationship("Product", back_populates="cart_items")
