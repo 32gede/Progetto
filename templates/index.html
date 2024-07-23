@@ -1,14 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <section>
-        <h1>Sito web</h1>
-    </section>
-    <a href="login">login</a>
-</body>
-</html>
+<!-- templates/index.html -->
+{% extends "base.html" %}
+
+{% block title %}Home - E-commerce{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Welcome to E-commerce Platform</h1>
+    <p>Find the best products and deals!</p>
+</div>
+{% endblock %}

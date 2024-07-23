@@ -1,7 +1,7 @@
-# Progetto sql
+`# Progetto sql
 
 ## Introduzione
-
+`
 L’obiettivo del progetto è lo sviluppo di una web application che si interfaccia con un database relazionale. Il
 progetto deve essere **sviluppato in Python**, utilizzando le **librerie Flask e SQLAlchemy**. La scelta del **DBMS**
 da utilizzare è invece libera e lasciata ai singoli gruppi (di due o tre persone), anche se è consigliato l’utilizzo

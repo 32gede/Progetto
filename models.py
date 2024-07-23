@@ -4,6 +4,10 @@ from datetime import datetime
 
 Base = declarative_base()
 
+from werkzeug.security import generate_password_hash, check_password_hash
+
+# -------------- Utenti:
+
 class User(Base):
     __tablename__ = 'users'
 
@@ -11,10 +15,22 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(String(255), nullable=False)
+
     seller: Mapped["UserSeller"] = relationship("UserSeller", uselist=False, back_populates="user")
     buyer: Mapped["UserBuyer"] = relationship("UserBuyer", uselist=False, back_populates="user")
     reviews: Mapped["Review"] = relationship("Review", back_populates="user")
     cart_items: Mapped["CartItem"] = relationship("CartItem", back_populates="user")
+
+    @property
+    def password_hash(self):
+        return self.password
+
+    @password_hash.setter
+    def password_hash(self, password):
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
 
 class UserSeller(Base):
     __tablename__ = 'user_sellers'
@@ -31,7 +47,7 @@ class UserBuyer(Base):
     buyer_rating: Mapped[int] = mapped_column(Integer, nullable=False)
     user: Mapped["User"] = relationship("User", back_populates="buyer")
 
-# --------------------------------------
+# -------------- Prodotti:
 
 class Product(Base):
     __tablename__ = 'products'
