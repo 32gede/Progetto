@@ -1,7 +1,9 @@
 from models import Product, Brand, Category
 from sqlalchemy.orm import Session
 
-def search_products(session: Session, name: str = None, description: str = None, min_price: int = None, max_price: int = None, brand_name: str = None, category_name: str = None):
+
+def search_products(session: Session, name: str = None, description: str = None, min_price: int = None,
+                    max_price: int = None, brand_name: str = None, category_name: str = None):
     query = session.query(Product)
 
     if name:

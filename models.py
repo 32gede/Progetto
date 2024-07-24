@@ -4,11 +4,12 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 
+from app import app
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 
 Base = declarative_base()
-
 
 
 # -------------- Utenti:
@@ -37,6 +38,7 @@ class User(Base):
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
+
 class UserSeller(Base):
     __tablename__ = 'user_sellers'
 
@@ -45,12 +47,14 @@ class UserSeller(Base):
     user: Mapped["User"] = relationship("User", back_populates="seller")
     products: Mapped["Product"] = relationship("Product", back_populates="seller")
 
+
 class UserBuyer(Base):
     __tablename__ = 'user_buyers'
 
     id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), primary_key=True)
     buyer_rating: Mapped[int] = mapped_column(Integer, nullable=False)
     user: Mapped["User"] = relationship("User", back_populates="buyer")
+
 
 # -------------- Prodotti:
 
@@ -71,6 +75,7 @@ class Product(Base):
     reviews: Mapped["Review"] = relationship("Review", back_populates="product")
     cart_items: Mapped["CartItem"] = relationship("CartItem", back_populates="product")
 
+
 class Brand(Base):
     __tablename__ = 'brands'
 
@@ -78,12 +83,14 @@ class Brand(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     products: Mapped["Product"] = relationship("Product", back_populates="brand")
 
+
 class Category(Base):
     __tablename__ = 'categories'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     products: Mapped["Product"] = relationship("Product", back_populates="category")
+
 
 class Review(Base):
     __tablename__ = 'reviews'
@@ -97,6 +104,7 @@ class Review(Base):
 
     user: Mapped["User"] = relationship("User", back_populates="reviews")
     product: Mapped["Product"] = relationship("Product", back_populates="reviews")
+
 
 class CartItem(Base):
     __tablename__ = 'cart_items'

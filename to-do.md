@@ -11,7 +11,7 @@ Come segnare qualcosa di fatto:
 
 1. [ ] **buyers**: possono leggere e guardare i vari prodotti e aggiungerli alla loro lista/carrello della spesa.
 2. [ ] **sellers**: stessi permessi dei buyers, però possono modificare i prodotti che vendono.
-3. [ ] **Implementare controlli di autorizzazione nei route**: Utilizzare decorator per controllare i permessi degli utenti e assicurarsi che solo gli utenti autorizzati possano accedere a certe funzionalità.
+3. [x] **Implementare controlli di autorizzazione nei route**: Utilizzare decorator per controllare i permessi degli utenti e assicurarsi che solo gli utenti autorizzati possano accedere a certe funzionalità.
 
 ## Sicurezza
 
