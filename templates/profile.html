@@ -1,0 +1,17 @@
+<!-- templates/profile.html -->
+{% extends "base.html" %}
+
+{% block title %}Profile - E-commerce{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Your Profile</h1>
+    <p>Email: {{ current_user.email }}</p>
+    <p>Role: {{ current_user.role }}</p>
+    {% if current_user.role == 'seller' %}
+        <p>Seller Rating: {{ current_user.seller.seller_rating }}</p>
+    {% elif current_user.role == 'buyer' %}
+        <p>Buyer Rating: {{ current_user.buyer.buyer_rating }}</p>
+    {% endif %}
+</div>
+{% endblock %}

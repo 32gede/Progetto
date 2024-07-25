@@ -19,12 +19,27 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/">Home</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('main.login') }}">Login</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('main.registration') }}">Registration</a>
-                </li>
+                {% if current_user.is_authenticated %}
+                    {% if current_user.role == 'seller' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.seller_dashboard') }}">Dashboard</a>
+                        </li>
+                    {% elif current_user.role == 'buyer' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.buyer_dashboard') }}">Dashboard</a>
+                        </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.logout') }}">Logout</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.login') }}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.registration') }}">Registration</a>
+                    </li>
+                {% endif %}
             </ul>
         </div>
     </nav>

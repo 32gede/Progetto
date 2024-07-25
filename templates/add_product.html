@@ -1,5 +1,9 @@
 <!-- templates/add_product.html -->
+{% extends "base.html" %}
 
+{% block title %}Add Product - E-commerce{% endblock %}
+
+{% block content %}
 <form method="POST">
     <div>
         <label for="name">Product Name:</label>
@@ -37,3 +41,4 @@
         <button type="submit">Add Product</button>
     </div>
 </form>
+{% endblock %}

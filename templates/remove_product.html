@@ -1,0 +1,16 @@
+<!-- templates/remove_product.html -->
+{% extends "base.html" %}
+
+{% block title %}Remove Product - E-commerce{% endblock %}
+
+{% block content %}
+<form method="POST">
+    <div>
+        <label for="product_id">Product ID:</label>
+        <input type="number" id="product_id" name="product_id" required>
+    </div>
+    <div>
+        <button type="submit">Remove Product</button>
+    </div>
+</form>
+{% endblock %}

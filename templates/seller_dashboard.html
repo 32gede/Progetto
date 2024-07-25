@@ -1,0 +1,12 @@
+<!-- templates/seller_dashboard.html -->
+{% extends "base.html" %}
+
+{% block title %}Seller Dashboard - E-commerce{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Seller Dashboard</h1>
+    <p>Welcome to your dashboard, {{ current_user.email }}</p>
+    <a href="{{ url_for('main.add_product') }}" class="btn btn-primary">Add Product</a>
+</div>
+{% endblock %}

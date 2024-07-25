@@ -1,0 +1,11 @@
+<!-- templates/buyer_dashboard.html -->
+{% extends "base.html" %}
+
+{% block title %}Buyer Dashboard - E-commerce{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Buyer Dashboard</h1>
+    <p>Welcome to your dashboard, {{ current_user.email }}</p>
+</div>
+{% endblock %}

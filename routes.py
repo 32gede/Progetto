@@ -115,26 +115,34 @@ def add_product():
         description = request.form['description']
         price = request.form['price']
         quantity = request.form['quantity']
+        brand_id = request.form['brand_id']
+        category_id = request.form['category_id']
         db_session = get_db_session()
         new_product = Product(
             name=name,
             description=description,
             price=price,
-            quantity=quantity
+            quantity=quantity,
+            brand_id=brand_id,
+            category_id=category_id,
+            seller_id=current_user.id
         )
         db_session.add(new_product)
         db_session.commit()
         return redirect(url_for('main.view_products'))
-    return render_template('add_product.html')
+    db_session = get_db_session()
+    brands = db_session.query(Brand).all()
+    categories = db_session.query(Category).all()
+    return render_template('add_product.html', brands=brands, categories=categories)
 
 
 @main_routes.route('/product/remove', methods=['GET', 'POST'])
 @login_required
 @role_required('seller')
 def remove_product(product_id):
-    if request.method == 'POST':
-        db_session = get_db_session()
-        product = db_session.query(Product).filter_by(id=product_id).first()
+    db_session = get_db_session()
+    product = db_session.query(Product).filter_by(id=product_id).first()
+    if product and product.seller_id == current_user.id:
         db_session.delete(product)
         db_session.commit()
         return redirect(url_for('main.view_products'))
@@ -149,16 +157,18 @@ def edit_product(product_id):
     product = db_session.query(Product).filter_by(id=product_id).first()
     if not product or product.seller_id != session['id']:
         return redirect(url_for('main.index'))
-
     if request.method == 'POST':
         product.name = request.form['name']
         product.description = request.form['description']
         product.price = request.form['price']
         product.quantity = request.form['quantity']
+        product.brand_id = request.form['brand_id']
+        product.category_id = request.form['category_id']
         db_session.commit()
         return redirect(url_for('main.view_product', product_id=product.id))
-
-    return render_template('edit_product.html', product=product)
+    brands = db_session.query(Brand).all()
+    categories = db_session.query(Category).all()
+    return render_template('edit_product.html', product=product, brands=brands, categories=categories)
 
 
 def login_required(f):

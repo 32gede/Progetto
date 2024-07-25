@@ -3,18 +3,12 @@ from sqlalchemy.orm import relationship, declarative_base, Mapped, mapped_column
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-
-from app import app
-
-login_manager = LoginManager()
-login_manager.init_app(app)
-
 Base = declarative_base()
 
 
 # -------------- Utenti:
 
-class User(Base):
+class User(UserMixin, Base):
     __tablename__ = 'users'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
@@ -37,6 +31,25 @@ class User(Base):
 
     def check_password(self, password):
         return check_password_hash(self.password, password)
+
+    @property
+    def is_active(self):
+        # La logica per determinare se l'utente è attivo
+        return True  # Cambia questa logica in base alle tue necessità
+
+    @property
+    def is_authenticated(self):
+        # La logica per determinare se l'utente è autenticato
+        return True  # Cambia questa logica in base alle tue necessità
+
+    @property
+    def is_anonymous(self):
+        # La logica per determinare se l'utente è anonimo
+        return False  # Cambia questa logica in base alle tue necessità
+
+    def get_id(self):
+        # Restituisce l'ID dell'utente come stringa
+        return str(self.id)
 
 
 class UserSeller(Base):
