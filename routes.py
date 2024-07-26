@@ -113,10 +113,18 @@ def add_product():
     if request.method == 'POST':
         name = request.form['name']
         description = request.form['description']
-        price = request.form['price']
+        try:
+            price = int(request.form['price'])
+            if price < 0 or price > 2147483647:
+                raise ValueError("Price out of range")
+        except ValueError:
+            flash('Invalid price. Please enter a number between 0 and 2147483647')
+            return redirect(url_for('main.add_product'))
+
         quantity = request.form['quantity']
-        brand_id = request.form['brand_id']
-        category_id = request.form['category_id']
+        brand_id = request.form['brand_id'] or None
+        category_id = request.form['category_id'] or None
+
         db_session = get_db_session()
         new_product = Product(
             name=name,
@@ -130,6 +138,7 @@ def add_product():
         db_session.add(new_product)
         db_session.commit()
         return redirect(url_for('main.view_products'))
+
     db_session = get_db_session()
     brands = db_session.query(Brand).all()
     categories = db_session.query(Category).all()
