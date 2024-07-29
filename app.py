@@ -1,5 +1,5 @@
 from flask import Flask
-from Progetto.models import User
+from models import User
 from flask_session import Session
 from routes import main_routes
 from database import init_db, get_db_session
