@@ -34,8 +34,8 @@ Come segnare qualcosa di fatto:
 
 ## Gestione degli utenti
 
-1. [ ] **Registrazione degli utenti**: Implementare la funzionalità di registrazione che consente agli utenti di creare un account scegliendo tra i ruoli di buyer e seller.
-2. [ ] **Autenticazione degli utenti**: Implementare la funzionalità di login che consente agli utenti di accedere al proprio account.
+1. [x] **Registrazione degli utenti**: Implementare la funzionalità di registrazione che consente agli utenti di creare un account scegliendo tra i ruoli di buyer e seller.
+2. [x] **Autenticazione degli utenti**: Implementare la funzionalità di login che consente agli utenti di accedere al proprio account.
 3. [ ] **Gestione dei profili**: Consentire agli utenti di aggiornare le informazioni del proprio profilo.
 4. [ ] **Reset della password**: Implementare la funzionalità di reset della password per consentire agli utenti di recuperare l'accesso al proprio account.
 
