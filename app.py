@@ -6,6 +6,10 @@ from database import init_db, get_db_session
 from flask_login import LoginManager
 
 app = Flask(__name__, template_folder='templates')
+
+# Configura la chiave segreta per Flask
+app.config['SECRET_KEY'] = 'your_secret_key_here'  # Sostituisci con una chiave segreta sicura
+
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 

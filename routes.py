@@ -1,8 +1,9 @@
-from flask import Blueprint, render_template, request, redirect, session, url_for
+from flask import Blueprint, render_template, request, redirect, session, url_for, flash
 from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem
 from database import get_db_session
 from functools import wraps
 from flask_login import login_user, login_required, current_user, logout_user
+from datetime import timedelta
 
 main_routes = Blueprint('main', __name__)
 
@@ -18,9 +19,7 @@ def role_required(*roles):
             if user.role not in roles:
                 return redirect(url_for('main.index'))
             return f(*args, **kwargs)
-
         return decorated_function
-
     return decorator
 
 
@@ -38,11 +37,16 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
+        remember = 'remember' in request.form
         db_session = get_db_session()
         user = db_session.query(User).filter_by(email=email).first()
         if user and user.check_password(password):
-            session['id'] = user.id
-            login_user(user)
+            session.permanent = remember  # Set session permanence based on remember checkbox
+            login_user(user, remember=remember)
+            if remember:
+                session.permanent = True
+            else:
+                session.permanent = False
             return redirect(url_for('main.index'))
         else:
             return render_template('login.html', error='Invalid username or password')
@@ -55,6 +59,7 @@ def registration():
         email = request.form['email']
         password = request.form['password']
         role = request.form['role']
+        remember = 'remember' in request.form
         db_session = get_db_session()
         existing_user = db_session.query(User).filter_by(email=email).first()
         if not existing_user:
@@ -73,7 +78,13 @@ def registration():
                 db_session.add(new_buyer)
 
             db_session.commit()
-            return redirect(url_for('main.login'))
+            session.permanent = remember  # Set session permanence based on remember checkbox
+            login_user(new_user, remember=remember)
+            if remember:
+                session.permanent = True
+            else:
+                session.permanent = False
+            return redirect(url_for('main.index'))
         return render_template('registration.html', error='User already exists')
     return render_template('registration.html')
 
@@ -102,7 +113,7 @@ def view_product(product_id):
     db_session = get_db_session()
     product = db_session.query(Product).filter_by(id=product_id).first()
     if not product:
-        return render_template('product.html', error="Product doesn't exist")
+        return render_template('products.html', error="Product doesn't exist")
     return render_template('product.html', product=product)
 
 
@@ -144,8 +155,7 @@ def add_product():
     categories = db_session.query(Category).all()
     return render_template('add_product.html', brands=brands, categories=categories)
 
-
-@main_routes.route('/product/remove', methods=['GET', 'POST'])
+@main_routes.route('/product/<int:product_id>/remove', methods=['POST'])
 @login_required
 @role_required('seller')
 def remove_product(product_id):
@@ -164,7 +174,7 @@ def remove_product(product_id):
 def edit_product(product_id):
     db_session = get_db_session()
     product = db_session.query(Product).filter_by(id=product_id).first()
-    if not product or product.seller_id != session['id']:
+    if not product or product.seller_id != current_user.id:
         return redirect(url_for('main.index'))
     if request.method == 'POST':
         product.name = request.form['name']
