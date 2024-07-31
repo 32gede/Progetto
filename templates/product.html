@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Product Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>{{ product.name }}</h1>
+    <p>{{ product.description }}</p>
+    <p><strong>Price:</strong> ${{ product.price }}</p>
+    <p><strong>Quantity:</strong> {{ product.quantity }}</p>
+    <p><strong>Brand:</strong> {{ product.brand.name }}</p>
+    <p><strong>Category:</strong> {{ product.category.name }}</p>
+
+    {% if current_user.is_authenticated and current_user.id == product.seller_id %}
+        <a href="{{ url_for('main.edit_product', product_id=product.id) }}" class="btn btn-primary">Edit Product</a>
+    {% endif %}
+    <a href="{{ url_for('main.view_products') }}" class="btn btn-secondary">Back to Products</a>
+</div>
+{% endblock %}
