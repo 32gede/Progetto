@@ -1,0 +1,40 @@
+<!-- templates/cart.html -->
+{% extends "base.html" %}
+
+{% block title %}Cart - E-commerce{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Your Cart</h1>
+    <table class="table cart-table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Total</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart_items %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>${{ item.product.price }}</td>
+                    <td>${{ item.product.price * item.quantity }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('main.remove_from_cart', item_id=item.id) }}">
+                            <button type="submit" class="btn btn-danger">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="cart-total">
+        <p>Total: ${{ cart_total }}</p>
+        <a href="{{ url_for('main.checkout') }}" class="btn btn-primary">Proceed to Checkout</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, request, redirect, session, url_for
-from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem
+from flask import Blueprint, render_template, request, redirect, session, url_for, flash
+from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem
 from database import get_db_session
 from functools import wraps
 from flask_login import login_user, login_required, current_user, logout_user
@@ -22,6 +22,26 @@ def role_required(*roles):
         return decorated_function
 
     return decorator
+
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'id' not in session:
+            return redirect(url_for('main.login', next=request.url))
+        return f(*args, **kwargs)
+
+    return decorated_function
+
+
+def validate_int(value, min_value=0, max_value=2147483647, error_message="Invalid value"):
+    try:
+        int_value = int(value)
+        if int_value < min_value or int_value > max_value:
+            raise ValueError(error_message)
+        return int_value
+    except ValueError:
+        raise ValueError(error_message)
 
 
 @main_routes.route('/')
@@ -86,12 +106,82 @@ def logout():
     return redirect(url_for('main.index'))
 
 
+@main_routes.route('/profile')
+@login_required
+def profile():
+    return render_template('profile.html')
+
+
+@main_routes.route('/cart')
+@login_required
+@role_required('buyer')
+def cart():
+    db_session = get_db_session()
+    cart_items = db_session.query(CartItem).filter_by(user_id=current_user.id).all()
+    cart_total = sum(item.product.price * item.quantity for item in cart_items)
+    return render_template('cart.html', cart_items=cart_items, cart_total=cart_total)
+
+@main_routes.route('/cart/remove/<int:item_id>', methods=['POST'])
+@login_required
+@role_required('buyer')
+def remove_from_cart(item_id):
+    db_session = get_db_session()
+    item = db_session.query(CartItem).filter_by(id=item_id, user_id=current_user.id).first()
+    if item:
+        db_session.delete(item)
+        db_session.commit()
+    return redirect(url_for('main.cart'))
+
+@main_routes.route('/order_history')
+@login_required
+@role_required('buyer')
+def order_history():
+    db_session = get_db_session()
+    orders = db_session.query(Order).filter_by(user_id=current_user.id).all()
+    return render_template('order_history.html', orders=orders)
+
+@main_routes.route('/checkout', methods=['POST'])
+@login_required
+@role_required('buyer')
+def checkout():
+    db_session = get_db_session()
+    cart_items = db_session.query(CartItem).filter_by(user_id=current_user.id).all()
+    if not cart_items:
+        return redirect(url_for('main.cart'))
+
+    total = sum(item.product.price * item.quantity for item in cart_items)
+    new_order = Order(user_id=current_user.id, total=total)
+    db_session.add(new_order)
+    db_session.commit()
+
+    for item in cart_items:
+        order_item = OrderItem(order_id=new_order.id, product_id=item.product.id, quantity=item.quantity)
+        db_session.add(order_item)
+        db_session.delete(item)
+
+    db_session.commit()
+    return redirect(url_for('main.order_history'))
+
+
 @main_routes.route('/products')
 @login_required
-@role_required('buyer', 'seller')
-def view_products():
+@role_required('seller')
+def view_products_seller():
+    db_session = get_db_session()
+    products = db_session.query(Product).filter_by(seller_id=current_user.id).all()
+    if not products:
+        return render_template('product.html', error="You haven't added any products yet")
+    return render_template('products.html', products=products)
+
+
+@main_routes.route('/products')
+@login_required
+@role_required('buyer')
+def view_products_buyer():
     db_session = get_db_session()
     products = db_session.query(Product).all()
+    if not products:
+        return render_template('product.html', error="There are no products available")
     return render_template('products.html', products=products)
 
 
@@ -114,14 +204,17 @@ def add_product():
         name = request.form['name']
         description = request.form['description']
         try:
-            price = int(request.form['price'])
-            if price < 0 or price > 2147483647:
-                raise ValueError("Price out of range")
-        except ValueError:
-            flash('Invalid price. Please enter a number between 0 and 2147483647')
+            price = validate_int(request.form['price'],
+                                 error_message='Invalid price. Please enter a number between 0 and 2147483647')
+        except ValueError as e:
+            flash(str(e))
             return redirect(url_for('main.add_product'))
-
-        quantity = request.form['quantity']
+        try:
+            quantity = validate_int(request.form['quantity'],
+                                 error_message='Invalid quantity. Please enter a number between 0 and 2147483647')
+        except ValueError as e:
+            flash(str(e))
+            return redirect(url_for('main.add_product'))
         brand_id = request.form['brand_id'] or None
         category_id = request.form['category_id'] or None
 
@@ -169,8 +262,18 @@ def edit_product(product_id):
     if request.method == 'POST':
         product.name = request.form['name']
         product.description = request.form['description']
-        product.price = request.form['price']
-        product.quantity = request.form['quantity']
+        try:
+            price = validate_int(request.form['price'],
+                                 error_message='Invalid price. Please enter a number between 0 and 2147483647')
+        except ValueError as e:
+            flash(str(e))
+            return redirect(url_for('main.add_product'))
+        try:
+            quantity = validate_int(request.form['quantity'],
+                                    error_message='Invalid quantity. Please enter a number between 0 and 2147483647')
+        except ValueError as e:
+            flash(str(e))
+            return redirect(url_for('main.add_product'))
         product.brand_id = request.form['brand_id']
         product.category_id = request.form['category_id']
         db_session.commit()
@@ -178,16 +281,6 @@ def edit_product(product_id):
     brands = db_session.query(Brand).all()
     categories = db_session.query(Category).all()
     return render_template('edit_product.html', product=product, brands=brands, categories=categories)
-
-
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'id' not in session:
-            return redirect(url_for('main.login', next=request.url))
-        return f(*args, **kwargs)
-
-    return decorated_function
 
 
 @main_routes.route('/seller-dashboard')

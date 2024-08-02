@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><!-- templates/order_history.html -->
+{% extends "base.html" %}
+
+{% block title %}Order History - E-commerce{% endblock %}
+
+{% block content %}
+<div class="container order-history">
+    <h1>Your Order History</h1>
+    {% for order in orders %}
+        <div class="card order-card">
+            <div class="card-body">
+                <h5 class="card-title">Order #{{ order.id }}</h5>
+                <p class="card-text">Date: {{ order.date }}</p>
+                <p class="card-text">Total: ${{ order.total }}</p>
+                <h6>Items:</h6>
+                <ul>
+                    {% for item in order.items %}
+                        <li>{{ item.product.name }} ({{ item.quantity }} x ${{ item.product.price }})</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
+</title>
+</head>
+<body>
+
+</body>
+</html>
