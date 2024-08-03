@@ -15,29 +15,39 @@
     </div>
     <div>
         <label for="price">Price:</label>
-        <input type="number" id="price" name="price"  min="0" max="2147483647" required>
+        <input type="number" id="price" name="price" min="0" max="2147483647" required>
     </div>
     <div>
         <label for="quantity">Quantity:</label>
         <input type="number" id="quantity" name="quantity" required>
     </div>
-    <div>
-        <label for="brand_id">Brand:</label>
-        <select id="brand_id" name="brand_id">
-            <option value="">Select a brand</option>
+    <div class="form-group">
+        <label for="brand_id">Brand</label>
+        <select class="form-control" id="brand_id" name="brand_id">
+            <option value="" disabled selected>Select a brand</option>
             {% for brand in brands %}
                 <option value="{{ brand.id }}">{{ brand.name }}</option>
             {% endfor %}
+            <option value="new">Create new brand</option>
         </select>
     </div>
-    <div>
-        <label for="category_id">Category:</label>
-        <select id="category_id" name="category_id">
-            <option value="">Select a category</option>
+    <div class="form-group" id="new_brand_name_group" style="display: none;">
+        <label for="new_brand_name">New Brand Name</label>
+        <input type="text" class="form-control" id="new_brand_name" name="new_brand_name">
+    </div>
+    <div class="form-group">
+        <label for="category_id">Category</label>
+        <select class="form-control" id="category_id" name="category_id">
+            <option value="" disabled selected>Select a category</option>
             {% for category in categories %}
                 <option value="{{ category.id }}">{{ category.name }}</option>
             {% endfor %}
+            <option value="new">Create new category</option>
         </select>
+    </div>
+    <div class="form-group" id="new_category_name_group" style="display: none;">
+        <label for="new_category_name">New Category Name</label>
+        <input type="text" class="form-control" id="new_category_name" name="new_category_name">
     </div>
     <div>
         <button type="submit">Add Product</button>

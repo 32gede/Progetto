@@ -1,17 +1,25 @@
-<!-- templates/profile.html -->
 {% extends "base.html" %}
 
 {% block title %}Profile - E-commerce{% endblock %}
 
 {% block content %}
-<div class="container profile">
-    <h1>Your Profile</h1>
-    <p>Email: {{ current_user.email }}</p>
-    <p>Role: {{ current_user.role }}</p>
-    {% if current_user.role == 'seller' %}
-        <p>Seller Rating: {{ current_user.seller.seller_rating }}</p>
-    {% elif current_user.role == 'buyer' %}
-        <p>Buyer Rating: {{ current_user.buyer.buyer_rating }}</p>
-    {% endif %}
+<div class="container mt-5">
+    <h1>Profile</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" value="{{ current_user.email }}" readonly>
+        </div>
+        <div class="mb-3">
+            <label for="avatar" class="form-label">Avatar</label>
+            <input type="file" class="form-control" id="avatar" name="avatar">
+        </div>
+        {% if current_user.avatar %}
+            <div class="mb-3">
+                <img src="{{ url_for('static', filename='avatars/' ~ current_user.avatar) }}" alt="Avatar" class="img-thumbnail" width="150">
+            </div>
+        {% endif %}
+        <button type="submit" class="btn btn-primary">Update Profile</button>
+    </form>
 </div>
 {% endblock %}

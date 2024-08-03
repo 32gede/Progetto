@@ -1,4 +1,8 @@
+import os
+
 from flask import Blueprint, render_template, request, redirect, session, url_for, flash
+from werkzeug.utils import secure_filename
+
 from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem
 from database import get_db_session
 from functools import wraps
@@ -105,12 +109,34 @@ def logout():
     session.pop('id', None)  # Clear the session
     return redirect(url_for('main.index'))
 
+'''
+UPLOAD_FOLDER = 'static/avatars'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@main_routes.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    db_session = get_db_session()
+    if request.method == 'POST':
+        file = request.files['avatar']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(UPLOAD_FOLDER, filename))
+            current_user.avatar = filename
+            db_session.commit()
+            flash('Your profile has been updated.')
+        else:
+            flash('Invalid file type.')
+    return render_template('profile.html')
+'''
 
 @main_routes.route('/profile')
 @login_required
 def profile():
     return render_template('profile.html')
-
 
 @main_routes.route('/cart')
 @login_required
@@ -120,6 +146,7 @@ def cart():
     cart_items = db_session.query(CartItem).filter_by(user_id=current_user.id).all()
     cart_total = sum(item.product.price * item.quantity for item in cart_items)
     return render_template('cart.html', cart_items=cart_items, cart_total=cart_total)
+
 
 @main_routes.route('/cart/remove/<int:item_id>', methods=['POST'])
 @login_required
@@ -132,6 +159,7 @@ def remove_from_cart(item_id):
         db_session.commit()
     return redirect(url_for('main.cart'))
 
+
 @main_routes.route('/order_history')
 @login_required
 @role_required('buyer')
@@ -139,6 +167,7 @@ def order_history():
     db_session = get_db_session()
     orders = db_session.query(Order).filter_by(user_id=current_user.id).all()
     return render_template('order_history.html', orders=orders)
+
 
 @main_routes.route('/checkout', methods=['POST'])
 @login_required
@@ -170,7 +199,7 @@ def view_products_seller():
     db_session = get_db_session()
     products = db_session.query(Product).filter_by(seller_id=current_user.id).all()
     if not products:
-        return render_template('product.html', error="You haven't added any products yet")
+        return render_template('products.html', error="You haven't added any products yet")
     return render_template('products.html', products=products)
 
 
@@ -181,7 +210,7 @@ def view_products_buyer():
     db_session = get_db_session()
     products = db_session.query(Product).all()
     if not products:
-        return render_template('product.html', error="There are no products available")
+        return render_template('products.html', error="There are no products available")
     return render_template('products.html', products=products)
 
 
@@ -211,14 +240,36 @@ def add_product():
             return redirect(url_for('main.add_product'))
         try:
             quantity = validate_int(request.form['quantity'],
-                                 error_message='Invalid quantity. Please enter a number between 0 and 2147483647')
+                                    error_message='Invalid quantity. Please enter a number between 0 and 2147483647')
         except ValueError as e:
             flash(str(e))
             return redirect(url_for('main.add_product'))
-        brand_id = request.form['brand_id'] or None
-        category_id = request.form['category_id'] or None
+
+        brand_id = request.form['brand_id']
+        new_brand_name = request.form.get('new_brand_name')
+        category_id = request.form['category_id']
+        new_category_name = request.form.get('new_category_name')
 
         db_session = get_db_session()
+
+        if brand_id == 'new' and new_brand_name:
+            new_brand = Brand(name=new_brand_name)
+            db_session.add(new_brand)
+            db_session.commit()
+            brand_id = new_brand.id
+        elif brand_id == 'new':
+            flash('Please provide a name for the new brand.')
+            return redirect(url_for('main.add_product'))
+
+        if category_id == 'new' and new_category_name:
+            new_category = Category(name=new_category_name)
+            db_session.add(new_category)
+            db_session.commit()
+            category_id = new_category.id
+        elif category_id == 'new':
+            flash('Please provide a name for the new category.')
+            return redirect(url_for('main.add_product'))
+
         new_product = Product(
             name=name,
             description=description,
@@ -230,7 +281,7 @@ def add_product():
         )
         db_session.add(new_product)
         db_session.commit()
-        return redirect(url_for('main.view_products'))
+        return redirect(url_for('main.view_products_seller'))
 
     db_session = get_db_session()
     brands = db_session.query(Brand).all()
@@ -247,7 +298,7 @@ def remove_product(product_id):
     if product and product.seller_id == current_user.id:
         db_session.delete(product)
         db_session.commit()
-        return redirect(url_for('main.view_products'))
+        return redirect(url_for('main.view_products_seller'))
     return render_template('remove_product.html', error="Product doesn't exist or already deleted")
 
 

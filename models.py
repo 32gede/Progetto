@@ -15,6 +15,7 @@ class User(UserMixin, Base):
     email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(String(255), nullable=False)
+    #avatar: Mapped[str] = mapped_column(String(255), nullable=True)
 
     seller: Mapped["UserSeller"] = relationship("UserSeller", uselist=False, back_populates="user")
     buyer: Mapped["UserBuyer"] = relationship("UserBuyer", uselist=False, back_populates="user")
