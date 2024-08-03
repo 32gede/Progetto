@@ -174,7 +174,7 @@ def view_products_seller():
     return render_template('products.html', products=products)
 
 
-@main_routes.route('/products')
+@main_routes.route('/buyer/products')
 @login_required
 @role_required('buyer')
 def view_products_buyer():

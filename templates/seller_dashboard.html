@@ -8,6 +8,6 @@
     <h1>Seller Dashboard</h1>
     <p>Welcome to your dashboard, {{ current_user.email }}</p>
     <a href="{{ url_for('main.add_product') }}" class="btn btn-primary">Add Product</a>
-    <a href="{{ url_for('main.view_products') }}" class="btn btn-secondary">View Products</a>
+    <a href="{{ url_for('main.view_products_seller') }}" class="btn btn-secondary">View Products</a>
 </div>
 {% endblock %}
