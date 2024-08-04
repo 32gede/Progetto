@@ -1,15 +1,23 @@
 import os
-
-from flask import Blueprint, render_template, request, redirect, session, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from werkzeug.utils import secure_filename
-
 from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem
 from database import get_db_session
 from functools import wraps
 from flask_login import login_user, login_required, current_user, logout_user
+from hashlib import md5
 
 main_routes = Blueprint('main', __name__)
 
+UPLOAD_FOLDER = 'static/avatars'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def ensure_upload_folder():
+    if not os.path.exists(UPLOAD_FOLDER):
+        os.makedirs(UPLOAD_FOLDER)
 
 def role_required(*roles):
     def decorator(f):
@@ -27,7 +35,6 @@ def role_required(*roles):
 
     return decorator
 
-
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -36,7 +43,6 @@ def login_required(f):
         return f(*args, **kwargs)
 
     return decorated_function
-
 
 def validate_int(value, min_value=0, max_value=2147483647, error_message="Invalid value"):
     try:
@@ -47,7 +53,6 @@ def validate_int(value, min_value=0, max_value=2147483647, error_message="Invali
     except ValueError:
         raise ValueError(error_message)
 
-
 @main_routes.route('/')
 def index():
     if 'id' in session:
@@ -55,7 +60,6 @@ def index():
     else:
         print('NESSUN cookie')
     return render_template('index.html')
-
 
 @main_routes.route('/login', methods=['GET', 'POST'])
 def login():
@@ -72,19 +76,21 @@ def login():
             return render_template('login.html', error='Invalid username or password')
     return render_template('login.html')
 
-
 @main_routes.route('/registration', methods=['GET', 'POST'])
 def registration():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
         role = request.form['role']
+        avatar_choice = request.form['avatar_choice']
         db_session = get_db_session()
         existing_user = db_session.query(User).filter_by(email=email).first()
         if not existing_user:
             new_user = User(
                 email=email,
-                role=role)
+                role=role,
+                avatar=avatar_choice if avatar_choice else None
+            )
             new_user.password_hash = password  # Hash the password
             db_session.add(new_user)
             db_session.commit()
@@ -101,20 +107,12 @@ def registration():
         return render_template('registration.html', error='User already exists')
     return render_template('registration.html')
 
-
 @main_routes.route('/logout')
 @login_required
 def logout():
     logout_user()  # Log out the user
     session.pop('id', None)  # Clear the session
     return redirect(url_for('main.index'))
-
-'''
-UPLOAD_FOLDER = 'static/avatars'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @main_routes.route('/profile', methods=['GET', 'POST'])
 @login_required
@@ -123,6 +121,7 @@ def profile():
     if request.method == 'POST':
         file = request.files['avatar']
         if file and allowed_file(file.filename):
+            ensure_upload_folder()  # Ensure the upload folder exists
             filename = secure_filename(file.filename)
             file.save(os.path.join(UPLOAD_FOLDER, filename))
             current_user.avatar = filename
@@ -130,12 +129,6 @@ def profile():
             flash('Your profile has been updated.')
         else:
             flash('Invalid file type.')
-    return render_template('profile.html')
-'''
-
-@main_routes.route('/profile')
-@login_required
-def profile():
     return render_template('profile.html')
 
 @main_routes.route('/cart')
@@ -146,7 +139,6 @@ def cart():
     cart_items = db_session.query(CartItem).filter_by(user_id=current_user.id).all()
     cart_total = sum(item.product.price * item.quantity for item in cart_items)
     return render_template('cart.html', cart_items=cart_items, cart_total=cart_total)
-
 
 @main_routes.route('/cart/remove/<int:item_id>', methods=['POST'])
 @login_required
@@ -159,7 +151,6 @@ def remove_from_cart(item_id):
         db_session.commit()
     return redirect(url_for('main.cart'))
 
-
 @main_routes.route('/order_history')
 @login_required
 @role_required('buyer')
@@ -167,7 +158,6 @@ def order_history():
     db_session = get_db_session()
     orders = db_session.query(Order).filter_by(user_id=current_user.id).all()
     return render_template('order_history.html', orders=orders)
-
 
 @main_routes.route('/checkout', methods=['POST'])
 @login_required
@@ -191,7 +181,6 @@ def checkout():
     db_session.commit()
     return redirect(url_for('main.order_history'))
 
-
 @main_routes.route('/products')
 @login_required
 @role_required('seller')
@@ -201,7 +190,6 @@ def view_products_seller():
     if not products:
         return render_template('products.html', error="You haven't added any products yet")
     return render_template('products.html', products=products)
-
 
 @main_routes.route('/buyer/products')
 @login_required
@@ -213,7 +201,6 @@ def view_products_buyer():
         return render_template('products.html', error="There are no products available")
     return render_template('products.html', products=products)
 
-
 @main_routes.route('/products/<int:product_id>')
 @login_required
 @role_required('buyer', 'seller')
@@ -223,7 +210,6 @@ def view_product(product_id):
     if not product:
         return render_template('product.html', error="Product doesn't exist")
     return render_template('product.html', product=product)
-
 
 @main_routes.route('/product/add', methods=['GET', 'POST'])
 @login_required
@@ -288,7 +274,6 @@ def add_product():
     categories = db_session.query(Category).all()
     return render_template('add_product.html', brands=brands, categories=categories)
 
-
 @main_routes.route('/product/remove', methods=['GET', 'POST'])
 @login_required
 @role_required('seller')
@@ -300,7 +285,6 @@ def remove_product(product_id):
         db_session.commit()
         return redirect(url_for('main.view_products_seller'))
     return render_template('remove_product.html', error="Product doesn't exist or already deleted")
-
 
 @main_routes.route('/product/<int:product_id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -333,13 +317,11 @@ def edit_product(product_id):
     categories = db_session.query(Category).all()
     return render_template('edit_product.html', product=product, brands=brands, categories=categories)
 
-
 @main_routes.route('/seller-dashboard')
 @login_required
 @role_required('seller')
 def seller_dashboard():
     return render_template('seller_dashboard.html')
-
 
 @main_routes.route('/buyer-dashboard')
 @login_required

@@ -1,3 +1,4 @@
+<!-- templates/profile.html -->
 {% extends "base.html" %}
 
 {% block title %}Profile - E-commerce{% endblock %}
@@ -17,6 +18,10 @@
         {% if current_user.avatar %}
             <div class="mb-3">
                 <img src="{{ url_for('static', filename='avatars/' ~ current_user.avatar) }}" alt="Avatar" class="img-thumbnail" width="150">
+            </div>
+        {% else %}
+            <div class="mb-3">
+                <img src="{{ current_user.gravatar(150) }}" alt="Avatar" class="img-thumbnail" width="150">
             </div>
         {% endif %}
         <button type="submit" class="btn btn-primary">Update Profile</button>

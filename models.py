@@ -1,3 +1,5 @@
+from hashlib import md5
+
 from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, event, Float
 from sqlalchemy.orm import relationship, declarative_base, Mapped, mapped_column
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -52,6 +54,10 @@ class User(UserMixin, Base):
     def get_id(self):
         # Restituisce l'ID dell'utente come stringa
         return str(self.id)
+
+    def gravatar(self, size):
+        digest = md5(self.email.lower().encode('utf-8')).hexdigest()
+        return f'https://www.gravatar.com/avatar/{digest}?d=identicon&s={size}'
 
 
 class UserSeller(Base):
