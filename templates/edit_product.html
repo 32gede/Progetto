@@ -1,0 +1,56 @@
+<!-- templates/edit_product.html -->
+{% extends "base.html" %}
+
+{% block title %}Edit Product - E-commerce{% endblock %}
+
+{% block content %}
+<form method="POST">
+    <div>
+        <label for="name">Product Name:</label>
+        <input type="text" id="name" name="name" value="{{ product.name }}" required>
+    </div>
+    <div>
+        <label for="description">Description:</label>
+        <textarea id="description" name="description">{{ product.description }}</textarea>
+    </div>
+    <div>
+        <label for="price">Price:</label>
+        <input type="number" id="price" name="price" min="0" max="2147483647" value="{{ product.price }}" required>
+    </div>
+    <div>
+        <label for="quantity">Quantity:</label>
+        <input type="number" id="quantity" name="quantity" value="{{ product.quantity }}" required>
+    </div>
+    <div class="form-group">
+        <label for="brand_id">Brand</label>
+        <select class="form-control" id="brand_id" name="brand_id">
+            <option value="" disabled>Select a brand</option>
+            {% for brand in brands %}
+                <option value="{{ brand.id }}" {% if brand.id == product.brand_id %}selected{% endif %}>{{ brand.name }}</option>
+            {% endfor %}
+            <option value="new">Create new brand</option>
+        </select>
+    </div>
+    <div class="form-group" id="new_brand_name_group" style="display: none;">
+        <label for="new_brand_name">New Brand Name</label>
+        <input type="text" class="form-control" id="new_brand_name" name="new_brand_name">
+    </div>
+    <div class="form-group">
+        <label for="category_id">Category</label>
+        <select class="form-control" id="category_id" name="category_id">
+            <option value="" disabled>Select a category</option>
+            {% for category in categories %}
+                <option value="{{ category.id }}" {% if category.id == product.category_id %}selected{% endif %}>{{ category.name }}</option>
+            {% endfor %}
+            <option value="new">Create new category</option>
+        </select>
+    </div>
+    <div class="form-group" id="new_category_name_group" style="display: none;">
+        <label for="new_category_name">New Category Name</label>
+        <input type="text" class="form-control" id="new_category_name" name="new_category_name">
+    </div>
+    <div>
+        <button type="submit">Update Product</button>
+    </div>
+</form>
+{% endblock %}

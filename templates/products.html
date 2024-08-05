@@ -15,6 +15,8 @@
                         <p class="card-text">{{ product.description }}</p>
                         <p class="card-text">Price: ${{ product.price }}</p>
                         <a href="{{ url_for('main.view_product', product_id=product.id) }}" class="btn btn-primary">View Product</a>
+                        <a href="{{ url_for('main.edit_product', product_id=product.id) }}" class="btn btn-primary">Edit Product</a>
+                        <a href="{{ url_for('main.remove_product', product_id=product.id) }}" class="btn btn-primary">Remove Product</a>
                     </div>
                 </div>
             </div>

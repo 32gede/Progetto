@@ -274,17 +274,19 @@ def add_product():
     categories = db_session.query(Category).all()
     return render_template('add_product.html', brands=brands, categories=categories)
 
-@main_routes.route('/product/remove', methods=['GET', 'POST'])
+@main_routes.route('/product/remove/<int:product_id>', methods=['GET', 'POST'])
 @login_required
 @role_required('seller')
 def remove_product(product_id):
     db_session = get_db_session()
     product = db_session.query(Product).filter_by(id=product_id).first()
-    if product and product.seller_id == current_user.id:
-        db_session.delete(product)
-        db_session.commit()
-        return redirect(url_for('main.view_products_seller'))
-    return render_template('remove_product.html', error="Product doesn't exist or already deleted")
+    if request.method == 'POST':
+        if product and product.seller_id == current_user.id:
+            db_session.delete(product)
+            db_session.commit()
+            return redirect(url_for('main.view_products_seller'))
+        return render_template('remove_product.html', error="Product doesn't exist or already deleted")
+    return render_template('remove_product.html', product=product)
 
 @main_routes.route('/product/<int:product_id>/edit', methods=['GET', 'POST'])
 @login_required
