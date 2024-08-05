@@ -1,11 +1,13 @@
 import os
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
+from sqlalchemy.testing import db
 from werkzeug.utils import secure_filename
 from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem
 from database import get_db_session
 from functools import wraps
 from flask_login import login_user, login_required, current_user, logout_user
 from hashlib import md5
+
 
 main_routes = Blueprint('main', __name__)
 
@@ -274,19 +276,22 @@ def add_product():
     categories = db_session.query(Category).all()
     return render_template('add_product.html', brands=brands, categories=categories)
 
-@main_routes.route('/product/remove/<int:product_id>', methods=['GET', 'POST'])
+@main_routes.route('/remove_product/<int:product_id>', methods=['DELETE'])
 @login_required
-@role_required('seller')
 def remove_product(product_id):
+    print('sono qua')
     db_session = get_db_session()
     product = db_session.query(Product).filter_by(id=product_id).first()
-    if request.method == 'POST':
-        if product and product.seller_id == current_user.id:
-            db_session.delete(product)
-            db_session.commit()
-            return redirect(url_for('main.view_products_seller'))
-        return render_template('remove_product.html', error="Product doesn't exist or already deleted")
-    return render_template('remove_product.html', product=product)
+
+    if not product:
+        return jsonify({'error': 'Product not found'}), 404
+
+    if product.seller_id != current_user.id:
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    db_session.delete(product)
+    db_session.commit()
+    return jsonify({'success': 'Product deleted'}), 200
 
 @main_routes.route('/product/<int:product_id>/edit', methods=['GET', 'POST'])
 @login_required
