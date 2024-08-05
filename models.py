@@ -142,6 +142,7 @@ class CartItem(Base):
 
 class Order(Base):
     __tablename__ = 'orders'
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
@@ -153,6 +154,7 @@ class Order(Base):
 
 class OrderItem(Base):
     __tablename__ = 'order_items'
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
     order_id: Mapped[int] = mapped_column(Integer, ForeignKey('orders.id'), nullable=False)
     product_id: Mapped[int] = mapped_column(Integer, ForeignKey('products.id'), nullable=False)
