@@ -85,15 +85,19 @@ class Product(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(String(255), nullable=True)
-    price: Mapped[int] = mapped_column(Integer, nullable=False)
+    price: Mapped[float] = mapped_column(Float, nullable=False)
     quantity: Mapped[int] = mapped_column(Integer, nullable=False)
+
     brand_id: Mapped[int] = mapped_column(Integer, ForeignKey('brands.id'), nullable=True)
     brand: Mapped["Brand"] = relationship("Brand", back_populates="products")
+
     category_id: Mapped[int] = mapped_column(Integer, ForeignKey('categories.id'), nullable=True)
     category: Mapped["Category"] = relationship("Category", back_populates="products")
+
     seller_id: Mapped[int] = mapped_column(Integer, ForeignKey('user_sellers.id'), nullable=True)
     seller: Mapped["UserSeller"] = relationship("UserSeller", back_populates="products")
-    reviews: Mapped["Review"] = relationship("Review", back_populates="product")
+
+    reviews: Mapped[list["Review"]] = relationship("Review", back_populates="product")
     cart_items: Mapped["CartItem"] = relationship("CartItem", back_populates="product")
     order_items: Mapped["OrderItem"] = relationship("OrderItem", back_populates="product")
 
@@ -120,7 +124,7 @@ class Review(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     product_id: Mapped[int] = mapped_column(Integer, ForeignKey('products.id'), nullable=False)
-    rating: Mapped[int] = mapped_column(Integer, nullable=False)
+    rating: Mapped[float] = mapped_column(Float, nullable=False)
     comment: Mapped[str] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
 

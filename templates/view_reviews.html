@@ -1,0 +1,32 @@
+<!-- templates/view_reviews.html -->
+{% extends "base.html" %}
+
+{% block title %}View Review - E-commerce{% endblock %}
+
+{% block content %}
+    <h1>Product Review</h1>
+    <div class="product">
+        <h2>{{ product.name }}</h2>
+        <p>{{ product.description }}</p>
+        <p>Price: ${{ product.price }}</p>
+        <p>Quantity: {{ product.quantity }}</p>
+        <p>Brand: {{ product.brand.name }}</p>
+        <p>Category: {{ product.category.name }}</p>
+    </div>
+    <h2>Reviews</h2>
+    <ul class="reviews">
+        {% if reviews %}
+            {% for review in reviews %}
+                <li>
+                    <strong>Rating:</strong> {{ review.rating }}<br>
+                    <strong>Comment:</strong> {{ review.comment }}<br>
+                    <strong>Reviewed by:</strong> {{ review.user.email }}<br>
+                    <strong>Date:</strong> {{ review.created_at }}
+                </li>
+            {% endfor %}
+        {% else %}
+            <p>No reviews yet.</p>
+        {% endif %}
+    </ul>
+    <a href="{{ url_for('main.add_review', product_id=product.id) }}">Add a Review</a>
+{% endblock %}

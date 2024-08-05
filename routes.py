@@ -1,4 +1,3 @@
-import os
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from sqlalchemy.testing import db
 from werkzeug.utils import secure_filename
@@ -7,19 +6,23 @@ from database import get_db_session
 from functools import wraps
 from flask_login import login_user, login_required, current_user, logout_user
 from hashlib import md5
-
+import os
+import sys
 
 main_routes = Blueprint('main', __name__)
 
 UPLOAD_FOLDER = 'static/avatars'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 def ensure_upload_folder():
     if not os.path.exists(UPLOAD_FOLDER):
         os.makedirs(UPLOAD_FOLDER)
+
 
 def role_required(*roles):
     def decorator(f):
@@ -36,6 +39,7 @@ def role_required(*roles):
         return decorated_function
 
     return decorator
+
 
 def login_required(f):
     @wraps(f)
@@ -55,6 +59,16 @@ def validate_int(value, min_value=0, max_value=2147483647, error_message="Invali
     except ValueError:
         raise ValueError(error_message)
 
+
+def validate_float(value, min_value=0, max_value=sys.float_info.max, error_message="Invalid value"):
+    try:
+        float_value = float(value)
+        if float_value < min_value or float_value > max_value:
+            raise ValueError(error_message)
+        return float_value
+    except ValueError:
+        raise ValueError(error_message)
+
 @main_routes.route('/')
 def index():
     if 'id' in session:
@@ -62,6 +76,7 @@ def index():
     else:
         print('NESSUN cookie')
     return render_template('index.html')
+
 
 @main_routes.route('/login', methods=['GET', 'POST'])
 def login():
@@ -77,6 +92,7 @@ def login():
         else:
             return render_template('login.html', error='Invalid username or password')
     return render_template('login.html')
+
 
 @main_routes.route('/registration', methods=['GET', 'POST'])
 def registration():
@@ -109,12 +125,14 @@ def registration():
         return render_template('registration.html', error='User already exists')
     return render_template('registration.html')
 
+
 @main_routes.route('/logout')
 @login_required
 def logout():
     logout_user()  # Log out the user
     session.pop('id', None)  # Clear the session
     return redirect(url_for('main.index'))
+
 
 @main_routes.route('/profile', methods=['GET', 'POST'])
 @login_required
@@ -133,6 +151,7 @@ def profile():
             flash('Invalid file type.')
     return render_template('profile.html')
 
+
 @main_routes.route('/cart')
 @login_required
 @role_required('buyer')
@@ -141,6 +160,7 @@ def cart():
     cart_items = db_session.query(CartItem).filter_by(user_id=current_user.id).all()
     cart_total = sum(item.product.price * item.quantity for item in cart_items)
     return render_template('cart.html', cart_items=cart_items, cart_total=cart_total)
+
 
 @main_routes.route('/cart/remove/<int:item_id>', methods=['POST'])
 @login_required
@@ -153,6 +173,7 @@ def remove_from_cart(item_id):
         db_session.commit()
     return redirect(url_for('main.cart'))
 
+
 @main_routes.route('/order_history')
 @login_required
 @role_required('buyer')
@@ -160,6 +181,7 @@ def order_history():
     db_session = get_db_session()
     orders = db_session.query(Order).filter_by(user_id=current_user.id).all()
     return render_template('order_history.html', orders=orders)
+
 
 @main_routes.route('/checkout', methods=['POST'])
 @login_required
@@ -183,15 +205,17 @@ def checkout():
     db_session.commit()
     return redirect(url_for('main.order_history'))
 
-@main_routes.route('/products')
+
+@main_routes.route('/seller/products')
 @login_required
 @role_required('seller')
 def view_products_seller():
     db_session = get_db_session()
     products = db_session.query(Product).filter_by(seller_id=current_user.id).all()
     if not products:
-        return render_template('products.html', error="You haven't added any products yet")
-    return render_template('products.html', products=products)
+        return render_template('products_seller.html', error="You haven't added any products yet")
+    return render_template('products_seller.html', products=products)
+
 
 @main_routes.route('/buyer/products')
 @login_required
@@ -200,8 +224,9 @@ def view_products_buyer():
     db_session = get_db_session()
     products = db_session.query(Product).all()
     if not products:
-        return render_template('products.html', error="There are no products available")
-    return render_template('products.html', products=products)
+        return render_template('products_buyer.html', error="There are no products available")
+    return render_template('products_buyer.html', products=products)
+
 
 @main_routes.route('/products/<int:product_id>')
 @login_required
@@ -213,6 +238,7 @@ def view_product(product_id):
         return render_template('product.html', error="Product doesn't exist")
     return render_template('product.html', product=product)
 
+
 @main_routes.route('/product/add', methods=['GET', 'POST'])
 @login_required
 @role_required('seller')
@@ -221,11 +247,12 @@ def add_product():
         name = request.form['name']
         description = request.form['description']
         try:
-            price = validate_int(request.form['price'],
-                                 error_message='Invalid price. Please enter a number between 0 and 2147483647')
+            price = validate_float(request.form['price'],
+                                   error_message='Invalid price. Please enter a number between 0 and 2147483647')
         except ValueError as e:
             flash(str(e))
             return redirect(url_for('main.add_product'))
+
         try:
             quantity = validate_int(request.form['quantity'],
                                     error_message='Invalid quantity. Please enter a number between 0 and 2147483647')
@@ -310,14 +337,14 @@ def edit_product(product_id):
         product.name = request.form['name']
         product.description = request.form['description']
         try:
-            product.price = validate_int(request.form['price'],
-                                 error_message='Invalid price. Please enter a number between 0 and 2147483647')
+            product.price = validate_float(request.form['price'],
+                                           error_message='Invalid price. Please enter a number between 0 and 2147483647')
         except ValueError as e:
             flash(str(e))
             return redirect(url_for('main.edit_product', product_id=product.id))
         try:
             product.quantity = validate_int(request.form['quantity'],
-                                    error_message='Invalid quantity. Please enter a number between 0 and 2147483647')
+                                            error_message='Invalid quantity. Please enter a number between 0 and 2147483647')
         except ValueError as e:
             flash(str(e))
             return redirect(url_for('main.edit_product', product_id=product.id))
@@ -329,37 +356,132 @@ def edit_product(product_id):
     categories = db_session.query(Category).all()
     return render_template('edit_product.html', product=product, brands=brands, categories=categories)
 
-@main_routes.route('/product/<int:product_id>/add_review', methods=['POST'])
+
+@main_routes.route('/product/<int:product_id>/reviews')
+@login_required
+@role_required('buyer', 'seller')
+def view_reviews(product_id):
+    db_session = get_db_session()
+    product = db_session.query(Product).filter_by(id=product_id).first()
+    if not product:
+        return redirect(url_for('main.index'))
+
+    reviews = product.reviews  # Directly access the reviews attribute
+    return render_template('view_reviews.html', product=product, reviews=reviews)
+
+
+@main_routes.route('/product/<int:product_id>/add_review', methods=['GET', 'POST'])
 @login_required
 @role_required('buyer')
 def add_review(product_id):
     db_session = get_db_session()
     product = db_session.query(Product).filter_by(id=product_id).first()
     if not product:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.index'), error="Seller cannot review the product")
 
-    rating = request.form['rating']
-    text = request.form['text']
+    if request.method == 'POST':
+        rating = request.form.get('rating')
+        comment = request.form.get('comment')
 
-    if not rating or not text:
-        flash('Please provide a rating and a review text.')
+        if not rating or not comment:
+            flash('Please provide a rating and a review text.')
+            return redirect(url_for('main.view_product', product_id=product.id))
+
+        try:
+            rating = validate_float(rating, min_value=1, max_value=5,
+                                    error_message='Invalid rating. Please enter a number between 1 and 5.')
+        except ValueError as e:
+            flash(str(e))
+            return redirect(url_for('main.view_product', product_id=product.id))
+
+        new_review = Review(product_id=product.id, user_id=current_user.id, rating=rating, comment=comment)
+        db_session.add(new_review)
+        db_session.commit()
+
         return redirect(url_for('main.view_product', product_id=product.id))
 
-    try:
-        rating = validate_int(rating, min_value=1, max_value=5, error_message='Invalid rating. Please enter a number between 1 and 5.')
-    except ValueError as e:
-        flash(str(e))
-        return redirect(url_for('main.view_product', product_id=product.id))
-
-    new_review = Review(product_id=product.id, user_id=current_user.id, rating=rating, text=text)
-    db_session.add(new_review)
-    db_session.commit()
-
-    return redirect(url_for('main.view_product', product_id=product.id))
+    return render_template('add_review.html', product=product)
 
 
-@main_routes.route('/buyer-dashboard')
+@main_routes.route('/product/<int:product_id>/edit_review', methods=['GET', 'POST'])
 @login_required
 @role_required('buyer')
-def buyer_dashboard():
-    return render_template('buyer_dashboard.html')
+def edit_review(product_id):
+    db_session = get_db_session()
+    product = db_session.query(Product).filter_by(id=product_id).first()
+    if not product:
+        return redirect(url_for('main.index'))
+
+    review = db_session.query(Review).filter_by(product_id=product.id, user_id=current_user.id).first()
+    if not review:
+        return redirect(url_for('main.index'))
+
+    if request.method == 'POST':
+        rating = request.form.get('rating')
+        comment = request.form.get('comment')
+
+        if not rating or not comment:
+            flash('Please provide a rating and a review text.')
+            return redirect(url_for('main.view_product', product_id=product.id))
+
+        try:
+            rating = validate_float(rating, min_value=1, max_value=5,
+                                    error_message='Invalid rating. Please enter a number between 1 and 5.')
+        except ValueError as e:
+            flash(str(e))
+            return redirect(url_for('main.view_product', product_id=product.id))
+
+        review.rating = rating
+        review.comment = comment
+        db_session.commit()
+
+        return redirect(url_for('main.view_product', product_id=product.id))
+
+    return render_template('edit_review.html', product=product, review=review)
+
+
+@main_routes.route('/product/<int:product_id>/remove_review', methods=['GET', 'POST'])
+@login_required
+@role_required('seller')
+def remove_review(product_id):
+    db_session = get_db_session()
+    product = db_session.query(Product).filter_by(id=product_id).first()
+
+    if not product:
+        flash('Product not found.')
+        return redirect(url_for('main.view_products_seller'))
+
+    if product.seller_id != current_user.id:
+        flash('Unauthorized action.')
+        return redirect(url_for('main.view_products_seller'))
+
+    review = db_session.query(Review).filter_by(product_id=product.id, user_id=current_user.id).first()
+    if not review:
+        return redirect(url_for('main.view_products_seller'))
+
+    db_session.delete(review)
+    db_session.commit()
+    flash('Product deleted successfully.')
+    return redirect(url_for('main.view_products_seller', product_id=product.id))
+
+'''
+def order_history_returns_orders_for_valid_user(client, db_session, valid_user):
+    response = client.get('/order_history', query_string={'user_id': valid_user.id})
+    assert response.status_code == 200
+    assert len(response.json['orders']) > 0
+
+def order_history_returns_empty_for_user_with_no_orders(client, db_session, user_with_no_orders):
+    response = client.get('/order_history', query_string={'user_id': user_with_no_orders.id})
+    assert response.status_code == 200
+    assert len(response.json['orders']) == 0
+
+def order_history_returns_404_for_invalid_user(client, db_session):
+    response = client.get('/order_history', query_string={'user_id': 9999})
+    assert response.status_code == 404
+
+def order_history_handles_missing_user_id(client, db_session):
+    response = client.get('/order_history')
+    
+    assert response.status_code == 400
+    assert response.json == {'error': 'Missing user_id parameter'}
+'''
