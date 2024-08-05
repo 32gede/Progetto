@@ -33,7 +33,7 @@
                     {% endif %}
                     {% if current_user.role == 'seller' %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.seller_dashboard') }}">Dashboard</a>
+                            <a class="nav-link" href="{{ url_for('main.view_products_seller') }}">Dashboard</a>
                         </li>
                     {% elif current_user.role == 'buyer' %}
                         <li class="nav-item">

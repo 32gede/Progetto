@@ -319,11 +319,7 @@ def edit_product(product_id):
     categories = db_session.query(Category).all()
     return render_template('edit_product.html', product=product, brands=brands, categories=categories)
 
-@main_routes.route('/seller-dashboard')
-@login_required
-@role_required('seller')
-def seller_dashboard():
-    return render_template('seller_dashboard.html')
+
 
 @main_routes.route('/buyer-dashboard')
 @login_required
