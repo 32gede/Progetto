@@ -301,23 +301,24 @@ def remove_product(product_id):
 def edit_product(product_id):
     db_session = get_db_session()
     product = db_session.query(Product).filter_by(id=product_id).first()
-    if not product or product.seller_id != session['id']:
+    if not product or product.seller_id != current_user.id:
+        print("codice errato")
         return redirect(url_for('main.index'))
     if request.method == 'POST':
         product.name = request.form['name']
         product.description = request.form['description']
         try:
-            price = validate_int(request.form['price'],
+            product.price = validate_int(request.form['price'],
                                  error_message='Invalid price. Please enter a number between 0 and 2147483647')
         except ValueError as e:
             flash(str(e))
-            return redirect(url_for('main.add_product'))
+            return redirect(url_for('main.edit_product', product_id=product.id))
         try:
-            quantity = validate_int(request.form['quantity'],
+            product.quantity = validate_int(request.form['quantity'],
                                     error_message='Invalid quantity. Please enter a number between 0 and 2147483647')
         except ValueError as e:
             flash(str(e))
-            return redirect(url_for('main.add_product'))
+            return redirect(url_for('main.edit_product', product_id=product.id))
         product.brand_id = request.form['brand_id']
         product.category_id = request.form['category_id']
         db_session.commit()
