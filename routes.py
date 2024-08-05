@@ -276,6 +276,7 @@ def add_product():
     categories = db_session.query(Category).all()
     return render_template('add_product.html', brands=brands, categories=categories)
 
+
 @main_routes.route('/remove_product/<int:product_id>', methods=['POST'])
 @login_required
 def remove_product(product_id):
@@ -294,6 +295,7 @@ def remove_product(product_id):
     db_session.commit()
     flash('Product deleted successfully.')
     return redirect(url_for('main.view_products_seller'))
+
 
 @main_routes.route('/product/<int:product_id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -327,6 +329,33 @@ def edit_product(product_id):
     categories = db_session.query(Category).all()
     return render_template('edit_product.html', product=product, brands=brands, categories=categories)
 
+@main_routes.route('/product/<int:product_id>/add_review', methods=['POST'])
+@login_required
+@role_required('buyer')
+def add_review(product_id):
+    db_session = get_db_session()
+    product = db_session.query(Product).filter_by(id=product_id).first()
+    if not product:
+        return redirect(url_for('main.index'))
+
+    rating = request.form['rating']
+    text = request.form['text']
+
+    if not rating or not text:
+        flash('Please provide a rating and a review text.')
+        return redirect(url_for('main.view_product', product_id=product.id))
+
+    try:
+        rating = validate_int(rating, min_value=1, max_value=5, error_message='Invalid rating. Please enter a number between 1 and 5.')
+    except ValueError as e:
+        flash(str(e))
+        return redirect(url_for('main.view_product', product_id=product.id))
+
+    new_review = Review(product_id=product.id, user_id=current_user.id, rating=rating, text=text)
+    db_session.add(new_review)
+    db_session.commit()
+
+    return redirect(url_for('main.view_product', product_id=product.id))
 
 
 @main_routes.route('/buyer-dashboard')
