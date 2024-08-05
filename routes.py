@@ -276,22 +276,24 @@ def add_product():
     categories = db_session.query(Category).all()
     return render_template('add_product.html', brands=brands, categories=categories)
 
-@main_routes.route('/remove_product/<int:product_id>', methods=['DELETE'])
+@main_routes.route('/remove_product/<int:product_id>', methods=['POST'])
 @login_required
 def remove_product(product_id):
-    print('sono qua')
     db_session = get_db_session()
     product = db_session.query(Product).filter_by(id=product_id).first()
 
     if not product:
-        return jsonify({'error': 'Product not found'}), 404
+        flash('Product not found.')
+        return redirect(url_for('main.view_products_seller'))
 
     if product.seller_id != current_user.id:
-        return jsonify({'error': 'Unauthorized'}), 403
+        flash('Unauthorized action.')
+        return redirect(url_for('main.view_products_seller'))
 
     db_session.delete(product)
     db_session.commit()
-    return jsonify({'success': 'Product deleted'}), 200
+    flash('Product deleted successfully.')
+    return redirect(url_for('main.view_products_seller'))
 
 @main_routes.route('/product/<int:product_id>/edit', methods=['GET', 'POST'])
 @login_required
