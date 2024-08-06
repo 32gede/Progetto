@@ -18,6 +18,7 @@ body {
 /* Navbar personalizzata */
 .navbar {
     margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Stili per il contenitore principale */
@@ -54,6 +55,7 @@ body {
 .btn-primary {
     background-color: #007bff;
     border-color: #007bff;
+    transition: background-color 0.3s, border-color 0.3s;
 }
 
 .btn-primary:hover {
@@ -68,6 +70,11 @@ body {
 
 .dashboard .card {
     margin-bottom: 20px;
+    transition: transform 0.3s;
+}
+
+.dashboard .card:hover {
+    transform: translateY(-10px);
 }
 
 /* Stili per la pagina del carrello */
@@ -94,9 +101,25 @@ body {
 
 .order-history .order-card {
     margin-bottom: 20px;
+    transition: transform 0.3s;
+}
+
+.order-history .order-card:hover {
+    transform: translateY(-10px);
 }
 
 /* Stili per la pagina del profilo */
 .profile {
     margin-top: 20px;
+}
+
+/* Stili per i pulsanti di default */
+.btn-link {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.btn-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
 }

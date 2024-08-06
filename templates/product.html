@@ -4,12 +4,14 @@
 {% block title %}Product Details - E-commerce{% endblock %}
 
 {% block content %}
-<h1>{{ product.name }}</h1>
-<p>{{ product.description }}</p>
-<p>Price: {{ product.price }}</p>
-<p>Quantity: {{ product.quantity }}</p>
-{% if current_user.role == 'buyer' %}
-    <a href="{{ url_for('main.cart') }}" class="btn btn-primary">Add to Cart</a>
-{% endif %}
-<a href="{% if current_user.role == 'seller' %}{{ url_for('main.view_products_seller') }}{% else %}{{ url_for('main.view_products_buyer') }}{% endif %}" class="btn btn-secondary">Back to Products</a>
+<div class="container mt-5">
+    <h1>{{ product.name }}</h1>
+    <p>{{ product.description }}</p>
+    <p>Price: {{ product.price }}</p>
+    <p>Quantity: {{ product.quantity }}</p>
+    {% if current_user.role == 'buyer' %}
+        <a href="{{ url_for('main.add_to_cart', product_id=product.id) }}" class="btn btn-primary">Add to Cart</a>
+    {% endif %}
+    <a href="{% if current_user.role == 'seller' %}{{ url_for('main.view_products_seller') }}{% else %}{{ url_for('main.view_products_buyer') }}{% endif %}" class="btn btn-secondary">Back to Products</a>
+</div>
 {% endblock %}

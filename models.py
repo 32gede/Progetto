@@ -139,6 +139,7 @@ class CartItem(Base):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     product_id: Mapped[int] = mapped_column(Integer, ForeignKey('products.id'), nullable=False)
     quantity: Mapped[int] = mapped_column(Integer, nullable=False)
+    added_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)  # Timestamp aggiunto
 
     user: Mapped["User"] = relationship("User", back_populates="cart_items")
     product: Mapped["Product"] = relationship("Product", back_populates="cart_items")
@@ -151,6 +152,7 @@ class Order(Base):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     total: Mapped[float] = mapped_column(Float, nullable=False)
+    status: Mapped[str] = mapped_column(String(50), default='pending')  # Stati dell'ordine
 
     user: Mapped["User"] = relationship("User", back_populates="orders")
     order_items: Mapped["OrderItem"] = relationship("OrderItem", back_populates="order")
@@ -163,6 +165,7 @@ class OrderItem(Base):
     order_id: Mapped[int] = mapped_column(Integer, ForeignKey('orders.id'), nullable=False)
     product_id: Mapped[int] = mapped_column(Integer, ForeignKey('products.id'), nullable=False)
     quantity: Mapped[int] = mapped_column(Integer, nullable=False)
+    price: Mapped[float] = mapped_column(Float, nullable=False)  # Prezzo aggiunto
 
     order: Mapped["Order"] = relationship("Order", back_populates="order_items")
     product: Mapped["Product"] = relationship("Product")

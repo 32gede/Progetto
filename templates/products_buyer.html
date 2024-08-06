@@ -1,3 +1,4 @@
+<!-- templates/products_buyer.html -->
 {% extends "base.html" %}
 
 {% block title %}Products - E-commerce{% endblock %}
@@ -18,7 +19,11 @@
                         <a href="{{ url_for('main.view_product', product_id=product.id) }}" class="btn btn-primary">View Product</a>
                         <a href="{{ url_for('main.view_reviews', product_id=product.id) }}" class="btn btn-primary">View Reviews</a>
                         <a href="{{ url_for('main.add_review', product_id=product.id) }}" class="btn btn-primary">Add Review</a>
-                        <a href="{{ url_for('main.add_review', product_id=product.id) }}" class="btn btn-primary">Edit Review</a>
+                        <a href="{{ url_for('main.edit_review', product_id=product.id) }}" class="btn btn-primary">Edit Review</a>
+                        <form method="POST" action="{{ url_for('main.add_to_cart', product_id=product.id) }}">
+                            <input type="number" name="quantity" value="1" min="1" class="form-control mb-2">
+                            <button type="submit" class="btn btn-primary">Add to Cart</button>
+                        </form>
                     </div>
                 </div>
             </div>

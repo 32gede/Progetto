@@ -1,5 +1,3 @@
-# routes.py
-
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from werkzeug.utils import secure_filename
 from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem
@@ -15,12 +13,15 @@ main_routes = Blueprint('main', __name__)
 UPLOAD_FOLDER = 'static/avatars'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 def ensure_upload_folder():
     if not os.path.exists(UPLOAD_FOLDER):
         os.makedirs(UPLOAD_FOLDER)
+
 
 def role_required(*roles):
     def decorator(f):
@@ -33,8 +34,11 @@ def role_required(*roles):
             if user.role not in roles:
                 return redirect(url_for('main.index'))
             return f(*args, **kwargs)
+
         return decorated_function
+
     return decorator
+
 
 def login_required(f):
     @wraps(f)
@@ -42,7 +46,9 @@ def login_required(f):
         if 'id' not in session:
             return redirect(url_for('main.login', next=request.url))
         return f(*args, **kwargs)
+
     return decorated_function
+
 
 def validate_int(value, min_value=0, max_value=2147483647, error_message="Invalid value"):
     try:
@@ -53,6 +59,7 @@ def validate_int(value, min_value=0, max_value=2147483647, error_message="Invali
     except ValueError:
         raise ValueError(error_message)
 
+
 def validate_float(value, min_value=0, max_value=sys.float_info.max, error_message="Invalid value"):
     try:
         float_value = float(value)
@@ -62,13 +69,21 @@ def validate_float(value, min_value=0, max_value=sys.float_info.max, error_messa
     except ValueError:
         raise ValueError(error_message)
 
+
+# MAIN ROUTES #
+
+
 @main_routes.route('/')
 def index():
     if 'id' in session:
-        print(session['id'])
+        print('L\'utente con id: ' + str(session['id']) + ', si è loggato')
     else:
-        print('NESSUN cookie')
+        print('Nessun utente è loggato')
     return render_template('index.html')
+
+
+# USER ROUTES #
+
 
 @main_routes.route('/login', methods=['GET', 'POST'])
 def login():
@@ -84,6 +99,7 @@ def login():
         else:
             return render_template('login.html', error='Invalid username or password')
     return render_template('login.html')
+
 
 @main_routes.route('/registration', methods=['GET', 'POST'])
 def registration():
@@ -116,12 +132,14 @@ def registration():
         return render_template('registration.html', error='User already exists')
     return render_template('registration.html')
 
+
 @main_routes.route('/logout')
 @login_required
 def logout():
     logout_user()  # Log out the user
     session.pop('id', None)  # Clear the session
     return redirect(url_for('main.index'))
+
 
 @main_routes.route('/profile', methods=['GET', 'POST'])
 @login_required
@@ -140,59 +158,9 @@ def profile():
             flash('Invalid file type.')
     return render_template('profile.html')
 
-@main_routes.route('/cart')
-@login_required
-@role_required('buyer')
-def cart():
-    db_session = get_db_session()
-    cart_items = db_session.query(CartItem).filter_by(user_id=current_user.id).all()
-    cart_total = sum(item.product.price * item.quantity for item in cart_items)
-    return render_template('cart.html', cart_items=cart_items, cart_total=cart_total)
 
-@main_routes.route('/cart/remove/<int:item_id>', methods=['POST'])
-@login_required
-@role_required('buyer')
-def remove_from_cart(item_id):
-    db_session = get_db_session()
-    item = db_session.query(CartItem).filter_by(id=item_id, user_id=current_user.id).first()
-    if item:
-        db_session.delete(item)
-        db_session.commit()
-    return redirect(url_for('main.cart'))
+# PRODUCT ROUTES #
 
-@main_routes.route('/order_history')
-@login_required
-@role_required('buyer')
-def order_history():
-    db_session = get_db_session()
-    orders = db_session.query(Order).filter_by(user_id=current_user.id).all()
-    return render_template('order_history.html', orders=orders)
-
-@main_routes.route('/checkout', methods=['POST'])
-@login_required
-@role_required('buyer')
-def checkout():
-    db_session = get_db_session()
-    cart_items = db_session.query(CartItem).filter_by(user_id=current_user.id).all()
-
-    if not cart_items:
-        return redirect(url_for('main.cart'))
-
-    total = sum(item.product.price * item.quantity for item in cart_items)
-    new_order = Order(user_id=current_user.id, total=total)
-    db_session.add(new_order)
-    db_session.commit()
-
-    for item in cart_items:
-        order_item = OrderItem(
-            order_id=new_order.id,
-            product_id=item.product.id,
-            quantity=item.quantity)
-        db_session.add(order_item)
-        db_session.delete(item)
-
-    db_session.commit()
-    return redirect(url_for('main.order_history'))
 
 @main_routes.route('/seller/products')
 @login_required
@@ -204,6 +172,7 @@ def view_products_seller():
         return render_template('products_seller.html', error="You haven't added any products yet")
     return render_template('products_seller.html', products=products)
 
+
 @main_routes.route('/buyer/products')
 @login_required
 @role_required('buyer')
@@ -214,6 +183,7 @@ def view_products_buyer():
         return render_template('products_buyer.html', error="There are no products available")
     return render_template('products_buyer.html', products=products)
 
+
 @main_routes.route('/products/<int:product_id>')
 @login_required
 @role_required('buyer', 'seller')
@@ -223,6 +193,7 @@ def view_product(product_id):
     if not product:
         return render_template('product.html', error="Product doesn't exist")
     return render_template('product.html', product=product)
+
 
 @main_routes.route('/product/add', methods=['GET', 'POST'])
 @login_required
@@ -288,6 +259,7 @@ def add_product():
     categories = db_session.query(Category).all()
     return render_template('add_product.html', brands=brands, categories=categories)
 
+
 @main_routes.route('/remove_product/<int:product_id>', methods=['POST'])
 @login_required
 def remove_product(product_id):
@@ -306,6 +278,7 @@ def remove_product(product_id):
     db_session.commit()
     flash('Product deleted successfully.')
     return redirect(url_for('main.view_products_seller'))
+
 
 @main_routes.route('/product/<int:product_id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -344,6 +317,10 @@ def edit_product(product_id):
     categories = db_session.query(Category).all()
     return render_template('edit_product.html', product=product, brands=brands, categories=categories)
 
+
+# REVIEW ROUTES #
+
+
 @main_routes.route('/product/<int:product_id>/reviews')
 @login_required
 @role_required('buyer', 'seller')
@@ -356,6 +333,7 @@ def view_reviews(product_id):
 
     reviews = product.reviews  # Directly access the reviews attribute
     return render_template('view_reviews.html', product=product, reviews=reviews)
+
 
 @main_routes.route('/product/<int:product_id>/add_review', methods=['GET', 'POST'])
 @login_required
@@ -394,6 +372,7 @@ def add_review(product_id):
 
     return render_template('add_review.html', product=product)
 
+
 @main_routes.route('/product/<int:product_id>/edit_review', methods=['GET', 'POST'])
 @login_required
 @role_required('buyer')
@@ -430,6 +409,7 @@ def edit_review(product_id):
 
     return render_template('edit_review.html', product=product, review=review)
 
+
 @main_routes.route('/product/<int:product_id>/remove_review/<int:review_id>', methods=['POST'])
 @login_required
 @role_required('buyer', 'seller')
@@ -455,6 +435,134 @@ def remove_review(product_id, review_id):
     db_session.commit()
     flash('Review deleted successfully.')
     return redirect(url_for('main.view_reviews', product_id=product_id))
+
+
+# CART AND ORDER ROUTES #
+
+
+@main_routes.route('/cart')
+@login_required
+@role_required('buyer')
+def cart():
+    db_session = get_db_session()
+    cart_items = db_session.query(CartItem).filter_by(user_id=current_user.id).all()
+    cart_total = sum(item.product.price * item.quantity for item in cart_items)
+    return render_template('cart.html', cart_items=cart_items, cart_total=cart_total)
+
+
+@main_routes.route('/cart/add/<int:product_id>', methods=['POST'])
+@login_required
+@role_required('buyer')
+def add_to_cart(product_id):
+    db_session = get_db_session()
+    product = db_session.query(Product).filter_by(id=product_id).first()
+    if not product:
+        flash('Product not found.')
+        return redirect(url_for('main.view_products_buyer'))
+
+    if product.quantity == 0:
+        flash('Product out of stock.')
+        return redirect(url_for('main.view_products_buyer'))
+
+    quantity = request.form.get('quantity')
+
+    try:
+        quantity = validate_int(quantity, min_value=1, max_value=product.quantity,
+                                error_message=f'Invalid quantity. Please enter a number between 1 and {product.quantity}')
+    except ValueError as e:
+        flash(str(e))
+        return redirect(url_for('main.view_product', product_id=product.id))
+
+    cart_item = db_session.query(CartItem).filter_by(product_id=product.id, user_id=current_user.id).first()
+    if cart_item:
+        cart_item.quantity += quantity
+    else:
+        cart_item = CartItem(user_id=current_user.id,
+                             product_id=product.id,
+                             quantity=quantity)
+        db_session.add(cart_item)
+    db_session.commit()
+    flash('Product added to cart.')
+    return redirect(url_for('main.cart'))
+
+
+@main_routes.route('/cart/remove/<int:item_id>', methods=['POST'])
+@login_required
+@role_required('buyer')
+def remove_from_cart(item_id):
+    db_session = get_db_session()
+    item = db_session.query(CartItem).filter_by(id=item_id, user_id=current_user.id).first()
+    if item:
+        db_session.delete(item)
+        db_session.commit()
+        flash('Item removed from cart.')
+    return redirect(url_for('main.cart'))
+
+
+@main_routes.route('/cart/edit', methods=['POST'])
+@login_required
+@role_required('buyer')
+def edit_cart():
+    item_id = request.form.get('item_id')
+    new_quantity = request.form.get('new_quantity')
+    if not item_id or not new_quantity:
+        flash('Invalid item ID or quantity')
+        return redirect(url_for('main.cart'))
+
+    try:
+        new_quantity = validate_int(new_quantity, min_value=1,
+                                    error_message='Invalid quantity. Please enter a number greater than 0')
+    except ValueError as e:
+        flash(str(e))
+        return redirect(url_for('main.cart'))
+
+    db_session = get_db_session()
+    item = db_session.query(CartItem).filter_by(id=item_id, user_id=current_user.id).first()
+    if item:
+        item.quantity = new_quantity
+        db_session.commit()
+    flash('Cart updated.')
+    return redirect(url_for('main.cart'))
+
+
+@main_routes.route('/order_history')
+@login_required
+@role_required('buyer')
+def order_history():
+    db_session = get_db_session()
+    orders = db_session.query(Order).filter_by(user_id=current_user.id).all()
+    return render_template('order_history.html', orders=orders)
+
+
+@main_routes.route('/checkout', methods=['POST'])
+@login_required
+@role_required('buyer')
+def checkout():
+    db_session = get_db_session()
+    cart_items = db_session.query(CartItem).filter_by(user_id=current_user.id).all()
+
+    if not cart_items:
+        flash('No items in cart.')
+        return redirect(url_for('main.cart'))
+
+    total = sum(item.product.price * item.quantity for item in cart_items)
+    new_order = Order(user_id=current_user.id,
+                      total=total)
+    db_session.add(new_order)
+    db_session.commit()
+
+    for item in cart_items:
+        order_item = OrderItem(
+            order_id=new_order.id,
+            product_id=item.product.id,
+            quantity=item.quantity,
+            price=item.product.price)
+        db_session.add(order_item)
+        db_session.delete(item)
+
+    db_session.commit()
+    flash('Order placed successfully.')
+    return redirect(url_for('main.order_history'))
 
 
 '''

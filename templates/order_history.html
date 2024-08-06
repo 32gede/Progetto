@@ -1,17 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title><!-- templates/order_history.html -->
+<!-- templates/order_history.html -->
 {% extends "base.html" %}
 
 {% block title %}Order History - E-commerce{% endblock %}
 
 {% block content %}
-<div class="container order-history">
+<div class="container order-history mt-5">
     <h1>Your Order History</h1>
     {% for order in orders %}
-        <div class="card order-card">
+        <div class="card order-card mb-4">
             <div class="card-body">
                 <h5 class="card-title">Order #{{ order.id }}</h5>
                 <p class="card-text">Date: {{ order.date }}</p>
@@ -27,9 +23,3 @@
     {% endfor %}
 </div>
 {% endblock %}
-</title>
-</head>
-<body>
-
-</body>
-</html>
