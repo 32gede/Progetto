@@ -21,7 +21,7 @@ class User(UserMixin, Base):
 
     seller: Mapped["UserSeller"] = relationship("UserSeller", uselist=False, back_populates="user")
     buyer: Mapped["UserBuyer"] = relationship("UserBuyer", uselist=False, back_populates="user")
-    reviews: Mapped["Review"] = relationship("Review", back_populates="user")
+    reviews: Mapped[list["Review"]] = relationship("Review", back_populates="user")
     cart_items: Mapped["CartItem"] = relationship("CartItem", back_populates="user")
     orders: Mapped["Order"] = relationship("Order", back_populates="user")
 

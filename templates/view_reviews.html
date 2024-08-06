@@ -1,32 +1,27 @@
 <!-- templates/view_reviews.html -->
 {% extends "base.html" %}
 
-{% block title %}View Review - E-commerce{% endblock %}
+{% block title %}Reviews for {{ product.name }} - E-commerce{% endblock %}
 
 {% block content %}
-    <h1>Product Review</h1>
-    <div class="product">
-        <h2>{{ product.name }}</h2>
-        <p>{{ product.description }}</p>
-        <p>Price: ${{ product.price }}</p>
-        <p>Quantity: {{ product.quantity }}</p>
-        <p>Brand: {{ product.brand.name }}</p>
-        <p>Category: {{ product.category.name }}</p>
+<div class="container mt-5">
+    <h1>Reviews for {{ product.name }}</h1>
+    <div class="list-group">
+        {% for review in reviews %}
+            <div class="list-group-item">
+                <h5>{{ review.user.email }}</h5>
+                <p>Rating: {{ review.rating }}</p>
+                <p>{{ review.comment }}</p>
+                {% if current_user.id == review.user_id %}
+                    <a href="{{ url_for('main.edit_review', product_id=product.id, review_id=review.id) }}" class="btn btn-secondary">Edit</a>
+                {% endif %}
+                {% if current_user.id == review.user_id or current_user.id == product.seller_id %}
+                    <form action="{{ url_for('main.remove_review', product_id=product.id, review_id=review.id) }}" method="POST" style="display:inline;">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this review?');">Delete</button>
+                    </form>
+                {% endif %}
+            </div>
+        {% endfor %}
     </div>
-    <h2>Reviews</h2>
-    <ul class="reviews">
-        {% if reviews %}
-            {% for review in reviews %}
-                <li>
-                    <strong>Rating:</strong> {{ review.rating }}<br>
-                    <strong>Comment:</strong> {{ review.comment }}<br>
-                    <strong>Reviewed by:</strong> {{ review.user.email }}<br>
-                    <strong>Date:</strong> {{ review.created_at }}
-                </li>
-            {% endfor %}
-        {% else %}
-            <p>No reviews yet.</p>
-        {% endif %}
-    </ul>
-    <a href="{{ url_for('main.add_review', product_id=product.id) }}">Add a Review</a>
+</div>
 {% endblock %}
