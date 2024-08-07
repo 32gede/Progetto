@@ -18,14 +18,12 @@ login_manager.init_app(app)
 login_manager.login_view = 'main.login'
 
 
-# Define the user_loader function
 @login_manager.user_loader
 def load_user(user_id):
     db_session = get_db_session()
     return db_session.query(User).get(int(user_id))
 
 
-# Registra i blueprint
 app.register_blueprint(main_routes)
 
 if __name__ == '__main__':
