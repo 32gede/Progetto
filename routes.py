@@ -75,10 +75,6 @@ def validate_float(value, min_value=0, max_value=sys.float_info.max, error_messa
 
 @main_routes.route('/')
 def index():
-    if 'id' in session:
-        print('L\'utente con id: ' + str(session['id']) + ', si è loggato')
-    else:
-        print('Nessun utente è loggato')
     return render_template('index.html')
 
 
@@ -568,6 +564,7 @@ def checkout():
     db_session.commit()
     flash('Order placed successfully.')
     return redirect(url_for('main.order_history'))
+
 
 '''
 def order_history_returns_orders_for_valid_user(client, db_session, valid_user):
