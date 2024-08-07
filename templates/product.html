@@ -8,8 +8,14 @@
     <h1>{{ product.name }}</h1>
     <p>{{ product.description }}</p>
     <p>Price: ${{ product.price }}</p>
-    <p>Quantity: {{ product.quantity }}</p>
-    {% if current_user.role == 'buyer' %}
+    <p>
+        {% if product.quantity == 0 %}
+            <span class="text-danger">Sold Out</span>
+        {% else %}
+            Quantity: {{ product.quantity }}
+        {% endif %}
+    </p>
+    {% if current_user.role == 'buyer' and product.quantity > 0 %}
         <form method="POST" action="{{ url_for('main.add_to_cart', product_id=product.id) }}">
             <div class="mb-3">
                 <label for="quantity" class="form-label">Quantity:</label>

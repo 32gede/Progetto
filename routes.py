@@ -557,12 +557,17 @@ def checkout():
             quantity=item.quantity,
             price=item.product.price)
         db_session.add(order_item)
+
+        # Update product quantity
+        product = db_session.query(Product).filter_by(id=item.product.id).first()
+        if product:
+            product.quantity -= item.quantity
+
         db_session.delete(item)
 
     db_session.commit()
     flash('Order placed successfully.')
     return redirect(url_for('main.order_history'))
-
 
 '''
 def order_history_returns_orders_for_valid_user(client, db_session, valid_user):
