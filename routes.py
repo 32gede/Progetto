@@ -534,7 +534,7 @@ def order_history():
     return render_template('order_history.html', orders=orders)
 
 
-@main_routes.route('/checkout', methods=['POST'])
+@main_routes.route('/checkout', methods=['GET', 'POST'])
 @login_required
 @role_required('buyer')
 def checkout():
@@ -546,8 +546,7 @@ def checkout():
         return redirect(url_for('main.cart'))
 
     total = sum(item.product.price * item.quantity for item in cart_items)
-    new_order = Order(user_id=current_user.id,
-                      total=total)
+    new_order = Order(user_id=current_user.id, total=total)
     db_session.add(new_order)
     db_session.commit()
 
