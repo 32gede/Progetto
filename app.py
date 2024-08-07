@@ -9,10 +9,8 @@ app = Flask(__name__, template_folder='templates')
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 
-# Inizializza il database
 init_db()
 
-# Configure the login manager
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'main.login'
