@@ -31,9 +31,9 @@
     <!-- Reviews Section -->
     <div class="mt-5">
         <h2>Reviews</h2>
-        {% if reviews %}
+        {% if product.reviews %}
             <ul class="list-group">
-                {% for review in reviews %}
+                {% for review in product.reviews %}
                     <li class="list-group-item">
                         <strong>Rating:</strong> {{ review.rating }}<br>
                         <strong>Comment:</strong> {{ review.comment }}
