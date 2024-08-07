@@ -7,11 +7,36 @@
 <div class="container mt-5">
     <h1>{{ product.name }}</h1>
     <p>{{ product.description }}</p>
-    <p>Price: {{ product.price }}</p>
+    <p>Price: ${{ product.price }}</p>
     <p>Quantity: {{ product.quantity }}</p>
     {% if current_user.role == 'buyer' %}
-        <a href="{{ url_for('main.add_to_cart', product_id=product.id) }}" class="btn btn-primary">Add to Cart</a>
+        <form method="POST" action="{{ url_for('main.add_to_cart', product_id=product.id) }}">
+            <div class="mb-3">
+                <label for="quantity" class="form-label">Quantity:</label>
+                <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ product.quantity }}" class="form-control mb-2" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Add to Cart</button>
+        </form>
+        <a href="{{ url_for('main.add_review', product_id=product.id) }}" class="btn btn-secondary mt-2">Add Review</a>
+        <a href="{{ url_for('main.edit_review', product_id=product.id) }}" class="btn btn-secondary mt-2">Edit Review</a>
     {% endif %}
-    <a href="{% if current_user.role == 'seller' %}{{ url_for('main.view_products_seller') }}{% else %}{{ url_for('main.view_products_buyer') }}{% endif %}" class="btn btn-secondary">Back to Products</a>
+    <a href="{% if current_user.role == 'seller' %}{{ url_for('main.view_products_seller') }}{% else %}{{ url_for('main.view_products_buyer') }}{% endif %}" class="btn btn-secondary mt-2">Back to Products</a>
+
+    <!-- Reviews Section -->
+    <div class="mt-5">
+        <h2>Reviews</h2>
+        {% if reviews %}
+            <ul class="list-group">
+                {% for review in reviews %}
+                    <li class="list-group-item">
+                        <strong>Rating:</strong> {{ review.rating }}<br>
+                        <strong>Comment:</strong> {{ review.comment }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No reviews yet.</p>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}
