@@ -15,22 +15,22 @@ Come segnare qualcosa di fatto:
 
 ## Sicurezza
 
-1. [ ] **Protezione contro SQL Injection**: SQLAlchemy utilizza query parametrizzate per prevenire SQL Injection. Verifica che tutte le query utilizzino correttamente i binding dei parametri.
+1. [x] **Protezione contro SQL Injection**: SQLAlchemy utilizza query parametrizzate per prevenire SQL Injection. Verifica che tutte le query utilizzino correttamente i binding dei parametri.
 2. [ ] **Protezione contro XSS (Cross-Site Scripting)**:
-   * Sanitizzare l'input dell'utente e eseguire l'escape dei dati prima di renderizzarli sul client. 
-   * Utilizzare flask.escape per evitare che il contenuto potenzialmente pericoloso venga eseguito come codice HTML o JavaScript. 
-   * Verificare che tutti i template utilizzino correttamente l'escaping di Jinja2.
-3. [ ] **Autenticazione e Autorizzazione**:
-   * Utilizzare password hash con werkzeug.security. 
-   * Implementare la gestione dei ruoli utente (buyer, seller) e controlli di accesso basati sui ruoli. 
-   * Creare decorator per login_required e role_required per proteggere le route.
+   1. [ ] Sanitizzare l'input dell'utente e eseguire l'escape dei dati prima di renderizzarli sul client.
+   2. [ ] Utilizzare flask.escape per evitare che il contenuto potenzialmente pericoloso venga eseguito come codice HTML o JavaScript.
+   3. [ ] Verificare che tutti i template utilizzino correttamente l'escaping di Jinja2.
+3. [x] **Autenticazione e Autorizzazione**:
+   1. [x] Utilizzare password hash con werkzeug.security.
+   2. [x] Implementare la gestione dei ruoli utente (buyer, seller) e controlli di accesso basati sui ruoli.
+   3. [x] Creare decorator per login_required e role_required per proteggere le route.
 4. [ ] **Protezione CSRF (Cross-Site Request Forgery)**:
-   * Utilizzare Flask-WTF per proteggere i form dalle attacchi CSRF. 
-   * Includere i token CSRF in tutti i form HTML.
+   1. [ ] Utilizzare Flask-WTF per proteggere i form dalle attacchi CSRF.
+   2. [ ] Includere i token CSRF in tutti i form HTML.
 5. [ ] **Politiche di Sicurezza per Sessioni**:
-   * Configurare correttamente le opzioni delle sessioni in Flask: `SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax'`.
+   1. [ ] Configurare correttamente le opzioni delle sessioni in Flask: `SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax'`.
 6. [ ] **Utilizzo di HTTPS**:
-   * Assicurarsi che la tua applicazione sia servita tramite HTTPS per proteggere i dati in transito tra il client e il server.
+   1. [ ] Assicurarsi che la tua applicazione sia servita tramite HTTPS per proteggere i dati in transito tra il client e il server.
 
 ## Gestione degli utenti
 

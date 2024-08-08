@@ -18,8 +18,8 @@ login_manager.login_view = 'main.login'
 
 @login_manager.user_loader
 def load_user(user_id):
-    db_session = get_db_session()
-    return db_session.query(User).get(int(user_id))
+    with get_db_session() as db_session:
+        return db_session.query(User).get(int(user_id))
 
 
 app.register_blueprint(main_routes)
