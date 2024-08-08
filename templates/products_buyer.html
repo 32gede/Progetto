@@ -7,6 +7,14 @@
 <div class="container mt-5">
     <h2>Welcome to your dashboard, {{ current_user.email }}</h2>
     <h1>Products</h1>
+        <form method="GET" action="{{ url_for('main.products') }}">
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" name="search" placeholder="Search for products" value="{{ request.args.get('search', '') }}">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="submit">Search</button>
+                </div>
+            </div>
+        </form>
 
     <div class="row">
         {% for product in products %}

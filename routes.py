@@ -579,6 +579,19 @@ def checkout():
     db_session.commit()
     flash('Order placed successfully.')
     return redirect(url_for('main.order_history'))
+@main_routes.route('/products', methods=['GET'])
+@login_required
+@role_required('buyer')
+def products():
+    db_session = get_db_session()
+    search_query = request.args.get('search', '')
+
+    if search_query:
+        products = db_session.query(Product).filter(Product.name.ilike(f'%{search_query}%')).all()
+    else:
+        products = db_session.query(Product).all()
+
+    return render_template('products_buyer.html', products=products)
 
 
 '''
