@@ -155,7 +155,7 @@ class Order(Base):
     status: Mapped[str] = mapped_column(String(50), default='pending')  # Stati dell'ordine
 
     user: Mapped["User"] = relationship("User", back_populates="orders")
-    order_items: Mapped["OrderItem"] = relationship("OrderItem", back_populates="order")
+    order_items: Mapped[list["OrderItem"]] = relationship("OrderItem", back_populates="order")
 
 
 class OrderItem(Base):
