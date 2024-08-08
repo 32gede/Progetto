@@ -23,7 +23,7 @@
                     <td>
                         <form method="POST" action="{{ url_for('main.edit_cart') }}">
                             <input type="hidden" name="item_id" value="{{ item.id }}">
-                            <input type="number" name="new_quantity" value="{{ item.quantity }}" min="1">
+                            <input type="number" name="new_quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.quantity }}">
                             <button type="submit" class="btn btn-primary">Update</button>
                         </form>
                     </td>
