@@ -24,7 +24,6 @@
             <button type="submit" class="btn btn-primary">Add to Cart</button>
         </form>
         <a href="{{ url_for('main.add_review', product_id=product.id) }}" class="btn btn-secondary mt-2">Add Review</a>
-        <a href="{{ url_for('main.edit_review', product_id=product.id) }}" class="btn btn-secondary mt-2">Edit Review</a>
     {% endif %}
     <a href="{% if current_user.role == 'seller' %}{{ url_for('main.view_products_seller') }}{% else %}{{ url_for('main.view_products_buyer') }}{% endif %}" class="btn btn-secondary mt-2">Back to Products</a>
 
@@ -36,7 +35,8 @@
                 {% for review in product.reviews %}
                     <li class="list-group-item">
                         <strong>Rating:</strong> {{ review.rating }}<br>
-                        <strong>Comment:</strong> {{ review.comment }}
+                        <strong>Comment:</strong> {{ review.comment }}<br>
+                        <a href="{{ url_for('main.edit_review', product_id=product.id, review_id=review.id) }}" class="btn btn-secondary mt-2">Edit Review</a>
                     </li>
                 {% endfor %}
             </ul>
