@@ -7,14 +7,32 @@
 <div class="container mt-5">
     <h2>Welcome to your dashboard, {{ current_user.email }}</h2>
     <h1>Products</h1>
-        <form method="GET" action="{{ url_for('main.products') }}">
-            <div class="input-group mb-3">
-                <input type="text" class="form-control" name="search" placeholder="Search for products" value="{{ request.args.get('search', '') }}">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="submit">Search</button>
-                </div>
+
+    <!-- Search Form -->
+    <form method="GET" action="{{ url_for('main.products_buyer') }}">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" name="search" placeholder="Search for products" value="{{ request.args.get('search', '') }}">
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="submit">Search</button>
             </div>
-        </form>
+        </div>
+        <div class="input-group mb-3">
+            <select class="form-control" name="brand">
+                <option value="">All Brands</option>
+                {% for product in products %}
+                    <option value="{{ product.brand.id }}" {% if request.args.get('brand') == product.brand.id %}selected{% endif %}>{{ product.brand.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="input-group mb-3">
+            <select class="form-control" name="category">
+                <option value="">All Categories</option>
+                {% for product in products %}
+                    <option value="{{ product.category.id }}" {% if request.args.get('category') == product.category.id %}selected{% endif %}>{{ product.category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
 
     <div class="row">
         {% for product in products %}

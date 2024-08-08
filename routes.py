@@ -582,16 +582,26 @@ def checkout():
 @main_routes.route('/products', methods=['GET'])
 @login_required
 @role_required('buyer')
-def products():
+def products_buyer():
     db_session = get_db_session()
     search_query = request.args.get('search', '')
+    brand_id = request.args.get('brand', '')
+    category_id = request.args.get('category', '')
+
+    query = db_session.query(Product)
 
     if search_query:
-        products = db_session.query(Product).filter(Product.name.ilike(f'%{search_query}%')).all()
-    else:
-        products = db_session.query(Product).all()
+        query = query.filter(Product.name.ilike(f'%{search_query}%'))
+    if brand_id:
+        query = query.filter(Product.brand_id == brand_id)
+    if category_id:
+        query = query.filter(Product.category_id == category_id)
 
-    return render_template('products_buyer.html', products=products)
+    products = query.all()
+    brands = db_session.query(Brand).all()
+    categories = db_session.query(Category).all()
+
+    return render_template('products_buyer.html', products=products, brands=brands, categories=categories)
 
 
 '''
