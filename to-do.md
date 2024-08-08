@@ -9,8 +9,8 @@ Come segnare qualcosa di fatto:
 
 ## Permessi
 
-1. [ ] **buyers**: possono leggere e guardare i vari prodotti e aggiungerli alla loro lista/carrello della spesa.
-2. [ ] **sellers**: stessi permessi dei buyers, però possono modificare i prodotti che vendono.
+1. [x] **buyers**: possono leggere e guardare i vari prodotti e aggiungerli alla loro lista/carrello della spesa.
+2. [x] **sellers**: stessi permessi dei buyers, però possono modificare i prodotti che vendono.
 3. [x] **Implementare controlli di autorizzazione nei route**: Utilizzare decorator per controllare i permessi degli utenti e assicurarsi che solo gli utenti autorizzati possano accedere a certe funzionalità.
 
 ## Sicurezza
@@ -41,42 +41,42 @@ Come segnare qualcosa di fatto:
 
 ## Gestione dei prodotti
 
-1. [ ] **Aggiungere prodotti**: Consentire ai venditori di aggiungere nuovi prodotti con tutte le informazioni necessarie (nome, descrizione, prezzo, quantità, brand, categoria).
-2. [ ] **Modificare prodotti**: Consentire ai venditori di modificare le informazioni dei prodotti esistenti.
-3. [ ] **Eliminare prodotti**: Consentire ai venditori di eliminare i propri prodotti.
-4. [ ] **Visualizzare prodotti**: Consentire a tutti gli utenti di visualizzare l'elenco dei prodotti disponibili.
-5. [ ] **Filtrare e ordinare prodotti**: Implementare la funzionalità di filtro e ordinamento dei prodotti per facilitare la ricerca agli utenti.
+1. [x] **Aggiungere prodotti**: Consentire ai venditori di aggiungere nuovi prodotti con tutte le informazioni necessarie (nome, descrizione, prezzo, quantità, brand, categoria).
+2. [x] **Modificare prodotti**: Consentire ai venditori di modificare le informazioni dei prodotti esistenti.
+3. [x] **Eliminare prodotti**: Consentire ai venditori di eliminare i propri prodotti.
+4. [x] **Visualizzare prodotti**: Consentire a tutti gli utenti di visualizzare l'elenco dei prodotti disponibili.
+5. [x] **Filtrare e ordinare prodotti**: Implementare la funzionalità di filtro e ordinamento dei prodotti per facilitare la ricerca agli utenti.
 
 ## Ricerca e Filtri
 
-1. [ ] **Ricerca per parole chiave**: Implementare la ricerca dei prodotti basata su parole chiave che cercano nel nome e nella descrizione dei prodotti.
-2. [ ] **Filtri per attributi**: Implementare filtri basati su attributi come prezzo, brand, categoria, ecc.
-3. [ ] **Interfaccia di ricerca avanzata**: Creare un'interfaccia utente per la ricerca avanzata che consenta agli utenti di combinare vari criteri di ricerca e filtro.
+1. [x] **Ricerca per parole chiave**: Implementare la ricerca dei prodotti basata su parole chiave che cercano nel nome e nella descrizione dei prodotti.
+2. [x] **Filtri per attributi**: Implementare filtri basati su attributi come prezzo, brand, categoria, ecc.
+3. [x] **Interfaccia di ricerca avanzata**: Creare un'interfaccia utente per la ricerca avanzata che consenta agli utenti di combinare vari criteri di ricerca e filtro.
 
 ## Carrello della spesa
 
-1. [ ] **Aggiungere al carrello**: Consentire agli utenti di aggiungere prodotti al carrello della spesa.
-2. [ ] **Aggiornare quantità**: Consentire agli utenti di aggiornare la quantità dei prodotti nel carrello.
-3. [ ] **Rimuovere dal carrello**: Consentire agli utenti di rimuovere prodotti dal carrello.
-4. [ ] **Visualizzare il carrello**: Creare una pagina del carrello dove gli utenti possono vedere i prodotti aggiunti e il totale dell'ordine.
-5. [ ] **Procedere al pagamento**: Implementare la funzionalità di checkout per permettere agli utenti di finalizzare l'acquisto.
+1. [x] **Aggiungere al carrello**: Consentire agli utenti di aggiungere prodotti al carrello della spesa.
+2. [x] **Aggiornare quantità**: Consentire agli utenti di aggiornare la quantità dei prodotti nel carrello.
+3. [x] **Rimuovere dal carrello**: Consentire agli utenti di rimuovere prodotti dal carrello.
+4. [x] **Visualizzare il carrello**: Creare una pagina del carrello dove gli utenti possono vedere i prodotti aggiunti e il totale dell'ordine.
+5. [x] **Procedere al pagamento**: Implementare la funzionalità di checkout per permettere agli utenti di finalizzare l'acquisto.
 
 ## Gestione degli ordini
 
 1. [ ] **Creare ordini**: Implementare la funzionalità di creazione dell'ordine durante il checkout.
-2. [ ] **Visualizzare cronologia ordini**: Consentire agli utenti di visualizzare la cronologia dei propri ordini.
+2. [x] **Visualizzare cronologia ordini**: Consentire agli utenti di visualizzare la cronologia dei propri ordini.
 3. [ ] **Aggiornare stato dell'ordine**: Consentire ai venditori di aggiornare lo stato degli ordini dei prodotti che hanno venduto.
 4. [ ] **Notifiche ordini**: Implementare un sistema di notifiche che informi gli utenti degli aggiornamenti sugli ordini (es. ordine spedito, ordine consegnato).
 
 ## Recensioni e Valutazioni
 
-1. [ ] **Aggiungere recensioni**: Consentire agli utenti di lasciare recensioni e valutazioni per i prodotti acquistati.
-2. [ ] **Moderare recensioni**: Consentire ai venditori di visualizzare e moderare le recensioni sui propri prodotti.
+1. [x] **Aggiungere recensioni**: Consentire agli utenti di lasciare recensioni e valutazioni per i prodotti acquistati.
+2. [x] **Moderare recensioni**: Consentire ai venditori di visualizzare e moderare le recensioni sui propri prodotti.
 3. [ ] **Visualizzare valutazioni**: Visualizzare le valutazioni medie dei prodotti e consentire l'ordinamento dei prodotti in base alle valutazioni.
 
 ## Design del Database
 
-1. [ ] **Schema del database**: Progettare lo schema del database con tutte le tabelle necessarie (utenti, prodotti, carrelli, ordini, recensioni, ecc.).
+1. [x] **Schema del database**: Progettare lo schema del database con tutte le tabelle necessarie (utenti, prodotti, carrelli, ordini, recensioni, ecc.).
 2. [ ] **Vincoli e chiavi esterne**: Definire vincoli di integrità e chiavi esterne per garantire la consistenza dei dati.
 3. [ ] **Trigger e transazioni**: Implementare trigger e transazioni per garantire l'integrità dei dati e automatizzare alcune operazioni (es. aggiornare le date di modifica).
 

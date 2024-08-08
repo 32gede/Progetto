@@ -1,58 +1,95 @@
-<!-- templates/products_buyer.html -->
 {% extends "base.html" %}
 
 {% block title %}Products - E-commerce{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
-    <h2>Welcome to your dashboard, {{ current_user.email }}</h2>
     <h1>Products</h1>
-
-    <!-- Search Form -->
-    <form method="GET" action="{{ url_for('main.products_buyer') }}">
-    <div class="form-group">
-        <label for="search">Search for products</label>
-        <div class="input-group mb-3">
-            <input type="text" class="form-control" id="search" name="search" placeholder="Search for products" value="{{ request.args.get('search', '') }}">
-            <div class="input-group-append">
-                <button class="btn btn-outline-secondary" type="submit">Search</button>
-                <button class="btn btn-outline-secondary" type="reset" onclick="window.location.href='{{ url_for('main.products_buyer') }}'">Reset</button>
+    <form method="GET" action="{{ url_for('main.search_product') }}">
+        <div class="row mb-3">
+            <div class="col">
+                <input type="text" name="query" class="form-control" placeholder="Search" value="{{ request.args.get('query', '') }}">
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+            <div class="col">
+                <button type="button" class="btn btn-secondary" id="filter-toggle">Filter</button>
             </div>
         </div>
-    </div>
-    <div class="form-group">
-        <label for="brand">Brand</label>
-        <select class="form-control" id="brand" name="brand">
-            <option value="">All Brands</option>
-            {% for brand in brands %}
-                <option value="{{ brand.id }}" {% if request.args.get('brand') == brand.id %}selected{% endif %}>{{ brand.name }}</option>
-            {% endfor %}
-        </select>
-    </div><br>
-    <div class="form-gsroup">
-        <label for="category">Category</label>
-        <select class="form-control" id="category" name="category">
-            <option value="">All Categories</option>
-            {% for category in categories %}
-                <option value="{{ category.id }}" {% if request.args.get('category') == category.id %}selected{% endif %}>{{ category.name }}</option>
-            {% endfor %}
-        </select>
-    </div>
-</form>
-    <br>
+        <div class="row mb-3" id="filter-options" style="display: none;">
+            <div class="col">
+                <input type="text" name="name" class="form-control" placeholder="Product Name" value="{{ request.args.get('name', '') }}">
+            </div>
+            <div class="col">
+                <input type="text" name="description" class="form-control" placeholder="Description" value="{{ request.args.get('description', '') }}">
+            </div>
+            <div class="col">
+                <input type="number" name="min_price" class="form-control" placeholder="Min Price" value="{{ request.args.get('min_price', '') }}">
+            </div>
+            <div class="col">
+                <input type="number" name="max_price" class="form-control" placeholder="Max Price" value="{{ request.args.get('max_price', '') }}">
+            </div>
+            <div class="col">
+                <select name="brand_name" class="form-control">
+                    <option value="">Select Brand</option>
+                    {% for brand in brands %}
+                        <option value="{{ brand.name }}" {% if request.args.get('brand_name') == brand.name %}selected{% endif %}>{{ brand.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col">
+                <select name="category_name" class="form-control">
+                    <option value="">Select Category</option>
+                    {% for category in categories %}
+                        <option value="{{ category.name }}" {% if request.args.get('category_name') == category.name %}selected{% endif %}>{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col">
+                {% if request.args.get('name') %}
+                    <span class="badge bg-secondary">
+                        {{ request.args.get('name') }} <a href="#" class="text-white remove-filter" data-filter="name">x</a>
+                    </span>
+                {% endif %}
+                {% if request.args.get('description') %}
+                    <span class="badge bg-secondary">
+                        {{ request.args.get('description') }} <a href="#" class="text-white remove-filter" data-filter="description">x</a>
+                    </span>
+                {% endif %}
+                {% if request.args.get('min_price') %}
+                    <span class="badge bg-secondary">
+                        Min Price: {{ request.args.get('min_price') }} <a href="#" class="text-white remove-filter" data-filter="min_price">x</a>
+                    </span>
+                {% endif %}
+                {% if request.args.get('max_price') %}
+                    <span class="badge bg-secondary">
+                        Max Price: {{ request.args.get('max_price') }} <a href="#" class="text-white remove-filter" data-filter="max_price">x</a>
+                    </span>
+                {% endif %}
+                {% if request.args.get('brand_name') %}
+                    <span class="badge bg-secondary">
+                        {{ request.args.get('brand_name') }} <a href="#" class="text-white remove-filter" data-filter="brand_name">x</a>
+                    </span>
+                {% endif %}
+                {% if request.args.get('category_name') %}
+                    <span class="badge bg-secondary">
+                        {{ request.args.get('category_name') }} <a href="#" class="text-white remove-filter" data-filter="category_name">x</a>
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+    </form>
     <div class="row">
         {% for product in products %}
-            <div class="col-md-4">
-                <div class="card mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">{{ product.name }}</h5>
                         <p class="card-text">{{ product.description }}</p>
-                        <p class="card-text">Price: ${{ product.price }}</p>
-                        {% if product.quantity > 0 %}
-                            <p class="card-text">Quantity: {{ product.quantity }}</p>
-                        {% else %}
-                            <p class="text-danger">Out of stock</p>
-                        {% endif %}
+                        <p class="card-text"><strong>Price:</strong> ${{ product.price }}</p>
                         <a href="{{ url_for('main.view_product', product_id=product.id) }}" class="btn btn-primary">View Product</a>
                     </div>
                 </div>
@@ -60,5 +97,25 @@
         {% endfor %}
     </div>
 </div>
-{% endblock %}
 
+<script>
+document.getElementById('filter-toggle').addEventListener('click', function() {
+    var filterOptions = document.getElementById('filter-options');
+    if (filterOptions.style.display === 'none') {
+        filterOptions.style.display = 'block';
+    } else {
+        filterOptions.style.display = 'none';
+    }
+});
+
+document.querySelectorAll('.remove-filter').forEach(function(element) {
+    element.addEventListener('click', function(event) {
+        event.preventDefault();
+        var filter = event.target.getAttribute('data-filter');
+        var url = new URL(window.location.href);
+        url.searchParams.delete(filter);
+        window.location.href = url.toString();
+    });
+});
+</script>
+{% endblock %}

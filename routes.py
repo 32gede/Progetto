@@ -7,6 +7,7 @@ from flask_login import login_user, login_required, current_user, logout_user
 from hashlib import md5
 import os
 import sys
+from search import search_products
 
 main_routes = Blueprint('main', __name__)
 
@@ -579,25 +580,22 @@ def checkout():
     db_session.commit()
     flash('Order placed successfully.')
     return redirect(url_for('main.order_history'))
+
+
 @main_routes.route('/products', methods=['GET'])
 @login_required
 @role_required('buyer')
-def products_buyer():
+def search_product():
     db_session = get_db_session()
-    search_query = request.args.get('search', '')
-    brand_id = request.args.get('brand', '')
-    category_id = request.args.get('category', '')
+    query = request.args.get('query', '')
+    name = request.args.get('name', '')
+    description = request.args.get('description', '')
+    min_price = request.args.get('min_price', type=int)
+    max_price = request.args.get('max_price', type=int)
+    brand_name = request.args.get('brand_name', '')
+    category_name = request.args.get('category_name', '')
 
-    query = db_session.query(Product)
-
-    if search_query:
-        query = query.filter(Product.name.ilike(f'%{search_query}%'))
-    if brand_id:
-        query = query.filter(Product.brand_id == brand_id)
-    if category_id:
-        query = query.filter(Product.category_id == category_id)
-
-    products = query.all()
+    products = search_products(db_session, name, description, min_price, max_price, brand_name, category_name)
     brands = db_session.query(Brand).all()
     categories = db_session.query(Category).all()
 
