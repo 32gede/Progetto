@@ -424,17 +424,17 @@ def remove_review(product_id, review_id):
 
     if not product:
         flash('Product not found.')
-        return redirect(url_for('main.view_reviews', product_id=product_id))
+        return redirect(url_for('main.view_product', product_id=product_id))
 
     review = db_session.query(Review).filter_by(id=review_id).first()
 
     if not review:
         flash('Review not found.')
-        return redirect(url_for('main.view_reviews', product_id=product_id))
+        return redirect(url_for('main.view_product', product_id=product_id))
 
     if review.user_id != current_user.id and product.seller_id != current_user.id:
         flash('Unauthorized action.')
-        return redirect(url_for('main.view_reviews', product_id=product_id))
+        return redirect(url_for('main.view_product', product_id=product_id))
 
     db_session.delete(review)
 
@@ -446,7 +446,7 @@ def remove_review(product_id, review_id):
 
     db_session.commit()
     flash('Review deleted successfully.')
-    return redirect(url_for('main.view_reviews', product_id=product_id))
+    return redirect(url_for('main.view_product', product_id=product_id))
 
 
 # CART AND ORDER ROUTES #
