@@ -362,6 +362,10 @@ def add_review(product_id):
             rating=rating,
             comment=comment)
         db_session.add(new_review)
+        seller = product.seller
+        seller_reviews = db_session.query(Review).join(Product).filter(Product.seller_id == seller.id).all()
+        seller_rating = sum(review.rating for review in seller_reviews) / len(seller_reviews)
+        seller.seller_rating = seller_rating
         db_session.commit()
 
         return redirect(url_for('main.view_product', product_id=product.id))
@@ -397,6 +401,12 @@ def edit_review(product_id, review_id):
 
         review.rating = rating
         review.comment = comment
+        seller = product.seller
+        seller_reviews = db_session.query(Review).join(Product).filter(Product.seller_id == seller.id).all()
+
+        seller_rating = sum(review.rating for review in seller_reviews) / len(seller_reviews)
+        seller.seller_rating = seller_rating
+
         db_session.commit()
         flash('Review updated successfully.')
         return redirect(url_for('main.view_product', product_id=product.id))
@@ -426,6 +436,13 @@ def remove_review(product_id, review_id):
         return redirect(url_for('main.view_reviews', product_id=product_id))
 
     db_session.delete(review)
+
+    # Update seller's rating
+    seller = product.seller
+    seller_reviews = db_session.query(Review).join(Product).filter(Product.seller_id == seller.id).all()
+    seller_rating = sum(r.rating for r in seller_reviews) / len(seller_reviews)
+    seller.seller_rating = seller_rating
+
     db_session.commit()
     flash('Review deleted successfully.')
     return redirect(url_for('main.view_reviews', product_id=product_id))

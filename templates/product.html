@@ -3,23 +3,31 @@
 {% block title %}Product Details - E-commerce{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
         <h1>{{ product.name }}</h1>
         <a href="{% if current_user.role == 'seller' %}{{ url_for('main.view_products_seller') }}{% else %}{{ url_for('main.view_products_buyer') }}{% endif %}" class="btn btn-secondary">Back to Products</a>
     </div>
 
-    <p>{{ product.description }}</p>
-    <p>Price: ${{ product.price }}</p>
-    <p>
-        {% if product.quantity == 0 %}
-            <span class="text-danger">Sold Out</span>
+    <div class="product-details">
+        <p>{{ product.description }}</p>
+        <p><strong>Price:</strong> ${{ product.price }}</p>
+        <p><strong>Seller:</strong> {{ product.seller.user.email }}</p>
+        {% if product.seller.seller_rating == 0 %}
+            <p class="text-danger">This seller has no sales</p>
         {% else %}
-            Quantity: {{ product.quantity }}
+            <p><strong>Rating:</strong> {{ product.seller.seller_rating }}</p>
         {% endif %}
-    </p>
+        <p>
+            {% if product.quantity == 0 %}
+                <span class="text-danger">Sold Out</span>
+            {% else %}
+                <strong>Quantity:</strong> {{ product.quantity }}
+            {% endif %}
+        </p>
+    </div>
+
     {% if current_user.role == 'buyer' and product.quantity > 0 %}
-    {% endif %}
         <form method="POST" action="{{ url_for('main.add_to_cart', product_id=product.id) }}">
             <div class="d-flex align-items-center mb-3">
                 <label for="quantity" class="form-label me-2">Quantity:</label>
@@ -27,6 +35,7 @@
                 <button type="submit" class="btn btn-primary">Add to Cart</button>
             </div>
         </form>
+    {% endif %}
 
     <!-- Reviews Section -->
     <div class="mt-5">
