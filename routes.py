@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from werkzeug.utils import secure_filename
 from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem
 from database import get_db_session
@@ -599,7 +599,25 @@ def search_product():
     brands = db_session.query(Brand).all()
     categories = db_session.query(Category).all()
 
-    return render_template('products_buyer.html', products=products, brands=brands, categories=categories)
+    return render_template('products_buyer.html', products=products, brands=brands, categories=categories, selected_brand=brand_name, selected_category=category_name)
+
+@main_routes.route('/filter_brands', methods=['GET'])
+@login_required
+@role_required('buyer')
+def filter_brands():
+    db_session = get_db_session()
+    search_term = request.args.get('search_term', '')
+    brands = db_session.query(Brand).filter(Brand.name.ilike(f'%{search_term}%')).all()
+    return jsonify([brand.name for brand in brands])
+
+@main_routes.route('/filter_categories', methods=['GET'])
+@login_required
+@role_required('buyer')
+def filter_categories():
+    db_session = get_db_session()
+    search_term = request.args.get('search_term', '')
+    categories = db_session.query(Category).filter(Category.name.ilike(f'%{search_term}%')).all()
+    return jsonify([category.name for category in categories])
 
 
 '''

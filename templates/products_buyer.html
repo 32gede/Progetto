@@ -31,54 +31,12 @@
                 <input type="number" name="max_price" class="form-control" placeholder="Max Price" value="{{ request.args.get('max_price', '') }}">
             </div>
             <div class="col">
-                <select name="brand_name" class="form-control">
-                    <option value="">Select Brand</option>
-                    {% for brand in brands %}
-                        <option value="{{ brand.name }}" {% if request.args.get('brand_name') == brand.name %}selected{% endif %}>{{ brand.name }}</option>
-                    {% endfor %}
-                </select>
+                <input type="text" id="brand-filter" name="brand_name" class="form-control" placeholder="Select Brand" value="{{ request.args.get('brand_name', '') }}">
+                <div id="brand-results" class="list-group" style="max-height: 200px; overflow-y: auto;"></div>
             </div>
             <div class="col">
-                <select name="category_name" class="form-control">
-                    <option value="">Select Category</option>
-                    {% for category in categories %}
-                        <option value="{{ category.name }}" {% if request.args.get('category_name') == category.name %}selected{% endif %}>{{ category.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col">
-                {% if request.args.get('name') %}
-                    <span class="badge bg-secondary">
-                        {{ request.args.get('name') }} <a href="#" class="text-white remove-filter" data-filter="name">x</a>
-                    </span>
-                {% endif %}
-                {% if request.args.get('description') %}
-                    <span class="badge bg-secondary">
-                        {{ request.args.get('description') }} <a href="#" class="text-white remove-filter" data-filter="description">x</a>
-                    </span>
-                {% endif %}
-                {% if request.args.get('min_price') %}
-                    <span class="badge bg-secondary">
-                        Min Price: {{ request.args.get('min_price') }} <a href="#" class="text-white remove-filter" data-filter="min_price">x</a>
-                    </span>
-                {% endif %}
-                {% if request.args.get('max_price') %}
-                    <span class="badge bg-secondary">
-                        Max Price: {{ request.args.get('max_price') }} <a href="#" class="text-white remove-filter" data-filter="max_price">x</a>
-                    </span>
-                {% endif %}
-                {% if request.args.get('brand_name') %}
-                    <span class="badge bg-secondary">
-                        {{ request.args.get('brand_name') }} <a href="#" class="text-white remove-filter" data-filter="brand_name">x</a>
-                    </span>
-                {% endif %}
-                {% if request.args.get('category_name') %}
-                    <span class="badge bg-secondary">
-                        {{ request.args.get('category_name') }} <a href="#" class="text-white remove-filter" data-filter="category_name">x</a>
-                    </span>
-                {% endif %}
+                <input type="text" id="category-filter" name="category_name" class="form-control" placeholder="Select Category" value="{{ request.args.get('category_name', '') }}">
+                <div id="category-results" class="list-group" style="max-height: 200px; overflow-y: auto;"></div>
             </div>
         </div>
     </form>
@@ -108,14 +66,104 @@ document.getElementById('filter-toggle').addEventListener('click', function() {
     }
 });
 
-document.querySelectorAll('.remove-filter').forEach(function(element) {
-    element.addEventListener('click', function(event) {
-        event.preventDefault();
-        var filter = event.target.getAttribute('data-filter');
-        var url = new URL(window.location.href);
-        url.searchParams.delete(filter);
-        window.location.href = url.toString();
-    });
+document.getElementById('brand-filter').addEventListener('focus', function() {
+    if (this.value === '') {
+        fetch(`/filter_brands`)
+            .then(response => response.json())
+            .then(data => {
+                var results = document.getElementById('brand-results');
+                results.innerHTML = '';
+                data.forEach(function(brand) {
+                    var item = document.createElement('a');
+                    item.className = 'list-group-item list-group-item-action';
+                    item.textContent = brand;
+                    item.addEventListener('click', function() {
+                        document.getElementById('brand-filter').value = brand;
+                        results.innerHTML = '';
+                    });
+                    results.appendChild(item);
+                });
+            });
+    }
+});
+
+document.getElementById('brand-filter').addEventListener('input', function() {
+    var searchTerm = this.value;
+    var results = document.getElementById('brand-results');
+    if (searchTerm === '') {
+        results.innerHTML = '';
+        return;
+    }
+    fetch(`/filter_brands?search_term=${searchTerm}`)
+        .then(response => response.json())
+        .then(data => {
+            results.innerHTML = '';
+            data.forEach(function(brand) {
+                var item = document.createElement('a');
+                item.className = 'list-group-item list-group-item-action';
+                item.textContent = brand;
+                item.addEventListener('click', function() {
+                    document.getElementById('brand-filter').value = brand;
+                    results.innerHTML = '';
+                });
+                results.appendChild(item);
+            });
+        });
+});
+
+document.getElementById('brand-filter').addEventListener('blur', function() {
+    var results = document.getElementById('brand-results');
+    results.innerHTML = '';
+});
+
+document.getElementById('category-filter').addEventListener('focus', function() {
+    if (this.value === '') {
+        fetch(`/filter_categories`)
+            .then(response => response.json())
+            .then(data => {
+                var results = document.getElementById('category-results');
+                results.innerHTML = '';
+                data.forEach(function(category) {
+                    var item = document.createElement('a');
+                    item.className = 'list-group-item list-group-item-action';
+                    item.textContent = category;
+                    item.addEventListener('click', function() {
+                        document.getElementById('category-filter').value = category;
+                        results.innerHTML = '';
+                    });
+                    results.appendChild(item);
+                });
+            });
+    }
+});
+
+document.getElementById('category-filter').addEventListener('input', function() {
+    var searchTerm = this.value;
+    var results = document.getElementById('category-results');
+    if (searchTerm === '') {
+        results.innerHTML = '';
+        return;
+    }
+    fetch(`/filter_categories?search_term=${searchTerm}`)
+        .then(response => response.json())
+        .then(data => {
+            results.innerHTML = '';
+            data.forEach(function(category) {
+                var item = document.createElement('a');
+                item.className = 'list-group-item list-group-item-action';
+                item.textContent = category;
+                item.addEventListener('click', function() {
+                    document.getElementById('category-filter').value = category;
+                    results.innerHTML = '';
+                });
+                results.appendChild(item);
+            });
+        });
+});
+
+document.getElementById('category-filter').addEventListener('blur', function() {
+    var results = document.getElementById('category-results');
+    results.innerHTML = '';
 });
 </script>
 {% endblock %}
