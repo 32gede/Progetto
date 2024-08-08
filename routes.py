@@ -75,10 +75,6 @@ def validate_float(value, min_value=0, max_value=sys.float_info.max, error_messa
 
 @main_routes.route('/')
 def index():
-    if 'id' in session:
-        print('L\'utente con id: ' + str(session['id']) + ', si è loggato')
-    else:
-        print('Nessun utente è loggato')
     return render_template('index.html')
 
 
@@ -373,26 +369,24 @@ def add_review(product_id):
     return render_template('add_review.html', product=product)
 
 
-@main_routes.route('/product/<int:product_id>/edit_review', methods=['GET', 'POST'])
+@main_routes.route('/edit_review/<int:product_id>/<int:review_id>', methods=['GET', 'POST'])
 @login_required
 @role_required('buyer')
-def edit_review(product_id):
+def edit_review(product_id, review_id):
     db_session = get_db_session()
+    review = db_session.query(Review).filter_by(id=review_id, user_id=current_user.id, product_id=product_id).first()
     product = db_session.query(Product).filter_by(id=product_id).first()
-    if not product:
-        return redirect(url_for('main.index'))
-
-    review = db_session.query(Review).filter_by(product_id=product.id, user_id=current_user.id).first()
     if not review:
-        return redirect(url_for('main.index'))
+        flash('Review not found.')
+        return redirect(url_for('main.view_product', product_id=product.id))
 
     if request.method == 'POST':
         rating = request.form.get('rating')
         comment = request.form.get('comment')
 
         if not rating or not comment:
-            flash('Please provide a rating and a review text.')
-            return redirect(url_for('main.view_product', product_id=product.id))
+            flash('Rating and comment are required.')
+            return redirect(url_for('main.edit_review', product_id=product.id, review_id=review_id))
 
         try:
             rating = validate_float(rating, min_value=1, max_value=5,
@@ -404,10 +398,10 @@ def edit_review(product_id):
         review.rating = rating
         review.comment = comment
         db_session.commit()
-
+        flash('Review updated successfully.')
         return redirect(url_for('main.view_product', product_id=product.id))
 
-    return render_template('edit_review.html', product=product, review=review)
+    return render_template('edit_review.html', review=review, product=product)
 
 
 @main_routes.route('/product/<int:product_id>/remove_review/<int:review_id>', methods=['POST'])
@@ -568,6 +562,7 @@ def checkout():
     db_session.commit()
     flash('Order placed successfully.')
     return redirect(url_for('main.order_history'))
+
 
 '''
 def order_history_returns_orders_for_valid_user(client, db_session, valid_user):

@@ -1,11 +1,14 @@
-<!-- templates/product.html -->
 {% extends "base.html" %}
 
 {% block title %}Product Details - E-commerce{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
-    <h1>{{ product.name }}</h1>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>{{ product.name }}</h1>
+        <a href="{% if current_user.role == 'seller' %}{{ url_for('main.view_products_seller') }}{% else %}{{ url_for('main.view_products_buyer') }}{% endif %}" class="btn btn-secondary">Back to Products</a>
+    </div>
+
     <p>{{ product.description }}</p>
     <p>Price: ${{ product.price }}</p>
     <p>
@@ -16,33 +19,40 @@
         {% endif %}
     </p>
     {% if current_user.role == 'buyer' and product.quantity > 0 %}
-        <form method="POST" action="{{ url_for('main.add_to_cart', product_id=product.id) }}">
-            <div class="mb-3">
-                <label for="quantity" class="form-label">Quantity:</label>
-                <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ product.quantity }}" class="form-control mb-2" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Add to Cart</button>
-        </form>
-        <a href="{{ url_for('main.add_review', product_id=product.id) }}" class="btn btn-secondary mt-2">Add Review</a>
     {% endif %}
-    <a href="{% if current_user.role == 'seller' %}{{ url_for('main.view_products_seller') }}{% else %}{{ url_for('main.view_products_buyer') }}{% endif %}" class="btn btn-secondary mt-2">Back to Products</a>
+        <form method="POST" action="{{ url_for('main.add_to_cart', product_id=product.id) }}">
+            <div class="d-flex align-items-center mb-3">
+                <label for="quantity" class="form-label me-2">Quantity:</label>
+                <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ product.quantity }}" class="form-control me-2" required>
+                <button type="submit" class="btn btn-primary">Add to Cart</button>
+            </div>
+        </form>
 
     <!-- Reviews Section -->
     <div class="mt-5">
-        <h2>Reviews</h2>
+        <div class="d-flex justify-content-between align-items-center">
+            <h2>Reviews</h2>
+            <a href="{{ url_for('main.add_review', product_id=product.id) }}" class="btn btn-secondary" title="Add Review">+</a>
+        </div>
         {% if product.reviews %}
-            <ul class="list-group">
-                {% for review in product.reviews %}
-                    <li class="list-group-item">
-                        <strong>Rating:</strong> {{ review.rating }}<br>
-                        <strong>Comment:</strong> {{ review.comment }}<br>
-                        <a href="{{ url_for('main.edit_review', product_id=product.id, review_id=review.id) }}" class="btn btn-secondary mt-2">Edit Review</a>
-                    </li>
-                {% endfor %}
-            </ul>
         {% else %}
             <p>No reviews yet.</p>
         {% endif %}
+        <ul class="list-group">
+            {% for review in product.reviews %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>Rating:</strong> {{ review.rating }}<br>
+                        <strong>Comment:</strong> {{ review.comment }}
+                    </div>
+                    {% if review.user_id == current_user.id %}
+                        <a href="{{ url_for('main.edit_review', product_id=product.id, review_id=review.id) }}" class="btn btn-secondary btn-sm" title="Edit Review">
+                            <i class="fa fa-pencil" style="font-size:16px"></i>
+                        </a>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
     </div>
 </div>
 {% endblock %}
