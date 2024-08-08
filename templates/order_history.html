@@ -10,7 +10,7 @@
         <div class="card order-card mb-4">
             <div class="card-body">
                 <h5 class="card-title">Order #{{ order.id }}</h5>
-                <p class="card-text">Date: {{ order.created_at }}</p>
+                <p class="card-text">Date: {{ order.created_at.strftime('%d/%m/%Y') }}</p>
                 <p class="card-text">Total: ${{ order.total }}</p>
                 <h6>Items:</h6>
                 <ul>
