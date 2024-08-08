@@ -42,6 +42,7 @@
             {% for review in product.reviews %}
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <div>
+                        <strong>{{ review.user.email }}</strong> <br>
                         <strong>Rating:</strong> {{ review.rating }}<br>
                         <strong>Comment:</strong> {{ review.comment }}
                     </div>
