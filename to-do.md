@@ -16,8 +16,8 @@ Come segnare qualcosa di fatto:
 ## Sicurezza
 
 1. [x] **Protezione contro SQL Injection**: SQLAlchemy utilizza query parametrizzate per prevenire SQL Injection. Verifica che tutte le query utilizzino correttamente i binding dei parametri.
-2. [ ] **Protezione contro XSS (Cross-Site Scripting)**:
-   1. [ ] Sanitizzare l'input dell'utente e eseguire l'escape dei dati prima di renderizzarli sul client.
+2. [x] **Protezione contro XSS (Cross-Site Scripting)**:
+   1. [x] Sanitizzare l'input dell'utente e eseguire l'escape dei dati prima di renderizzarli sul client.
    2. [ ] Utilizzare flask.escape per evitare che il contenuto potenzialmente pericoloso venga eseguito come codice HTML o JavaScript.
    3. [ ] Verificare che tutti i template utilizzino correttamente l'escaping di Jinja2.
 3. [x] **Autenticazione e Autorizzazione**:
