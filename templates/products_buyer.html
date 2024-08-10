@@ -8,7 +8,7 @@
     <form method="GET" action="{{ url_for('main.search_product') }}">
         <div class="row mb-3">
             <div class="col">
-                <input type="text" name="query" class="form-control" placeholder="Search" value="{{ request.args.get('query', '') }}">
+                <input type="text" name="name" class="form-control" placeholder="Product Name" value="{{ request.args.get('name', '') }}">
             </div>
             <div class="col">
                 <button type="submit" class="btn btn-primary">Search</button>
@@ -19,7 +19,6 @@
         </div>
         <div class="row mb-3" id="filter-options" style="display: none;">
             <div class="col">
-                <input type="text" name="name" class="form-control" placeholder="Product Name" value="{{ request.args.get('name', '') }}">
             </div>
             <div class="col">
                 <input type="text" name="description" class="form-control" placeholder="Description" value="{{ request.args.get('description', '') }}">

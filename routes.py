@@ -8,15 +8,12 @@ import bleach
 from bleach.sanitizer import ALLOWED_TAGS
 import re
 
-
 # Import models and functions from other file #
 
 
 from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem
 from database import get_db_session
 from search import search_products
-
-
 
 main_routes = Blueprint('main', __name__)
 
@@ -112,7 +109,6 @@ def validate_and_sanitize(value, value_type='string', min_value=None, max_value=
         raise ValueError("Invalid value_type specified. Must be 'string', 'int', or 'float'.")
 
 
-
 # MAIN ROUTES #
 
 
@@ -129,7 +125,7 @@ def login():
         email = validate_and_sanitize(
             request.form['email'],
             value_type='string',
-            min_value=5,
+            min_value=3,
             max_value=255,
             error_message='Invalid email address.',
             is_html=True
@@ -137,7 +133,7 @@ def login():
         password = validate_and_sanitize(
             request.form['password'],
             value_type='string',
-            min_value=4,
+            min_value=1,
             max_value=128,
             error_message="Invalid password.",
             is_html=True
@@ -160,7 +156,7 @@ def registration():
         email = validate_and_sanitize(
             request.form['email'],
             value_type='string',
-            min_value=5,
+            min_value=3,
             max_value=255,
             error_message='Invalid email address.',
             is_html=True
@@ -168,7 +164,7 @@ def registration():
         password = validate_and_sanitize(
             request.form['password'],
             value_type='string',
-            min_value=8,
+            min_value=1,
             max_value=128,
             error_message="Invalid password.",
             is_html=True
@@ -912,7 +908,7 @@ def order_history_returns_404_for_invalid_user(client, db_session):
 
 def order_history_handles_missing_user_id(client, db_session):
     response = client.get('/order_history')
-    
+
     assert response.status_code == 400
     assert response.json == {'error': 'Missing user_id parameter'}
 '''
