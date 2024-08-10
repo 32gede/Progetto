@@ -46,12 +46,13 @@ Come segnare qualcosa di fatto:
 3. [x] **Eliminare prodotti**: Consentire ai venditori di eliminare i propri prodotti.
 4. [x] **Visualizzare prodotti**: Consentire a tutti gli utenti di visualizzare l'elenco dei prodotti disponibili.
 5. [x] **Filtrare e ordinare prodotti**: Implementare la funzionalità di filtro e ordinamento dei prodotti per facilitare la ricerca agli utenti.
+6. [ ] **Immagine Prodotto**: Consentire ai venditori di aggiungere un'immagine per ciascun prodotto.
 
 ## Ricerca e Filtri
 
 1. [x] **Ricerca per parole chiave**: Implementare la ricerca dei prodotti basata su parole chiave che cercano nel nome e nella descrizione dei prodotti.
 2. [x] **Filtri per attributi**: Implementare filtri basati su attributi come prezzo, brand, categoria, ecc.
-3. [x] **Interfaccia di ricerca avanzata**: Creare un'interfaccia utente per la ricerca avanzata che consenta agli utenti di combinare vari criteri di ricerca e filtro.
+3. [x] **Interfaccia di ricerca avanzata**: Creare un'interfaccia utente per la ricerca avanzata che consenta agli utenti di combinare vari criteri di ricerca e filtro
 
 ## Carrello della spesa
 
