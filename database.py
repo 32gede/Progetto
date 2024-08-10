@@ -11,7 +11,7 @@ engine = sa.create_engine(
     max_overflow=5
 )
 Session = sessionmaker(bind=engine)
-
+print()
 @contextmanager
 def get_db_session():
     session = Session()
