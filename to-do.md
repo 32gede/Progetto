@@ -46,6 +46,7 @@ Come segnare qualcosa di fatto:
 3. [x] **Eliminare prodotti**: Consentire ai venditori di eliminare i propri prodotti.
 4. [x] **Visualizzare prodotti**: Consentire a tutti gli utenti di visualizzare l'elenco dei prodotti disponibili.
 5. [x] **Filtrare e ordinare prodotti**: Implementare la funzionalità di filtro e ordinamento dei prodotti per facilitare la ricerca agli utenti.
+6. [ ] **Immagine Prodotto**: Consentire ai venditori di aggiungere un'immagine per ciascun prodotto.
 
 ## Ricerca e Filtri
 
