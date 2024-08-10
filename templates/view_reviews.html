@@ -5,19 +5,19 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h1>Reviews for {{ product.name }}</h1>
+    <h1>Reviews for {{ product.name|e }}</h1>
     {% if reviews %}
         <ul class="list-group">
             {% for review in reviews %}
                 <li class="list-group-item">
-                    <strong>Rating:</strong> {{ review.rating }}<br>
-                    <strong>Comment:</strong> {{ review.comment }}
+                    <strong>Rating:</strong> {{ review.rating|e }}<br>
+                    <strong>Comment:</strong> {{ review.comment|e }}
                 </li>
             {% endfor %}
         </ul>
     {% else %}
         <p>No reviews yet.</p>
     {% endif %}
-    <a href="{{ url_for('main.view_product', product_id=product.id) }}" class="btn btn-secondary mt-2">Back to Product</a>
+    <a href="{{ url_for('main.view_product', product_id=product.id|e) }}" class="btn btn-secondary mt-2">Back to Product</a>
 </div>
 {% endblock %}

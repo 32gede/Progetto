@@ -6,6 +6,7 @@ from database import init_db, get_db_session
 from flask_login import LoginManager
 
 app = Flask(__name__, template_folder='templates')
+app.jinja_env.autoescape = True
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 

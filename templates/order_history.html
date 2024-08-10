@@ -9,13 +9,13 @@
     {% for order in orders %}
         <div class="card order-card mb-4">
             <div class="card-body">
-                <h5 class="card-title">Order #{{ order.id }}</h5>
-                <p class="card-text">Date: {{ order.created_at.strftime('%d/%m/%Y') }}</p>
-                <p class="card-text">Total: ${{ order.total }}</p>
+                <h5 class="card-title">Order #{{ order.id|e }}</h5>
+                <p class="card-text">Date: {{ order.created_at.strftime('%d/%m/%Y')|e }}</p>
+                <p class="card-text">Total: ${{ order.total|e }}</p>
                 <h6>Items:</h6>
                 <ul>
                     {% for item in order.order_items %}
-                        <li>{{ item.product.name }} ({{ item.quantity }} x ${{ item.price }})</li>
+                        <li>{{ item.product.name|e }} ({{ item.quantity|e }} x ${{ item.price|e }})</li>
                     {% endfor %}
                 </ul>
             </div>
