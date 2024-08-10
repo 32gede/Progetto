@@ -13,7 +13,7 @@
         <p>{{ product.description|e }}</p>
         <p><strong>Price:</strong> ${{ product.price|e }}</p>
         <p><strong>Seller:</strong> {{ product.seller.user.email|e }}</p>
-        {% if product.seller.seller_rating|e != 0 %}
+        {% if product.seller.seller_rating != 0 %}
             <p><strong>Rating:</strong> {{ product.seller.seller_rating|e }}</p>
         {% else %}
             <p class="text-danger">This seller has no sales</p>
