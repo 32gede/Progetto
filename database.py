@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from models import Base
 from contextlib import contextmanager
 
-DATABASE_URL = 'postgresql+psycopg2://prova:1234@localhost/Prova'
+DATABASE_URL = 'postgresql://Progetto_owner:pQxVqHj8hG7R@ep-aged-snow-a24c6vx8.eu-central-1.aws.neon.tech/Progetto?sslmode=require'
 
 engine = sa.create_engine(
     DATABASE_URL,
