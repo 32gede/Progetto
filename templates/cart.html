@@ -19,18 +19,18 @@
         <tbody>
             {% for item in cart_items %}
                 <tr>
-                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.product.name|e }}</td>
                     <td>
                         <form method="POST" action="{{ url_for('main.edit_cart') }}">
-                            <input type="hidden" name="item_id" value="{{ item.id }}">
-                            <input type="number" name="new_quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.quantity }}">
+                            <input type="hidden" name="item_id" value="{{ item.id|e }}">
+                            <input type="number" name="new_quantity" value="{{ item.quantity|e }}" min="1" max="{{ item.product.quantity|e }}">
                             <button type="submit" class="btn btn-primary">Update</button>
                         </form>
                     </td>
-                    <td>${{ item.product.price }}</td>
-                    <td>${{ item.product.price * item.quantity }}</td>
+                    <td>${{ item.product.price|e }}</td>
+                    <td>${{ (item.product.price|e) * (item.quantity|e) }}</td>
                     <td>
-                        <form method="POST" action="{{ url_for('main.remove_from_cart', item_id=item.id) }}">
+                        <form method="POST" action="{{ url_for('main.remove_from_cart', item_id=item.id|e) }}">
                             <button type="submit" class="btn btn-danger">Remove</button>
                         </form>
                     </td>
@@ -39,7 +39,7 @@
         </tbody>
     </table>
     <div class="cart-total">
-        <p>Total: ${{ cart_total }}</p>
+        <p>Total: ${{ cart_total|e }}</p>
         <a href="{{ url_for('main.checkout') }}" class="btn btn-primary">Proceed to Checkout</a>
     </div>
 </div>

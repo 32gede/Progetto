@@ -12,6 +12,7 @@ engine = sa.create_engine(
 )
 Session = sessionmaker(bind=engine)
 
+
 @contextmanager
 def get_db_session():
     session = Session()
@@ -19,6 +20,7 @@ def get_db_session():
         yield session
     finally:
         session.close()
+
 
 def init_db():
     Base.metadata.create_all(engine)

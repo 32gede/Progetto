@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
+from markupsafe import escape
 from werkzeug.utils import secure_filename
 from functools import wraps
 from flask_login import login_user, login_required, current_user, logout_user
@@ -71,6 +72,8 @@ def validate_and_sanitize(value, value_type='string', min_value=None, max_value=
             return None
         else:
             raise ValueError(f"{error_message}: Value cannot be None.")
+
+    value = escape(value)
 
     if value_type == 'string':
         # Sanitize HTML if required

@@ -6,28 +6,28 @@
 {% block content %}
 <div class="container mt-5">
     <h1>Edit Product</h1>
-    <form action="{{ url_for('main.edit_product', product_id=product.id) }}" method="POST">
+    <form action="{{ url_for('main.edit_product', product_id=product.id|e) }}" method="POST">
         <div class="mb-3">
             <label for="name" class="form-label">Name</label>
-            <input type="text" class="form-control" id="name" name="name" value="{{ product.name }}" required>
+            <input type="text" class="form-control" id="name" name="name" value="{{ product.name|e }}" required>
         </div>
         <div class="mb-3">
             <label for="description" class="form-label">Description</label>
-            <textarea class="form-control" id="description" name="description" required>{{ product.description }}</textarea>
+            <textarea class="form-control" id="description" name="description" required>{{ product.description|e }}</textarea>
         </div>
         <div class="mb-3">
             <label for="price" class="form-label">Price</label>
-            <input type="number" class="form-control" id="price" name="price" value="{{ product.price }}" required>
+            <input type="number" class="form-control" id="price" name="price" value="{{ product.price|e }}" required>
         </div>
         <div class="mb-3">
             <label for="quantity" class="form-label">Quantity</label>
-            <input type="number" class="form-control" id="quantity" name="quantity" value="{{ product.quantity }}" required>
+            <input type="number" class="form-control" id="quantity" name="quantity" value="{{ product.quantity|e }}" required>
         </div>
         <div class="mb-3">
             <label for="brand_id" class="form-label">Brand</label>
             <select class="form-control" id="brand_id" name="brand_id" required>
                 {% for brand in brands %}
-                    <option value="{{ brand.id }}" {% if brand.id == product.brand_id %}selected{% endif %}>{{ brand.name }}</option>
+                    <option value="{{ brand.id|e }}" {% if (brand.id|e) == (product.brand_id|e) %}selected{% endif %}>{{ brand.name|e }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -35,7 +35,7 @@
             <label for="category_id" class="form-label">Category</label>
             <select class="form-control" id="category_id" name="category_id" required>
                 {% for category in categories %}
-                    <option value="{{ category.id }}" {% if category.id == product.category_id %}selected{% endif %}>{{ category.name }}</option>
+                    <option value="{{ category.id|e }}" {% if (category.id|e) == (product.category_id|e) %}selected{% endif %}>{{ category.name|e }}</option>
                 {% endfor %}
             </select>
         </div>

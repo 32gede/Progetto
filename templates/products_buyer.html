@@ -8,7 +8,7 @@
     <form method="GET" action="{{ url_for('main.search_product') }}">
         <div class="row mb-3">
             <div class="col">
-                <input type="text" name="name" class="form-control" placeholder="Product Name" value="{{ request.args.get('name', '') }}">
+                <input type="text" name="name" class="form-control" placeholder="Product Name" value="{{ request.args.get('name', '')|e }}">
             </div>
             <div class="col">
                 <button type="submit" class="btn btn-primary">Search</button>
@@ -18,23 +18,22 @@
             </div>
         </div>
         <div class="row mb-3" id="filter-options" style="display: none;">
+            <div class="col"></div>
             <div class="col">
+                <input type="text" name="description" class="form-control" placeholder="Description" value="{{ request.args.get('description', '')|e }}">
             </div>
             <div class="col">
-                <input type="text" name="description" class="form-control" placeholder="Description" value="{{ request.args.get('description', '') }}">
+                <input type="number" name="min_price" class="form-control" placeholder="Min Price" value="{{ request.args.get('min_price', '')|e }}">
             </div>
             <div class="col">
-                <input type="number" name="min_price" class="form-control" placeholder="Min Price" value="{{ request.args.get('min_price', '') }}">
+                <input type="number" name="max_price" class="form-control" placeholder="Max Price" value="{{ request.args.get('max_price', '')|e }}">
             </div>
             <div class="col">
-                <input type="number" name="max_price" class="form-control" placeholder="Max Price" value="{{ request.args.get('max_price', '') }}">
-            </div>
-            <div class="col">
-                <input type="text" id="brand-filter" name="brand_name" class="form-control" placeholder="Select Brand" value="{{ request.args.get('brand_name', '') }}">
+                <input type="text" id="brand-filter" name="brand_name" class="form-control" placeholder="Select Brand" value="{{ request.args.get('brand_name', '')|e }}">
                 <div id="brand-results" class="list-group" style="max-height: 200px; overflow-y: auto;"></div>
             </div>
             <div class="col">
-                <input type="text" id="category-filter" name="category_name" class="form-control" placeholder="Select Category" value="{{ request.args.get('category_name', '') }}">
+                <input type="text" id="category-filter" name="category_name" class="form-control" placeholder="Select Category" value="{{ request.args.get('category_name', '')|e }}">
                 <div id="category-results" class="list-group" style="max-height: 200px; overflow-y: auto;"></div>
             </div>
         </div>
@@ -44,10 +43,10 @@
             <div class="col-md-4 mb-3">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">{{ product.name }}</h5>
-                        <p class="card-text">{{ product.description }}</p>
-                        <p class="card-text"><strong>Price:</strong> ${{ product.price }}</p>
-                        <a href="{{ url_for('main.view_product', product_id=product.id) }}" class="btn btn-primary">View Product</a>
+                        <h5 class="card-title">{{ product.name|e }}</h5>
+                        <p class="card-text">{{ product.description|e }}</p>
+                        <p class="card-text"><strong>Price:</strong> ${{ product.price|e }}</p>
+                        <a href="{{ url_for('main.view_product', product_id=product.id|e) }}" class="btn btn-primary">View Product</a>
                     </div>
                 </div>
             </div>
@@ -58,11 +57,7 @@
 <script>
 document.getElementById('filter-toggle').addEventListener('click', function() {
     var filterOptions = document.getElementById('filter-options');
-    if (filterOptions.style.display === 'none') {
-        filterOptions.style.display = 'block';
-    } else {
-        filterOptions.style.display = 'none';
-    }
+    filterOptions.style.display = filterOptions.style.display === 'none' ? 'block' : 'none';
 });
 
 document.getElementById('brand-filter').addEventListener('focus', function() {
