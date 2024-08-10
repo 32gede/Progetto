@@ -25,6 +25,8 @@
                 <strong>Quantity:</strong> {{ product.quantity }}
             {% endif %}
         </p>
+        <p><strong>Brand:</strong> {{ product.brand.name }}</p>
+        <p><strong>Category:</strong> {{ product.category.name }}</p>
     </div>
 
     {% if current_user.role == 'buyer' and product.quantity > 0 %}

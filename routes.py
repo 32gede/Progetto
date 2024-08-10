@@ -69,6 +69,12 @@ def validate_and_sanitize(value, value_type='string', min_value=None, max_value=
     :return: Validated and sanitized value.
     :raises ValueError: If the input value fails validation.
     """
+    if value is None:
+        if value_type in ['int', 'float']:
+            return None
+        else:
+            raise ValueError(f"{error_message}: Value cannot be None.")
+
     if value_type == 'string':
         # Sanitize HTML if required
         if is_html:
@@ -117,22 +123,23 @@ def index():
 
 # USER ROUTES #
 
-
 @main_routes.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         email = validate_and_sanitize(
             request.form['email'],
             value_type='string',
-            allowed_chars_pattern=r'^[\w\.-]+@[\w\.-]+$',
-            error_message='Invalid email',
+            min_value=5,
+            max_value=255,
+            error_message='Invalid email address.',
             is_html=True
         )
         password = validate_and_sanitize(
             request.form['password'],
             value_type='string',
-            allowed_chars_pattern=r'^[a-zA-Z0-9!@#$%^&*()_+={}\[\]|\\:;\'",.<>/?`~]*$',
-            error_message="Password is invalid",
+            min_value=4,
+            max_value=128,
+            error_message="Invalid password.",
             is_html=True
         )
 
@@ -143,7 +150,7 @@ def login():
                 login_user(user)
                 return redirect(url_for('main.index'))
             else:
-                return render_template('login.html', error='Invalid username or password')
+                return render_template('login.html', error='Invalid email or password.')
     return render_template('login.html')
 
 
@@ -153,22 +160,25 @@ def registration():
         email = validate_and_sanitize(
             request.form['email'],
             value_type='string',
-            allowed_chars_pattern=r'^[\w\.-]+@[\w\.-]+$',
-            error_message='Invalid email',
+            min_value=5,
+            max_value=255,
+            error_message='Invalid email address.',
             is_html=True
         )
         password = validate_and_sanitize(
             request.form['password'],
             value_type='string',
-            allowed_chars_pattern=r'^[a-zA-Z0-9!@#$%^&*()_+={}\[\]|\\:;\'",.<>/?`~]*$',
-            error_message="Password is invalid",
+            min_value=8,
+            max_value=128,
+            error_message="Invalid password.",
             is_html=True
         )
-        role = role = validate_and_sanitize(
+        role = validate_and_sanitize(
             request.form['role'],
             value_type='string',
-            allowed_chars_pattern=r'^[a-zA-Z]*$',
-            error_message='Invalid role',
+            min_value=4,
+            max_value=10,
+            error_message='Invalid role.',
             is_html=True
         )
         avatar_choice = request.form['avatar_choice']
@@ -194,7 +204,7 @@ def registration():
 
                 db_session.commit()
                 return redirect(url_for('main.login'))
-            return render_template('registration.html', error='User already exists')
+            return render_template('registration.html', error='User already exists.')
     return render_template('registration.html')
 
 
@@ -226,7 +236,6 @@ def profile():
 
 # PRODUCT ROUTES #
 
-
 @main_routes.route('/seller/products')
 @login_required
 @role_required('seller')
@@ -234,7 +243,7 @@ def view_products_seller():
     with get_db_session() as db_session:
         products = db_session.query(Product).filter_by(seller_id=current_user.id).all()
         if not products:
-            return render_template('products_seller.html', error="You haven't added any products yet")
+            return render_template('products_seller.html', error="No products found.")
         return render_template('products_seller.html', products=products)
 
 
@@ -245,7 +254,7 @@ def view_products_buyer():
     with get_db_session() as db_session:
         products = db_session.query(Product).all()
         if not products:
-            return render_template('products_buyer.html', error="There are no products available")
+            return render_template('products_buyer.html', error="No products available.")
         return render_template('products_buyer.html', products=products)
 
 
@@ -256,7 +265,7 @@ def view_product(product_id):
     with get_db_session() as db_session:
         product = db_session.query(Product).filter_by(id=product_id).first()
         if not product:
-            return render_template('product.html', error="Product doesn't exist")
+            return render_template('product.html', error="Product not found.")
         return render_template('product.html', product=product)
 
 
@@ -270,8 +279,7 @@ def add_product():
             value_type='string',
             min_value=1,
             max_value=255,
-            allowed_chars_pattern=r'^[a-zA-Z0-9 ]+$',
-            error_message='Invalid name. Please use only letters, numbers, and spaces.',
+            error_message='Invalid product name.',
             is_html=True
         )
         description = validate_and_sanitize(
@@ -279,16 +287,15 @@ def add_product():
             value_type='string',
             min_value=1,
             max_value=255,
-            allowed_chars_pattern=r'^[a-zA-Z0-9 ]+$',
-            error_message='Invalid name. Please use only letters, numbers, and spaces.',
+            error_message='Invalid product description.',
             is_html=True
         )
-        price = validated_quantity = validate_and_sanitize(
+        price = validate_and_sanitize(
             request.form['price'],
             value_type='float',
             min_value=0.01,
             max_value=1000000,
-            error_message='Invalid price. Please enter a number between 1 and 1000000',
+            error_message='Invalid price.',
             is_html=True
         )
         quantity = validate_and_sanitize(
@@ -296,42 +303,43 @@ def add_product():
             value_type='int',
             min_value=1,
             max_value=1000000,
-            error_message='Invalid price. Please enter a number between 1 and 1000000'
+            error_message='Invalid quantity.',
+            is_html=True
         )
         brand_id = validate_and_sanitize(
             request.form['brand_id'],
             value_type='string',
-            min_value=1,
+            min_value=0,
             max_value=255,
-            allowed_chars_pattern=r'^[a-zA-Z0-9 ]+$',
-            error_message='Invalid name. Please use only letters, numbers, and spaces.',
+            allowed_chars_pattern=r'^[a-zA-Z0-9 &]*$',
+            error_message='Invalid brand name.',
             is_html=True
         )
         new_brand_name = validate_and_sanitize(
             request.form['new_brand_name'],
             value_type='string',
-            min_value=1,
+            min_value=0,
             max_value=255,
-            allowed_chars_pattern=r'^[a-zA-Z0-9 ]+$',
-            error_message='Invalid name. Please use only letters, numbers, and spaces.',
+            allowed_chars_pattern=r'^[a-zA-Z0-9 &]*$',
+            error_message='Invalid new brand name.',
             is_html=True
         )
         category_id = validate_and_sanitize(
             request.form['category_id'],
             value_type='string',
-            min_value=1,
+            min_value=0,
             max_value=255,
-            allowed_chars_pattern=r'^[a-zA-Z0-9 ]+$',
-            error_message='Invalid name. Please use only letters, numbers, and spaces.',
+            allowed_chars_pattern=r'^[a-zA-Z0-9 &]*$',
+            error_message='Invalid category name.',
             is_html=True
         )
         new_category_name = validate_and_sanitize(
             request.form['new_category_name'],
             value_type='string',
-            min_value=1,
+            min_value=0,
             max_value=255,
-            allowed_chars_pattern=r'^[a-zA-Z0-9 ]+$',
-            error_message='Invalid name. Please use only letters, numbers, and spaces.',
+            allowed_chars_pattern=r'^[a-zA-Z0-9 &]*$',
+            error_message='Invalid new category name.',
             is_html=True
         )
 
@@ -361,14 +369,6 @@ def add_product():
                 return redirect(url_for('main.add_product'))
 
             if not category_id and not new_category_name:
-                flash('Please provide a name for the new category.')
-                return redirect(url_for('main.add_product'))
-
-            if brand_id == 'new' and not new_brand_name:
-                flash('Please provide a name for the new brand.')
-                return redirect(url_for('main.add_product'))
-
-            if category_id == 'new' and not new_category_name:
                 flash('Please provide a name for the new category.')
                 return redirect(url_for('main.add_product'))
 
@@ -445,8 +445,7 @@ def edit_product(product_id):
                 value_type='string',
                 min_value=1,
                 max_value=255,
-                allowed_chars_pattern=r'^[a-zA-Z0-9 ]+$',
-                error_message='Invalid name. Please use only letters, numbers, and spaces.',
+                error_message='Invalid product name.',
                 is_html=True
             )
             description = validate_and_sanitize(
@@ -454,24 +453,23 @@ def edit_product(product_id):
                 value_type='string',
                 min_value=1,
                 max_value=255,
-                allowed_chars_pattern=r'^[a-zA-Z0-9 ]+$',
-                error_message='Invalid name. Please use only letters, numbers, and spaces.',
+                error_message='Invalid product description.',
                 is_html=True
             )
-            price = validated_quantity = validate_and_sanitize(
+            price = validate_and_sanitize(
                 request.form.get('price'),
                 value_type='float',
                 min_value=0.01,
                 max_value=1000000,
-                error_message='Invalid price. Please enter a number between 1 and 1000000',
+                error_message='Invalid price.',
                 is_html=True
             )
             quantity = validate_and_sanitize(
-                request.form.get('price'),
+                request.form.get('quantity'),
                 value_type='int',
                 min_value=1,
                 max_value=1000000,
-                error_message='Invalid price. Please enter a number between 1 and 1000000',
+                error_message='Invalid quantity.',
                 is_html=True
             )
             brand_id = validate_and_sanitize(
@@ -479,8 +477,7 @@ def edit_product(product_id):
                 value_type='string',
                 min_value=1,
                 max_value=255,
-                allowed_chars_pattern=r'^[a-zA-Z0-9 ]+$',
-                error_message='Invalid name. Please use only letters, numbers, and spaces.',
+                error_message='Invalid brand name.',
                 is_html=True
             )
             category_id = validate_and_sanitize(
@@ -488,8 +485,7 @@ def edit_product(product_id):
                 value_type='string',
                 min_value=1,
                 max_value=255,
-                allowed_chars_pattern=r'^[a-zA-Z0-9 ]+$',
-                error_message='Invalid name. Please use only letters, numbers, and spaces.',
+                error_message='Invalid category name.',
                 is_html=True
             )
             db_session.commit()
@@ -501,7 +497,6 @@ def edit_product(product_id):
 
 
 # REVIEW ROUTES #
-
 
 @main_routes.route('/product/<int:product_id>/reviews')
 @login_required
@@ -533,7 +528,7 @@ def add_review(product_id):
                 value_type='float',
                 min_value=0,
                 max_value=5,
-                error_message='Invalid rating. Please enter a rating between 0 and 5',
+                error_message='Invalid rating.',
                 is_html=True
             )
             comment = validate_and_sanitize(
@@ -541,8 +536,7 @@ def add_review(product_id):
                 value_type='string',
                 min_value=1,
                 max_value=255,
-                allowed_chars_pattern=r'^[a-zA-Z0-9 ]+$',
-                error_message='Invalid name. Please use only letters, numbers, and spaces.',
+                error_message='Invalid comment.',
                 is_html=True
             )
 
@@ -587,7 +581,7 @@ def edit_review(product_id, review_id):
                 value_type='float',
                 min_value=0,
                 max_value=5,
-                error_message='Invalid rating. Please enter a rating between 0 and 5',
+                error_message='Invalid rating.',
                 is_html=True
             )
             comment = validate_and_sanitize(
@@ -595,8 +589,7 @@ def edit_review(product_id, review_id):
                 value_type='string',
                 min_value=1,
                 max_value=255,
-                allowed_chars_pattern=r'^[a-zA-Z0-9 ]+$',
-                error_message='Invalid name. Please use only letters, numbers, and spaces.',
+                error_message='Invalid comment.',
                 is_html=True
             )
 
@@ -655,7 +648,6 @@ def remove_review(product_id, review_id):
 
 # CART AND ORDER ROUTES #
 
-
 @main_routes.route('/cart')
 @login_required
 @role_required('buyer')
@@ -685,7 +677,7 @@ def add_to_cart(product_id):
             value_type='int',
             min_value=1,
             max_value=1000000,
-            error_message='Invalid price. Please enter a number between 1 and 1000000',
+            error_message='Invalid quantity.',
             is_html=True
         )
 
@@ -723,7 +715,7 @@ def edit_cart():
         request.form.get('item_id'),
         value_type='int',
         min_value=1,
-        error_message="Invalid item_id",
+        error_message="Invalid item ID.",
         is_html=True
     )
     new_quantity = validate_and_sanitize(
@@ -731,11 +723,11 @@ def edit_cart():
         value_type='int',
         min_value=1,
         max_value=1000000,
-        error_message='Invalid price. Please enter a number between 1 and 1000000',
+        error_message='Invalid quantity.',
         is_html=True
     )
     if not item_id or not new_quantity:
-        flash('Invalid item ID or quantity')
+        flash('Invalid item ID or quantity.')
         return redirect(url_for('main.cart'))
 
     with get_db_session() as db_session:
@@ -802,8 +794,7 @@ def search_product():
             value_type='string',
             min_value=0,
             max_value=255,
-            allowed_chars_pattern=r'^[a-zA-Z0-9 ]*$',
-            error_message='Invalid query. Please use only letters, numbers, and spaces.',
+            error_message='Invalid search query.',
             is_html=True
         )
         name = validate_and_sanitize(
@@ -811,8 +802,7 @@ def search_product():
             value_type='string',
             min_value=0,
             max_value=255,
-            allowed_chars_pattern=r'^[a-zA-Z0-9 ]+$',
-            error_message='Invalid name. Please use only letters, numbers, and spaces.',
+            error_message='Invalid product name.',
             is_html=True
         )
         description = validate_and_sanitize(
@@ -820,24 +810,23 @@ def search_product():
             value_type='string',
             min_value=0,
             max_value=255,
-            allowed_chars_pattern=r'^[a-zA-Z0-9 ]+$',
-            error_message='Invalid description. Please use only letters, numbers, and spaces.',
+            error_message='Invalid product description.',
             is_html=True
         )
         min_price = validate_and_sanitize(
-            request.args.get('min_price', type=int),
+            request.args.get('min_price', type=float),
             value_type='float',
-            min_value=0,  # Imposta il valore minimo a 0 o altro valore minimo accettabile
+            min_value=0,
             max_value=1000000,
-            error_message='Invalid minimum price. Please enter a number between 0 and 1000000',
+            error_message='Invalid minimum price.',
             is_html=True
         )
         max_price = validate_and_sanitize(
-            request.args.get('max_price', type=int),
+            request.args.get('max_price', type=float),
             value_type='float',
-            min_value=0,  # Imposta il valore minimo a 0 o altro valore minimo accettabile
+            min_value=0,
             max_value=1000000,
-            error_message='Invalid maximum price. Please enter a number between 0 and 1000000',
+            error_message='Invalid maximum price.',
             is_html=True
         )
         brand_name = validate_and_sanitize(
@@ -845,8 +834,7 @@ def search_product():
             value_type='string',
             min_value=0,
             max_value=255,
-            allowed_chars_pattern=r'^[a-zA-Z0-9 ]+$',
-            error_message='Invalid brand name. Please use only letters, numbers, and spaces.',
+            error_message='Invalid brand name.',
             is_html=True
         )
         category_name = validate_and_sanitize(
@@ -854,8 +842,7 @@ def search_product():
             value_type='string',
             min_value=0,
             max_value=255,
-            allowed_chars_pattern=r'^[a-zA-Z0-9 ]+$',
-            error_message='Invalid category name. Please use only letters, numbers, and spaces.',
+            error_message='Invalid category name.',
             is_html=True
         )
 
@@ -884,8 +871,7 @@ def filter_brands():
             value_type='string',
             min_value=0,
             max_value=255,
-            allowed_chars_pattern=r'^[a-zA-Z0-9 ]+$',
-            error_message='Invalid name. Please use only letters, numbers, and spaces.',
+            error_message='Invalid search term.',
             is_html=True
         )
         brands = db_session.query(Brand).filter(Brand.name.ilike(f'%{search_term}%')).all()
@@ -902,8 +888,7 @@ def filter_categories():
             value_type='string',
             min_value=1,
             max_value=255,
-            allowed_chars_pattern=r'^[a-zA-Z0-9 ]+$',
-            error_message='Invalid name. Please use only letters, numbers, and spaces.',
+            error_message='Invalid search term.',
             is_html=True
         )
         categories = db_session.query(Category).filter(Category.name.ilike(f'%{search_term}%')).all()
