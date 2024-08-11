@@ -22,15 +22,15 @@
                     <td>{{ item.product.name|e }}</td>
                     <td>
                         <form method="POST" action="{{ url_for('main.edit_cart') }}">
-                            <input type="hidden" name="item_id" value="{{ item.id|e }}">
-                            <input type="number" name="new_quantity" value="{{ item.quantity|e }}" min="1" max="{{ item.product.quantity|e }}">
+                            <input type="hidden" name="item_id" value="{{ item.id }}">
+                            <input type="number" name="new_quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.quantity }}">
                             <button type="submit" class="btn btn-primary">Update</button>
                         </form>
                     </td>
-                    <td>${{ item.product.price|e }}</td>
-                    <td>${{ (item.product.price|e) * (item.quantity|e) }}</td>
+                    <td>${{ item.product.price }}</td>
+                    <td>${{ (item.product.price) * (item.quantity) }}</td>
                     <td>
-                        <form method="POST" action="{{ url_for('main.remove_from_cart', item_id=item.id|e) }}">
+                        <form method="POST" action="{{ url_for('main.remove_from_cart', item_id=item.id) }}">
                             <button type="submit" class="btn btn-danger">Remove</button>
                         </form>
                     </td>
