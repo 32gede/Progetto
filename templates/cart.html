@@ -37,7 +37,7 @@
                 </tr>
             {% endfor %}
         </tbody>
-    </table>
+    </table><br>
     <div class="cart-total">
         <p>Total: ${{ cart_total|e }}</p>
         <a href="{{ url_for('main.checkout') }}" class="btn btn-primary">Proceed to Checkout</a>
