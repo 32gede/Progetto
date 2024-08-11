@@ -372,6 +372,10 @@ def add_product():
                 return redirect(url_for('main.add_product'))
 
             if brand_id == 'new' and new_brand_name:
+                existing_brand = db_session.query(Brand).filter_by(name=new_brand_name).first()
+                if existing_brand:
+                    flash('Brand name already exists. Please provide a different name.')
+                    return redirect(url_for('main.add_product'))
                 new_brand = Brand(name=new_brand_name)
                 db_session.add(new_brand)
                 db_session.commit()
@@ -381,6 +385,10 @@ def add_product():
                 return redirect(url_for('main.add_product'))
 
             if category_id == 'new' and new_category_name:
+                existing_category = db_session.query(Category).filter_by(name=new_category_name).first()
+                if existing_category:
+                    flash('Category name already exists. Please provide a different name.')
+                    return redirect(url_for('main.add_product'))
                 new_category = Category(name=new_category_name)
                 db_session.add(new_category)
                 db_session.commit()

@@ -4,55 +4,71 @@
 {% block title %}Add Product - E-commerce{% endblock %}
 
 {% block content %}
-<form method="POST">
-    <div class="mb-3">
-        <label for="name">Product Name:</label>
-        <input type="text" id="name" name="name" required>
-    </div>
-    <div class="mb-3">
-        <label for="description">Description:</label>
-        <textarea id="description" name="description"></textarea>
-    </div>
-    <div class="mb-3">
-        <label for="price">Price:</label>
-        <input type="number" id="price" name="price" min="0" max="2147483647" step="0.01" required>
-    </div>
-    <div class="mb-3">
-        <label for="quantity">Quantity:</label>
-        <input type="number" id="quantity" name="quantity" required>
-    </div>
-    <div class="form-group">
-        <label for="brand_id">Brand</label>
-        <select class="form-control" id="brand_id" name="brand_id" onchange="toggleNewBrandInput(this)">
-            <option value="" disabled selected>Select a brand</option>
-            {% for brand in brands %}
-                <option value="{{ brand.id|e }}">{{ brand.name|e }}</option>
-            {% endfor %}
-            <option value="new">Create new brand</option>
-        </select>
-    </div>
-    <div class="form-group" id="new_brand_name_group" style="display: none;">
-        <label for="new_brand_name">New Brand Name</label>
-        <input type="text" class="form-control" id="new_brand_name" name="new_brand_name">
-    </div>
-    <div class="form-group">
-        <label for="category_id">Category</label>
-        <select class="form-control" id="category_id" name="category_id" onchange="toggleNewCategoryInput(this)">
-            <option value="" disabled selected>Select a category</option>
-            {% for category in categories %}
-                <option value="{{ category.id|e }}">{{ category.name|e }}</option>
-            {% endfor %}
-            <option value="new">Create new category</option>
-        </select>
-    </div>
-    <div class="form-group" id="new_category_name_group" style="display: none;">
-        <label for="new_category_name">New Category Name</label>
-        <input type="text" class="form-control" id="new_category_name" name="new_category_name">
-    </div>
-    <div>
-        <button type="submit" class="btn btn-primary">Add Product</button>
-    </div>
-</form>
+<div class="container mt-5">
+    <h1>Add Product</h1>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="alert alert-danger" id="alert-message">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    <form method="POST" onsubmit="return validateForm()">
+        <div class="mb-3">
+            <label for="name">Product Name:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div class="mb-3">
+            <label for="description">Description:</label>
+            <textarea id="description" name="description"></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="price" class="form-label">Price:</label>
+            <input type="number" class="form-control" id="price" name="price" min="0.01" max="1000000" step="0.01" required aria-describedby="priceHelp">
+            <div id="priceHelp" class="form-text">Enter a price between $0.01 and $1,000,000.</div>
+            <div id="price-error" class="invalid-feedback" style="display: none;">Please enter a valid price between $0.01 and $1,000,000.</div>
+        </div>
+        <div class="mb-3">
+            <label for="quantity" class="form-label">Quantity:</label>
+            <input type="number" class="form-control" id="quantity" name="quantity" min="1" max="1000000" required aria-describedby="quantityHelp">
+            <div id="quantityHelp" class="form-text">Enter a quantity between 1 and 1,000,000.</div>
+            <div id="quantity-error" class="invalid-feedback" style="display: none;">Please enter a valid quantity between 1 and 1,000,000.</div>
+        </div>
+        <div class="form-group">
+            <label for="brand_id">Brand</label>
+            <select class="form-control" id="brand_id" name="brand_id" onchange="toggleNewBrandInput(this)">
+                <option value="" disabled selected>Select a brand</option>
+                {% for brand in brands %}
+                    <option value="{{ brand.id|e }}">{{ brand.name|e }}</option>
+                {% endfor %}
+                <option value="new">Create new brand</option>
+            </select>
+        </div>
+        <div class="form-group" id="new_brand_name_group" style="display: none;">
+            <label for="new_brand_name">New Brand Name</label>
+            <input type="text" class="form-control" id="new_brand_name" name="new_brand_name">
+        </div>
+        <div class="form-group">
+            <label for="category_id">Category</label>
+            <select class="form-control" id="category_id" name="category_id" onchange="toggleNewCategoryInput(this)">
+                <option value="" disabled selected>Select a category</option>
+                {% for category in categories %}
+                    <option value="{{ category.id|e }}">{{ category.name|e }}</option>
+                {% endfor %}
+                <option value="new">Create new category</option>
+            </select>
+        </div>
+        <div class="form-group" id="new_category_name_group" style="display: none;">
+            <label for="new_category_name">New Category Name</label>
+            <input type="text" class="form-control" id="new_category_name" name="new_category_name">
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary">Add Product</button>
+        </div>
+    </form>
+</div>
 
 <script>
 function toggleNewBrandInput(select) {
@@ -71,6 +87,57 @@ function toggleNewCategoryInput(select) {
     } else {
         newCategoryGroup.style.display = 'none';
     }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var alertMessage = document.getElementById('alert-message');
+    if (alertMessage) {
+        setTimeout(function() {
+            alertMessage.style.display = 'none';
+        }, 5000); // Hide after 5 seconds
+    }
+
+    var priceInput = document.getElementById('price');
+    var priceError = document.getElementById('price-error');
+    priceInput.addEventListener('input', function() {
+        var price = parseFloat(priceInput.value);
+        if (isNaN(price) || price < 0.01 || price > 1000000) {
+            priceError.style.display = 'block';
+        } else {
+            priceError.style.display = 'none';
+        }
+    });
+
+    var quantityInput = document.getElementById('quantity');
+    var quantityError = document.getElementById('quantity-error');
+    quantityInput.addEventListener('input', function() {
+        var quantity = parseInt(quantityInput.value);
+        if (isNaN(quantity) || quantity < 1 || quantity > 1000000) {
+            quantityError.style.display = 'block';
+        } else {
+            quantityError.style.display = 'none';
+        }
+    });
+});
+
+function validateForm() {
+    var priceInput = document.getElementById('price');
+    var priceError = document.getElementById('price-error');
+    var price = parseFloat(priceInput.value);
+    if (isNaN(price) || price < 0.01 || price > 1000000) {
+        priceError.style.display = 'block';
+        return false;
+    }
+
+    var quantityInput = document.getElementById('quantity');
+    var quantityError = document.getElementById('quantity-error');
+    var quantity = parseInt(quantityInput.value);
+    if (isNaN(quantity) || quantity < 1 || quantity > 1000000) {
+        quantityError.style.display = 'block';
+        return false;
+    }
+
+    return true;
 }
 </script>
 {% endblock %}

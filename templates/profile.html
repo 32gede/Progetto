@@ -38,10 +38,12 @@
                 <button type="submit" class="btn btn-primary">Update Profile</button>
             </form>
         </div>
-        <div class="card-footer text-end">
-            <a class="btn btn-link" href="{{ url_for('main.order_history') }}">Order History</a>
+            {% if current_user.role == 'buyer' %}
+                <div class="card-footer text-end">
+                    <a class="btn btn-link" href="{{ url_for('main.order_history') }}">Order History</a>
+                </div>
+            {% endif %}
         </div>
-    </div>
 </div>
 
 {% if get_flashed_messages() %}
