@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship, declarative_base, Mapped, mapped_column
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+
 Base = declarative_base()
 
 
@@ -77,6 +78,7 @@ class UserBuyer(Base):
     user: Mapped["User"] = relationship("User", back_populates="buyer")
     city: Mapped[str] = mapped_column(String, nullable=False)
     address: Mapped[str] = mapped_column(String, nullable=False)
+
 
 # -------------- Prodotti:
 
