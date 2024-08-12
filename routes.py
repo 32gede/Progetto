@@ -656,7 +656,7 @@ def edit_review(product_id, review_id):
                 request.form.get('comment'),
                 value_type='string',
                 min_value=1,
-                max_value=255,
+                max_value=3000,
                 error_message='Invalid comment.',
                 is_html=True
             )
