@@ -4,6 +4,7 @@ from flask_session import Session
 from routes import main_routes
 from database import init_db, get_db_session
 from flask_login import LoginManager
+from flask_wtf import CSRFProtect
 # from flask_talisman import Talisman - Permette di configurare Content Security Policy (CSP) per proteggere
 #                                       l'applicazione da attacchi XSS (Cross-Site Scripting) e per configurare altre
 #                                       politiche di sicurezza (tipo https).
@@ -11,6 +12,7 @@ from flask_login import LoginManager
 app = Flask(__name__, template_folder='templates')
 app.jinja_env.autoescape = True
 app.config['SESSION_TYPE'] = 'filesystem'
+# csrf = CSRFProtect(app)
 Session(app)
 
 '''

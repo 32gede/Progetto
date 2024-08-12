@@ -1,25 +1,78 @@
 <!-- templates/order_history.html -->
 {% extends "base.html" %}
 
-{% block title %}Order History - E-commerce{% endblock %}
+{% block title %}Cronologia Ordini - E-commerce{% endblock %}
 
 {% block content %}
-<div class="container order-history mt-5">
-    <h1>Your Order History</h1>
-    {% for order in orders %}
-        <div class="card order-card mb-4">
-            <div class="card-body">
-                <h5 class="card-title">Order #{{ order.id|e }}</h5>
-                <p class="card-text">Date: {{ order.created_at.strftime('%d/%m/%Y')|e }}</p>
-                <p class="card-text">Total: ${{ order.total|e }}</p>
-                <h6>Items:</h6>
-                <ul>
-                    {% for item in order.order_items %}
-                        <li>{{ item.product.name|e }} ({{ item.quantity|e }} x ${{ item.price|e }})</li>
-                    {% endfor %}
-                </ul>
-            </div>
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header">
+            <h1>La tua Cronologia Ordini</h1>
+        </div>
+        <div class="card-body">
+            {% if orders %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID Ordine</th>
+                            <th>Data Ordine</th>
+                            <th>Totale</th>
+                            <th>Tempo di consegna stimato</th>
+                            <th>Dettagli</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                            <tr>
+                                <td>{{ order.id }}</td>
+                                <td>{{ order.created_at.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ order.total }} €</td>
+                                <td>5 giorni lavorativi</td> <!-- Aggiunta qui -->
+                                <td>
+                                    <a href="#" onclick="toggleDetails({{ order.id }})">Mostra Dettagli</a>
+                                    <div id="details-{{ order.id }}" class="order-details" style="display: none;">
+                                        <h5>Dettagli Ordine #{{ order.id }}</h5>
+                                        <ul>
+                                            {% for item in order.items %}
+                                                <li>
+                                                    Prodotto: {{ item.product.name }} - Quantità: {{ item.quantity }} - Prezzo: {{ item.product.price * item.quantity }} €
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Non hai ancora effettuato alcun ordine.</p>
+            {% endif %}
+        </div>
+        <div class="card-footer text-end">
+            <a class="btn btn-link" href="{{ url_for('main.view_products_buyer') }}">Torna ai Prodotti</a>
+        </div>
+    </div>
+</div>
+
+{% if get_flashed_messages() %}
+<div class="container mt-3">
+    {% for message in get_flashed_messages() %}
+        <div class="alert alert-info" role="alert">
+            {{ message }}
         </div>
     {% endfor %}
 </div>
+{% endif %}
+
+<script>
+    function toggleDetails(orderId) {
+        const detailsDiv = document.getElementById(`details-${orderId}`);
+        if (detailsDiv.style.display === "none") {
+            detailsDiv.style.display = "block";
+        } else {
+            detailsDiv.style.display = "none";
+        }
+    }
+</script>
 {% endblock %}

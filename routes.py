@@ -9,12 +9,15 @@ import bleach
 from bleach.sanitizer import ALLOWED_TAGS
 import re
 
-# Import models and functions from other file #
-
+# IMPORT FROM OTHER FILES #
 
 from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem
 from database import get_db_session
 from search import search_products
+
+
+# DEFINE BLUEPRINT #
+
 
 main_routes = Blueprint('main', __name__)
 
@@ -22,7 +25,7 @@ UPLOAD_FOLDER = 'static/avatars'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 
-# Helper functions #
+# HELPER FUNCTIONS #
 
 
 def allowed_file(filename):
@@ -185,18 +188,18 @@ def registration():
 
         if role == 'buyer':
             city = validate_and_sanitize(
-            request.form['city'],
-            value_type='string',
-            min_value=2,
-            max_value=10,
-            error_message='Invalid street.',
-            is_html=True
+                request.form['city'],
+                value_type='string',
+                min_value=2,
+                max_value=255,
+                error_message='Invalid street.',
+                is_html=True
             )
             address = validate_and_sanitize(
                 request.form['address'],
                 value_type='string',
                 min_value=2,
-                max_value=10,
+                max_value=255,
                 error_message='Invalid city.',
                 is_html=True
             )
@@ -234,6 +237,7 @@ def logout():
 
 import base64
 
+
 @main_routes.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
@@ -248,7 +252,6 @@ def profile():
             else:
                 print('Invalid file type.')
         return render_template('profile.html', avatar_data=None)
-
 
 
 # PRODUCT ROUTES #
@@ -769,44 +772,61 @@ def edit_cart():
 @role_required('buyer')
 def order_history():
     with get_db_session() as db_session:
+        # Recupera gli ordini dell'utente
         orders = db_session.query(Order).filter_by(user_id=current_user.id).all()
-        return render_template('order_history.html', orders=orders)
+
+        # Supponiamo che il tempo di spedizione stimato sia di 5 giorni lavorativi
+        estimated_delivery_days = 5
+
+        return render_template('order_history.html', orders=orders, estimated_delivery_days=estimated_delivery_days)
 
 
 @main_routes.route('/checkout', methods=['GET', 'POST'])
 @login_required
-@role_required('buyer')
 def checkout():
     with get_db_session() as db_session:
+        # Ottieni gli articoli del carrello dell'utente
         cart_items = db_session.query(CartItem).filter_by(user_id=current_user.id).all()
 
-        if not cart_items:
-            flash('No items in cart.')
-            return redirect(url_for('main.cart'))
+        # Recupera l'indirizzo dell'utente
+        user_buyer = db_session.query(UserBuyer).filter_by(id=current_user.id).first()
 
-        total = sum(item.product.price * item.quantity for item in cart_items)
-        new_order = Order(user_id=current_user.id, total=total)
-        db_session.add(new_order)
-        db_session.commit()
+        if request.method == 'POST':
+            if not cart_items:
+                flash('Il carrello è vuoto. Non puoi completare l\'ordine.', 'warning')
+                return redirect(url_for('main.view_products_buyer'))
 
-        for item in cart_items:
-            order_item = OrderItem(
-                order_id=new_order.id,
-                product_id=item.product.id,
-                quantity=item.quantity,
-                price=item.product.price)
-            db_session.add(order_item)
+            # Calcola il totale dell'ordine
+            total = sum(item.product.price * item.quantity for item in cart_items)
 
-            # Update product quantity
-            product = db_session.query(Product).filter_by(id=item.product.id).first()
-            if product:
-                product.quantity -= item.quantity
+            # Crea un nuovo ordine
+            new_order = Order(user_id=current_user.id, total=total)
+            db_session.add(new_order)
+            db_session.commit()
 
-            db_session.delete(item)
+            # Aggiungi gli articoli all'ordine e rimuovi dal carrello
+            for item in cart_items:
+                order_item = OrderItem(
+                    order_id=new_order.id,
+                    product_id=item.product_id,
+                    quantity=item.quantity,
+                    price=item.product.price  # Assicurati di passare il prezzo qui
+                )
+                db_session.add(order_item)
 
-        db_session.commit()
-        flash('Order placed successfully.')
-        return redirect(url_for('main.order_history'))
+                # Rimuovi l'item dal carrello
+                db_session.delete(item)
+
+            db_session.commit()
+            flash('Ordine completato con successo!', 'success')
+            return redirect(url_for('main.order_history'))  # Reindirizza alla pagina degli ordini
+
+        return render_template('checkout.html', cart_items=cart_items, user_buyer=user_buyer)
+
+
+
+
+
 
 
 @main_routes.route('/products', methods=['GET'])
