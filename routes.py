@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify,current_app
 from markupsafe import escape
 from werkzeug.utils import secure_filename
 from functools import wraps
@@ -9,6 +9,7 @@ import bleach
 from bleach.sanitizer import ALLOWED_TAGS
 import re
 
+from collegamento_drive import carica_imm
 # IMPORT FROM OTHER FILES #
 
 from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem
@@ -241,17 +242,25 @@ import base64
 @main_routes.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    with get_db_session() as db_session:
-        if request.method == 'POST':
-            file = request.files['avatar']
-            if file and allowed_file(file.filename):
-                file_data = file.read()
-                current_user.avatar = file_data
-                db_session.commit()
-                print('Your profile has been updated.')
-            else:
-                print('Invalid file type.')
-        return render_template('profile.html', avatar_data=None)
+    if request.method == 'POST':
+        file = request.files['avatar']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            print()
+            try:
+                # Update user avatar in the database
+                with get_db_session() as db_session:
+                    user = db_session.query(User).filter_by(id=current_user.id).first()
+                    user.avatar_path = carica_imm(file_path, filename)
+                    db_session.commit()
+                    print('Your profile has been updated.')
+            except Exception as e:
+                print(f'Failed to update the profile: {e}')
+        else:
+            print('Invalid file type.')
+    return render_template('profile.html', avatar_data=None)
 
 
 # PRODUCT ROUTES #
@@ -263,6 +272,7 @@ def view_products_seller():
     with get_db_session() as db_session:
         products = db_session.query(Product).filter_by(seller_id=current_user.id).all()
         if not products:
+            print()
             return render_template('products_seller.html', error="No products found.")
         return render_template('products_seller.html', products=products)
 
@@ -772,14 +782,12 @@ def edit_cart():
 @role_required('buyer')
 def order_history():
     with get_db_session() as db_session:
+        # Recupera gli ordini dell'utente
         orders = db_session.query(Order).filter_by(user_id=current_user.id).all()
-
-        # Carica anche gli articoli per ciascun ordine
-        for order in orders:
-            order.items = db_session.query(OrderItem).filter_by(order_id=order.id).all()
 
         # Supponiamo che il tempo di spedizione stimato sia di 5 giorni lavorativi
         estimated_delivery_days = 5
+
         return render_template('order_history.html', orders=orders, estimated_delivery_days=estimated_delivery_days)
 
 
