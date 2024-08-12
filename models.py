@@ -77,7 +77,7 @@ class UserBuyer(Base):
     user: Mapped["User"] = relationship("User", back_populates="buyer")
     addresses: Mapped[list["Address"]] = relationship("Address", back_populates="buyer")
 
-class Address(Base):
+class Address(Base):#indirizzo
     __tablename__ = 'addresses'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
