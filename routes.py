@@ -778,12 +778,14 @@ def edit_cart():
 @role_required('buyer')
 def order_history():
     with get_db_session() as db_session:
-        # Recupera gli ordini dell'utente
         orders = db_session.query(Order).filter_by(user_id=current_user.id).all()
+
+        # Carica anche gli articoli per ciascun ordine
+        for order in orders:
+            order.items = db_session.query(OrderItem).filter_by(order_id=order.id).all()
 
         # Supponiamo che il tempo di spedizione stimato sia di 5 giorni lavorativi
         estimated_delivery_days = 5
-
         return render_template('order_history.html', orders=orders, estimated_delivery_days=estimated_delivery_days)
 
 
