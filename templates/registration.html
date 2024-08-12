@@ -31,6 +31,12 @@
                 <option value="default3.png">Default Avatar 3</option>
             </select>
         </div>
+        {% if current_user.role == 'buyer' %}
+        <div class="mb-3">
+            <label for="address" class="form-label">Password</label>
+            <input type="text" class="form-control" id="address" name="address" required>
+        </div>
+        {% endif %}
         <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
     </form>
 </div>

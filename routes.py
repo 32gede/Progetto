@@ -181,14 +181,22 @@ def registration():
             is_html=True
         )
         avatar_choice = request.form['avatar_choice']
-
+        address = validate_and_sanitize(
+            request.form['address'],
+            value_type='string',
+            min_value=2,
+            max_value=10,
+            error_message='Invalid address.',
+            is_html=True
+        )
         with get_db_session() as db_session:
             existing_user = db_session.query(User).filter_by(email=email).first()
             if not existing_user:
                 new_user = User(
                     email=email,
                     role=role,
-                    avatar=avatar_choice if avatar_choice else None
+                    avatar=avatar_choice if avatar_choice else None,
+                    address=address
                 )
                 new_user.password_hash = password  # Hash the password
                 db_session.add(new_user)
