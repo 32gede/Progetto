@@ -235,10 +235,6 @@ def logout():
     session.pop('id', None)  # Clear the session
     return redirect(url_for('main.index'))
 
-
-import base64
-
-
 @main_routes.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
