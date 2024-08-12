@@ -12,7 +12,7 @@ import re
 # Import models and functions from other file #
 
 
-from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem
+from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem, Address
 from database import get_db_session
 from search import search_products
 
@@ -181,12 +181,20 @@ def registration():
             is_html=True
         )
         avatar_choice = request.form['avatar_choice']
-        address = validate_and_sanitize(
-            request.form['address'],
+        street = validate_and_sanitize(
+            request.form['street'],
             value_type='string',
             min_value=2,
             max_value=10,
-            error_message='Invalid address.',
+            error_message='Invalid street.',
+            is_html=True
+        )
+        city = validate_and_sanitize(
+            request.form['city'],
+            value_type='string',
+            min_value=2,
+            max_value=10,
+            error_message='Invalid city.',
             is_html=True
         )
         with get_db_session() as db_session:
@@ -195,8 +203,7 @@ def registration():
                 new_user = User(
                     email=email,
                     role=role,
-                    avatar=avatar_choice if avatar_choice else None,
-                    address=address
+                    avatar=avatar_choice if avatar_choice else None
                 )
                 new_user.password_hash = password  # Hash the password
                 db_session.add(new_user)
@@ -208,6 +215,8 @@ def registration():
                 elif role == "buyer":
                     new_buyer = UserBuyer(id=new_user.id, buyer_rating=0)
                     db_session.add(new_buyer)
+                    new_address = Address(user_buyer_id=new_buyer.id, street=street, city=city)
+                    db_session.add(new_address)
 
                 db_session.commit()
                 return redirect(url_for('main.login'))
