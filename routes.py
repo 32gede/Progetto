@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify,current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify, current_app
 from markupsafe import escape
 from werkzeug.utils import secure_filename
 from functools import wraps
@@ -15,7 +15,6 @@ from collegamento_drive import carica_imm
 from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem
 from database import get_db_session
 from search import search_products
-
 
 # DEFINE BLUEPRINT #
 
@@ -235,29 +234,57 @@ def logout():
     session.pop('id', None)  # Clear the session
     return redirect(url_for('main.index'))
 
+
 @main_routes.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
     if request.method == 'POST':
-        file = request.files['avatar']
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-            file.save(file_path)
-            print()
-            try:
-                # Update user avatar in the database
-                with get_db_session() as db_session:
-                    user = db_session.query(User).filter_by(id=current_user.id).first()
-                    user.avatar_path = carica_imm(file_path, filename)
-                    print('File id:', user.avatar_path)
-                    print(db_session.commit())
-                    print('Your profile has been updated.')
-            except Exception as e:
-                print(f'Failed to update the profile: {e}')
-        else:
-            print('Invalid file type.')
-    return render_template('profile.html', avatar_data=None)
+        with get_db_session() as db_session:
+            user = db_session.query(User).filter_by(id=current_user.id).first()
+            file = request.files.get('avatar')
+
+            if file:
+                if allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                    try:
+                        file.save(file_path)
+                        user.avatar = carica_imm(file_path, filename)
+                        db_session.commit()  # Ensure commit here to save avatar changes
+                        flash('Your profile has been updated.', 'success')
+                    except Exception as e:
+                        db_session.rollback()  # Rollback in case of error
+                        flash(f'Failed to update the profile: {e}', 'error')
+                else:
+                    flash('Invalid file type.', 'error')
+
+            if user.role == 'buyer':
+                try:
+                    city = validate_and_sanitize(
+                        request.form['city'],
+                        value_type='string',
+                        min_value=2,
+                        max_value=255,
+                        error_message='Invalid city.',
+                        is_html=True
+                    )
+                    address = validate_and_sanitize(
+                        request.form['address'],
+                        value_type='string',
+                        min_value=2,
+                        max_value=255,
+                        error_message='Invalid address.',
+                        is_html=True
+                    )
+                    user.city = city
+                    user.address = address
+                    db_session.commit()  # Commit here for city and address changes
+                    flash('Your profile has been updated.', 'success')
+                except Exception as e:
+                    db_session.rollback()  # Rollback in case of error
+                    flash(f'Failed to update the profile: {e}', 'error')
+
+    return render_template('profile.html', avatar_data=current_user.avatar)
 
 
 # PRODUCT ROUTES #
@@ -523,6 +550,12 @@ def edit_product(product_id):
                 error_message='Invalid category name.',
                 is_html=True
             )
+            product.name = name
+            product.description = description
+            product.price = price
+            product.quantity = quantity
+            product.brand_id = brand_id
+            product.category_id = category_id
             db_session.commit()
             return redirect(url_for('main.view_product', product_id=product.id))
 
@@ -570,7 +603,7 @@ def add_review(product_id):
                 request.form.get('comment'),
                 value_type='string',
                 min_value=1,
-                max_value=255,
+                max_value=3000,
                 error_message='Invalid comment.',
                 is_html=True
             )
@@ -831,11 +864,6 @@ def checkout():
             return redirect(url_for('main.order_history'))  # Reindirizza alla pagina degli ordini
 
         return render_template('checkout.html', cart_items=cart_items, user_buyer=user_buyer)
-
-
-
-
-
 
 
 @main_routes.route('/products', methods=['GET'])

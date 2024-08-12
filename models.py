@@ -1,6 +1,6 @@
 from hashlib import md5
 
-from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, event, Float, LargeBinary
+from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, event, Float, LargeBinary, Text
 from sqlalchemy.orm import relationship, declarative_base, Mapped, mapped_column
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
@@ -128,7 +128,7 @@ class Review(Base):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     product_id: Mapped[int] = mapped_column(Integer, ForeignKey('products.id'), nullable=False)
     rating: Mapped[float] = mapped_column(Float, nullable=False)
-    comment: Mapped[str] = mapped_column(String(255), nullable=True)
+    comment: Mapped[str] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
 
     user: Mapped["User"] = relationship("User", back_populates="reviews")
