@@ -215,6 +215,8 @@ def logout():
     return redirect(url_for('main.index'))
 
 
+import base64
+
 @main_routes.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
@@ -222,15 +224,15 @@ def profile():
         if request.method == 'POST':
             file = request.files['avatar']
             if file and allowed_file(file.filename):
-                ensure_upload_folder()  # Ensure the upload folder exists
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(UPLOAD_FOLDER, filename))
-                current_user.avatar = filename
+                file_data = file.read()
+                current_user.avatar = file_data
                 db_session.commit()
-                flash('Your profile has been updated.')
+                print('Your profile has been updated.')
             else:
-                flash('Invalid file type.')
-        return render_template('profile.html')
+                print('Invalid file type.')
+        avatar_data = base64.b64encode(current_user.avatar).decode('utf-8') if current_user.avatar else None
+        return render_template('profile.html', avatar_data=avatar_data)
+
 
 
 # PRODUCT ROUTES #

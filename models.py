@@ -1,6 +1,6 @@
 from hashlib import md5
 
-from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, event, Float
+from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, event, Float, LargeBinary
 from sqlalchemy.orm import relationship, declarative_base, Mapped, mapped_column
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
@@ -17,7 +17,7 @@ class User(UserMixin, Base):
     email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(String(255), nullable=False)
-    avatar: Mapped[str] = mapped_column(String(255), nullable=True)
+    avatar: Mapped[bytes] = mapped_column(LargeBinary, nullable=True)
 
     seller: Mapped["UserSeller"] = relationship("UserSeller", uselist=False, back_populates="user")
     buyer: Mapped["UserBuyer"] = relationship("UserBuyer", uselist=False, back_populates="user")
@@ -75,7 +75,16 @@ class UserBuyer(Base):
     id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), primary_key=True)
     buyer_rating: Mapped[int] = mapped_column(Integer, nullable=False)
     user: Mapped["User"] = relationship("User", back_populates="buyer")
+    addresses: Mapped[list["Address"]] = relationship("Address", back_populates="buyer")
 
+class Address(Base):
+    __tablename__ = 'addresses'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_buyer_id: Mapped[int] = mapped_column(Integer, ForeignKey('user_buyers.id'))
+    street: Mapped[str] = mapped_column(String, nullable=False)
+    city: Mapped[str] = mapped_column(String, nullable=False)
+    buyer: Mapped["UserBuyer"] = relationship("UserBuyer", back_populates="addresses")
 
 # -------------- Prodotti:
 
