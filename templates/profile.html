@@ -31,19 +31,10 @@
                     <input type="file" class="form-control" id="avatar" name="avatar" onchange="previewAvatar(this)">
                 </div>
                 <div class="mb-3">
-                    <label for="avatar_choice" class="form-label">Choose a default avatar</label>
-                    <select class="form-select" id="avatar_choice" name="avatar_choice" onchange="previewDefaultAvatar(this)">
-                        <option value="">Select an avatar</option>
-                        <option value="avatar1.png">Avatar 1</option>
-                        <option value="avatar2.png">Avatar 2</option>
-                        <option value="avatar3.png">Avatar 3</option>
-                    </select>
-                </div>
-                <div class="mb-3">
                     {% if current_user.avatar %}
-                        <img id="avatar-preview" src="{{ url_for('static', filename='avatars/' ~ current_user.avatar|e) }}" alt="Avatar" class="img-thumbnail" width="150">
+                        <img id="avatar-preview" src="https://drive.google.com/thumbnail?id={{ current_user.avatar }}" alt="Avatar" class="img-thumbnail" width="150">
                     {% else %}
-                        <img id="avatar-preview" src="{{ current_user.gravatar(150)|e }}" alt="Avatar" class="img-thumbnail" width="150">
+                        <img id="avatar-preview" src="{{ current_user.gravatar(150) }}" alt="Avatar" class="img-thumbnail" width="150">
                     {% endif %}
                 </div>
                 <button type="submit" class="btn btn-primary">Update Profile</button>
@@ -82,7 +73,7 @@ function previewDefaultAvatar(select) {
     if (avatar) {
         document.getElementById('avatar-preview').src = "{{ url_for('static', filename='avatars/') }}" + avatar;
     } else {
-        document.getElementById('avatar-preview').src = "{{ current_user.gravatar(150)|e }}";
+        document.getElementById('avatar-preview').src = "{{ current_user.gravatar(150) }}";
     }
 }
 </script>

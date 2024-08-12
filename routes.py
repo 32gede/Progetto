@@ -247,8 +247,7 @@ def profile():
                 print('Your profile has been updated.')
             else:
                 print('Invalid file type.')
-        avatar_data = base64.b64encode(current_user.avatar).decode('utf-8') if current_user.avatar else None
-        return render_template('profile.html', avatar_data=avatar_data)
+        return render_template('profile.html', avatar_data=None)
 
 
 
