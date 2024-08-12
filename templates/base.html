@@ -43,6 +43,9 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url_for('main.cart') }}">Cart</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('main.order_history') }}">I miei ordini</a>
+                            </li>
                         {% endif %}
                         {% if current_user.role == 'seller' %}
                             <li class="nav-item">

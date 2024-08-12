@@ -1,0 +1,63 @@
+<!-- templates/checkout.html -->
+{% extends "base.html" %}
+
+{% block title %}Checkout - E-commerce{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header">
+            <h1>Checkout</h1>
+        </div>
+        <div class="card-body">
+            <h5>Indirizzo di spedizione</h5>
+            {% if user_buyer %}
+                <p>Indirizzo: {{ user_buyer.address }}</p>
+                <p>Città: {{ user_buyer.city }}</p>
+            {% else %}
+                <p>Indirizzo non disponibile.</p>
+            {% endif %}
+            <form method="POST">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Prodotto</th>
+                            <th>Quantità</th>
+                            <th>Prezzo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if cart_items %}
+                            {% for item in cart_items %}
+                                <tr>
+                                    <td>{{ item.product.name }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>{{ item.product.price * item.quantity }} €</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="3">Il carrello è vuoto.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+                <button type="submit" class="btn btn-primary">Completa l'ordine</button>
+            </form>
+        </div>
+        <div class="card-footer text-end">
+            <a class="btn btn-link" href="{{ url_for('main.view_products_buyer') }}">Torna ai prodotti</a>
+        </div>
+    </div>
+</div>
+
+{% if get_flashed_messages() %}
+<div class="container mt-3">
+    {% for message in get_flashed_messages() %}
+        <div class="alert alert-info" role="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
