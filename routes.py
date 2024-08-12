@@ -9,12 +9,15 @@ import bleach
 from bleach.sanitizer import ALLOWED_TAGS
 import re
 
-# Import models and functions from other file #
-
+# IMPORT FROM OTHER FILES #
 
 from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem
 from database import get_db_session
 from search import search_products
+
+
+# DEFINE BLUEPRINT #
+
 
 main_routes = Blueprint('main', __name__)
 
@@ -22,7 +25,7 @@ UPLOAD_FOLDER = 'static/avatars'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 
-# Helper functions #
+# HELPER FUNCTIONS #
 
 
 def allowed_file(filename):
@@ -185,18 +188,18 @@ def registration():
 
         if role == 'buyer':
             city = validate_and_sanitize(
-            request.form['city'],
-            value_type='string',
-            min_value=2,
-            max_value=10,
-            error_message='Invalid street.',
-            is_html=True
+                request.form['city'],
+                value_type='string',
+                min_value=2,
+                max_value=255,
+                error_message='Invalid street.',
+                is_html=True
             )
             address = validate_and_sanitize(
                 request.form['address'],
                 value_type='string',
                 min_value=2,
-                max_value=10,
+                max_value=255,
                 error_message='Invalid city.',
                 is_html=True
             )
@@ -234,6 +237,7 @@ def logout():
 
 import base64
 
+
 @main_routes.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
@@ -248,7 +252,6 @@ def profile():
             else:
                 print('Invalid file type.')
         return render_template('profile.html', avatar_data=None)
-
 
 
 # PRODUCT ROUTES #
