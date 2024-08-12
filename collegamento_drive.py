@@ -44,7 +44,7 @@ def carica_imm(file_path, file_name):
 
         shareable_link = file.get('webViewLink')
         print(f'Shareable Link: {shareable_link}')
-        return shareable_link
+        return file_id
     else:
         print("Failed to create the service. Please check the credentials and try again.")
         return None

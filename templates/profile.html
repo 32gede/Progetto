@@ -32,9 +32,9 @@
                 </div>
                 <div class="mb-3">
                     {% if current_user.avatar %}
-                        <img id="avatar-preview" src="https://drive.google.com/thumbnail?id={{ current_user.avatar }}" alt="Avatar" class="img-thumbnail" width="150">
+                        <img id="avatar-preview" src="https://drive.google.com/thumbnail?id={{ current_user.avatar }}" alt="Avatar" class="img-thumbnail" width="100">
                     {% else %}
-                        <img id="avatar-preview" src="{{ current_user.gravatar(150) }}" alt="Avatar" class="img-thumbnail" width="150">
+                        <img id="avatar-preview" src="{{ current_user.gravatar(150) }}" alt="Avatar" class="img-thumbnail" width="50">
                     {% endif %}
                 </div>
                 <button type="submit" class="btn btn-primary">Update Profile</button>

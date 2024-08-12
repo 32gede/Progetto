@@ -250,7 +250,8 @@ def profile():
                 with get_db_session() as db_session:
                     user = db_session.query(User).filter_by(id=current_user.id).first()
                     user.avatar_path = carica_imm(file_path, filename)
-                    db_session.commit()
+                    print('File id:', user.avatar_path)
+                    print(db_session.commit())
                     print('Your profile has been updated.')
             except Exception as e:
                 print(f'Failed to update the profile: {e}')
