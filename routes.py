@@ -12,7 +12,7 @@ import re
 # Import models and functions from other file #
 
 
-from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem, Address
+from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem
 from database import get_db_session
 from search import search_products
 
@@ -181,16 +181,16 @@ def registration():
             is_html=True
         )
         avatar_choice = request.form['avatar_choice']
-        street = validate_and_sanitize(
-            request.form['street'],
+        city = validate_and_sanitize(
+            request.form['city'],
             value_type='string',
             min_value=2,
             max_value=10,
             error_message='Invalid street.',
             is_html=True
         )
-        city = validate_and_sanitize(
-            request.form['city'],
+        address = validate_and_sanitize(
+            request.form['address'],
             value_type='string',
             min_value=2,
             max_value=10,
@@ -213,11 +213,8 @@ def registration():
                     new_seller = UserSeller(id=new_user.id, seller_rating=0)
                     db_session.add(new_seller)
                 elif role == "buyer":
-                    new_buyer = UserBuyer(id=new_user.id, buyer_rating=0)
+                    new_buyer = UserBuyer(id=new_user.id, buyer_rating=0, city=city, address=address)
                     db_session.add(new_buyer)
-                    new_address = Address(user_buyer_id=new_buyer.id, street=street, city=city)
-                    db_session.add(new_address)
-
                 db_session.commit()
                 return redirect(url_for('main.login'))
             return render_template('registration.html', error='User already exists.')

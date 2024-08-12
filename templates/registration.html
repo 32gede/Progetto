@@ -32,12 +32,12 @@
         </div>
         <div id="address-fields" style="display: none;">
             <div class="mb-3">
-                <label for="street" class="form-label">Street</label>
-                <input type="text" class="form-control" id="street" name="street">
+                <label for="city" class="form-label">Street</label>
+                <input type="text" class="form-control" id="city" name="city">
             </div>
             <div class="mb-3">
-                <label for="city" class="form-label">City</label>
-                <input type="text" class="form-control" id="city" name="city">
+                <label for="address" class="form-label">Address</label>
+                <input type="text" class="form-control" id="address" name="address">
             </div>
         </div>
         <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
@@ -48,17 +48,23 @@
 function toggleAddressFields() {
     const role = document.getElementById('role').value;
     const addressFields = document.getElementById('address-fields');
-    const street = document.getElementById('street');
+    const address = document.getElementById('address');
     const city = document.getElementById('city');
+
     if (role === 'buyer') {
         addressFields.style.display = 'block';
-        street.required = true;
+        address.required = true;
         city.required = true;
     } else {
         addressFields.style.display = 'none';
-        street.required = false;
+        address.required = false;
         city.required = false;
     }
 }
+
+// Initialize address fields visibility on page load based on the default role
+document.addEventListener('DOMContentLoaded', function() {
+    toggleAddressFields();
+});
 </script>
 {% endblock %}

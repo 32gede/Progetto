@@ -13,8 +13,19 @@
             <form method="POST" enctype="multipart/form-data">
                 <div class="mb-3">
                     <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" value="{{ current_user.email|e }}" readonly>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ current_user.email }}" readonly>
                 </div>
+
+                {% if current_user.role == 'buyer' %}
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Address</label>
+                        <input type="text" class="form-control" id="address" name="address" value="{{ current_user.address }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="city" class="form-label">City</label>
+                        <input type="text" class="form-control" id="city" name="city" value="{{ current_user.city }}">
+                    </div>
+                {% endif %}
                 <div class="mb-3">
                     <label for="avatar" class="form-label">Avatar</label>
                     <input type="file" class="form-control" id="avatar" name="avatar" onchange="previewAvatar(this)">

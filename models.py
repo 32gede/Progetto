@@ -75,16 +75,8 @@ class UserBuyer(Base):
     id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), primary_key=True)
     buyer_rating: Mapped[int] = mapped_column(Integer, nullable=False)
     user: Mapped["User"] = relationship("User", back_populates="buyer")
-    addresses: Mapped[list["Address"]] = relationship("Address", back_populates="buyer")
-
-class Address(Base):#indirizzo
-    __tablename__ = 'addresses'
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_buyer_id: Mapped[int] = mapped_column(Integer, ForeignKey('user_buyers.id'))
-    street: Mapped[str] = mapped_column(String, nullable=False)
     city: Mapped[str] = mapped_column(String, nullable=False)
-    buyer: Mapped["UserBuyer"] = relationship("UserBuyer", back_populates="addresses")
+    address: Mapped[str] = mapped_column(String, nullable=False)
 
 # -------------- Prodotti:
 
