@@ -181,29 +181,32 @@ def registration():
             is_html=True
         )
         avatar_choice = request.form['avatar_choice']
-        city = validate_and_sanitize(
+        print(avatar_choice)
+
+        if role == 'buyer':
+            city = validate_and_sanitize(
             request.form['city'],
             value_type='string',
             min_value=2,
             max_value=10,
             error_message='Invalid street.',
             is_html=True
-        )
-        address = validate_and_sanitize(
-            request.form['address'],
-            value_type='string',
-            min_value=2,
-            max_value=10,
-            error_message='Invalid city.',
-            is_html=True
-        )
+            )
+            address = validate_and_sanitize(
+                request.form['address'],
+                value_type='string',
+                min_value=2,
+                max_value=10,
+                error_message='Invalid city.',
+                is_html=True
+            )
         with get_db_session() as db_session:
             existing_user = db_session.query(User).filter_by(email=email).first()
             if not existing_user:
                 new_user = User(
                     email=email,
                     role=role,
-                    avatar=avatar_choice if avatar_choice else None
+                    avatar=avatar_choice
                 )
                 new_user.password_hash = password  # Hash the password
                 db_session.add(new_user)

@@ -22,13 +22,21 @@
             </select>
         </div>
         <div class="mb-3">
-            <label for="avatar_choice" class="form-label">Choose a Default Avatar</label>
-            <select class="form-select" id="avatar_choice" name="avatar_choice">
-                <option value="" selected>Use Gravatar</option>
-                <option value="default1.png">Default Avatar 1</option>
-                <option value="default2.png">Default Avatar 2</option>
-                <option value="default3.png">Default Avatar 3</option>
-            </select>
+            <label class="form-label">Choose a Default Avatar</label>
+            <div id="avatar-selection" class="d-flex flex-wrap">
+                <div class="avatar-option me-3 mb-3">
+                    <input type="radio" id="avatar1" name="avatar_choice" value="1yOOHEp8xJx7S_vbZmRe5K3nbia1XMVL6" checked>
+                    <label for="avatar1">
+                        <img src="https://drive.google.com/thumbnail?id=1yOOHEp8xJx7S_vbZmRe5K3nbia1XMVL6" alt="Avatar 1" class="img-thumbnail">
+                    </label>
+                </div>
+                <div class="avatar-option me-3 mb-3">
+                    <input type="radio" id="avatar2" name="avatar_choice" value="1A8BXdiu2XE7FaAz8NmtYTYL4zYyIRsD7">
+                    <label for="avatar2">
+                        <img src="https://drive.google.com/thumbnail?id=1A8BXdiu2XE7FaAz8NmtYTYL4zYyIRsD7" alt="Avatar 2" class="img-thumbnail">
+                    </label>
+                </div>
+            </div>
         </div>
         <div id="address-fields" style="display: none;">
             <div class="mb-3">
