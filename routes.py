@@ -473,7 +473,8 @@ def add_product():
                 quantity=quantity,
                 brand_id=brand_id,
                 category_id=category_id,
-                seller_id=current_user.id
+                seller_id=current_user.id,
+                image=id_immagine
             )
             db_session.add(new_product)
             try:
