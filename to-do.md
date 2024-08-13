@@ -74,6 +74,14 @@ Come segnare qualcosa di fatto:
 1. [x] **Aggiungere recensioni**: Consentire agli utenti di lasciare recensioni e valutazioni per i prodotti acquistati.
 2. [x] **Moderare recensioni**: Consentire ai venditori di visualizzare e moderare le recensioni sui propri prodotti.
 3. [ ] **Visualizzare valutazioni**: Visualizzare le valutazioni medie dei prodotti e consentire l'ordinamento dei prodotti in base alle valutazioni.
+4. [ ] **Risposte alle recensioni**: Consentire ai venditori di rispondere alle recensioni dei clienti per fornire feedback o risolvere eventuali problemi.
+5. [ ] **Recensioni anonime**: Implementare la possibilità per gli utenti di lasciare recensioni in forma anonima.
+6. [ ] **Segnalare recensioni**: Consentire agli utenti di segnalare recensioni inappropriate o fuorvianti.
+7. [ ] **Recensioni verificate**: Implementare un sistema per verificare che le recensioni siano state effettivamente scritte da clienti che hanno acquistato il prodotto.
+8. [ ] **Valutazioni per venditori**: Consentire agli acquirenti di valutare i venditori e lasciare feedback sulla loro esperienza complessiva.
+9. [ ] **Recensioni più utili**: Implementare un sistema per votare le recensioni più utili e visualizzare le recensioni più votate in cima all'elenco.
+10. [ ] **Recensioni con immagini**: Consentire agli utenti di aggiungere immagini alle recensioni per mostrare il prodotto in uso.
+11. [ ] **Problema rimozione recensioni**: Problema quando c'è solo una recensione
 
 ## Design del Database
 
