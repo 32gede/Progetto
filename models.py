@@ -90,6 +90,7 @@ class Product(Base):
     description: Mapped[str] = mapped_column(String(255), nullable=True)
     price: Mapped[float] = mapped_column(Float, nullable=False)
     quantity: Mapped[int] = mapped_column(Integer, nullable=False)
+    image: Mapped[bytes] = mapped_column(String(255), nullable=True)
 
     brand_id: Mapped[int] = mapped_column(Integer, ForeignKey('brands.id'), nullable=True)
     brand: Mapped["Brand"] = relationship("Brand", back_populates="products")

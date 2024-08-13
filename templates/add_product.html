@@ -1,4 +1,3 @@
-<!-- templates/add_product.html -->
 {% extends "base.html" %}
 
 {% block title %}Add Product - E-commerce{% endblock %}
@@ -15,7 +14,7 @@
             </div>
         {% endif %}
     {% endwith %}
-    <form method="POST" onsubmit="return validateForm()">
+    <form method="POST" action="{{ url_for('main.add_product') }}" enctype="multipart/form-data" onsubmit="return validateForm()">
         <div class="mb-3">
             <label for="name">Product Name:</label>
             <input type="text" id="name" name="name" required>
@@ -28,13 +27,13 @@
             <label for="price" class="form-label">Price:</label>
             <input type="number" class="form-control" id="price" name="price" min="0.01" max="1000000" step="0.01" required aria-describedby="priceHelp">
             <div id="priceHelp" class="form-text">Enter a price between $0.01 and $1,000,000.</div>
-            <div id="price-error" class="invalid-feedback" style="display: none;">Please enter a valid price between $0.01 and $1,000,000.</div>
+            <div id="price-error" class="invalid-feedback d-none">Please enter a valid price between $0.01 and $1,000,000.</div>
         </div>
         <div class="mb-3">
             <label for="quantity" class="form-label">Quantity:</label>
             <input type="number" class="form-control" id="quantity" name="quantity" min="1" max="1000000" required aria-describedby="quantityHelp">
             <div id="quantityHelp" class="form-text">Enter a quantity between 1 and 1,000,000.</div>
-            <div id="quantity-error" class="invalid-feedback" style="display: none;">Please enter a valid quantity between 1 and 1,000,000.</div>
+            <div id="quantity-error" class="invalid-feedback d-none">Please enter a valid quantity between 1 and 1,000,000.</div>
         </div>
         <div class="form-group">
             <label for="brand_id">Brand</label>
@@ -63,6 +62,13 @@
         <div class="form-group" id="new_category_name_group" style="display: none;">
             <label for="new_category_name">New Category Name</label>
             <input type="text" class="form-control" id="new_category_name" name="new_category_name">
+        </div>
+        <div class="mb-3">
+            <label for="image" class="form-label">Image:</label>
+            <input type="file" class="form-control" id="image" name="image" accept="image/*" onchange="previewAvatar(this)">
+        </div>
+        <div class="mb-3">
+            <img id="avatar-preview" src="{{ current_user.gravatar(150) }}" alt="Avatar" class="img-thumbnail" width="50">
         </div>
         <div>
             <button type="submit" class="btn btn-primary">Add Product</button>
@@ -102,9 +108,11 @@ document.addEventListener('DOMContentLoaded', function() {
     priceInput.addEventListener('input', function() {
         var price = parseFloat(priceInput.value);
         if (isNaN(price) || price < 0.01 || price > 1000000) {
-            priceError.style.display = 'block';
+            priceError.classList.remove('d-none');
+            priceError.classList.add('d-block');
         } else {
-            priceError.style.display = 'none';
+            priceError.classList.remove('d-block');
+            priceError.classList.add('d-none');
         }
     });
 
@@ -113,9 +121,11 @@ document.addEventListener('DOMContentLoaded', function() {
     quantityInput.addEventListener('input', function() {
         var quantity = parseInt(quantityInput.value);
         if (isNaN(quantity) || quantity < 1 || quantity > 1000000) {
-            quantityError.style.display = 'block';
+            quantityError.classList.remove('d-none');
+            quantityError.classList.add('d-block');
         } else {
-            quantityError.style.display = 'none';
+            quantityError.classList.remove('d-block');
+            quantityError.classList.add('d-none');
         }
     });
 });
@@ -125,7 +135,8 @@ function validateForm() {
     var priceError = document.getElementById('price-error');
     var price = parseFloat(priceInput.value);
     if (isNaN(price) || price < 0.01 || price > 1000000) {
-        priceError.style.display = 'block';
+        priceError.classList.remove('d-none');
+        priceError.classList.add('d-block');
         return false;
     }
 
@@ -133,11 +144,30 @@ function validateForm() {
     var quantityError = document.getElementById('quantity-error');
     var quantity = parseInt(quantityInput.value);
     if (isNaN(quantity) || quantity < 1 || quantity > 1000000) {
-        quantityError.style.display = 'block';
+        quantityError.classList.remove('d-none');
+        quantityError.classList.add('d-block');
         return false;
     }
 
     return true;
+}
+
+function previewAvatar(input) {
+    var file = input.files[0];
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById('avatar-preview').src = e.target.result;
+    }
+    reader.readAsDataURL(file);
+}
+
+function previewDefaultAvatar(select) {
+    var avatar = select.value;
+    if (avatar) {
+        document.getElementById('avatar-preview').src = "{{ url_for('static', filename='avatars/') }}" + avatar;
+    } else {
+        document.getElementById('avatar-preview').src = "{{ current_user.gravatar(150) }}";
+    }
 }
 </script>
 {% endblock %}

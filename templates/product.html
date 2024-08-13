@@ -9,40 +9,45 @@
         <a href="{% if (current_user.role) == 'seller' %}{{ url_for('main.view_products_seller') }}{% else %}{{ url_for('main.view_products_buyer') }}{% endif %}" class="btn btn-secondary">Back to Products</a>
     </div>
 
-    <div class="product-details">
-        <p>{{ product.description }}</p>
-        <p><strong>Price:</strong> ${{ product.price }}</p>
-        <p><strong>Seller:</strong> {{ product.seller.user.email }}</p>
-        {% if product.seller.seller_rating != 0 %}
-            <p><strong>Rating:</strong> {{ product.seller.seller_rating }}</p>
-        {% else %}
-            <p class="text-danger">This seller has no sales</p>
-        {% endif %}
-        <p>
-            {% if product.quantity == 0 %}
-                <span class="text-danger">Sold Out</span>
-            {% else %}
-                <strong>Quantity:</strong> {{ product.quantity }}
-            {% endif %}
-        </p>
-        <p><strong>Brand:</strong> {{ product.brand.name }}</p>
-        <p><strong>Category:</strong> {{ product.category.name }}</p>
-    </div>
-
-    {% if current_user.role == 'buyer' and product.quantity > 0 %}
-        <form method="POST" action="{{ url_for('main.add_to_cart', product_id=product.id) }}">
-            <div class="d-flex align-items-center mb-3">
-                <label for="quantity" class="form-label me-2">Quantity:</label>
-                <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ product.quantity }}" class="form-control me-2" required>
-                <button type="submit" class="btn btn-primary">Add to Cart</button>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="product-details">
+                <p>{{ product.description }}</p>
+                <p><strong>Price:</strong> ${{ product.price }}</p>
+                <p><strong>Seller:</strong> {{ product.seller.user.email }}</p>
+                {% if product.seller.seller_rating != 0 %}
+                    <p><strong>Rating:</strong> {{ product.seller.seller_rating }}</p>
+                {% else %}
+                    <p class="text-danger">This seller has no sales</p>
+                {% endif %}
+                <p>
+                    {% if product.quantity == 0 %}
+                        <span class="text-danger">Sold Out</span>
+                    {% else %}
+                        <strong>Quantity:</strong> {{ product.quantity }}
+                    {% endif %}
+                </p>
+                <p><strong>Brand:</strong> {{ product.brand.name }}</p>
+                <p><strong>Category:</strong> {{ product.category.name }}</p>
             </div>
-        </form>
-    {% endif %}
 
-    {% if current_user.role == 'seller' %}
-        <a href="{{ url_for('main.edit_product', product_id=product.id) }}" class="btn btn-primary mb-3">Edit Product</a>
-    {% endif %}
-
+            {% if current_user.role == 'buyer' and product.quantity > 0 %}
+                <form method="POST" action="{{ url_for('main.add_to_cart', product_id=product.id) }}">
+                    <div class="d-flex align-items-center mb-3">
+                        <label for="quantity" class="form-label me-2">Quantity:</label>
+                        <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ product.quantity }}" class="form-control me-2" required>
+                        <button type="submit" class="btn btn-primary">Add to Cart</button>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+        <div class="col-md-4">
+            <img src="https://drive.google.com/thumbnail?id={{ product.image }}" alt="image" class="img-thumbnail mb-3" width="200">
+        </div>
+        {% if current_user.role == 'seller' %}
+            <a href="{{ url_for('main.edit_product', product_id=product.id) }}" class="btn btn-primary btn-block">Edit Product</a>
+        {% endif %}
+    </div>
     <!-- Reviews Section -->
     <div class="mt-5">
         <div class="d-flex justify-content-between align-items-center">

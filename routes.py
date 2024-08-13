@@ -396,6 +396,18 @@ def add_product():
             error_message='Invalid new category name.',
             is_html=True
         )
+        file = request.files['image']
+        id_immagine = ''
+        if file:
+            if allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
+                id_immagine = carica_imm(file_path, filename)
+            else:
+                flash('Invalid file type.', 'error')
+        else:
+            id_immagine = '1Hv34hUD0h4XOi74ETwjRFkiFIuJA-RJz'
 
         with get_db_session() as db_session:
             if not name or not description:
@@ -459,7 +471,8 @@ def add_product():
                 quantity=quantity,
                 brand_id=brand_id,
                 category_id=category_id,
-                seller_id=current_user.id
+                seller_id=current_user.id,
+                image=id_immagine
             )
             db_session.add(new_product)
             db_session.commit()
