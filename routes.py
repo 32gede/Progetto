@@ -330,80 +330,30 @@ def view_product(product_id):
 def add_product():
     form = ProductForm()
 
-    with get_db_session() as db_session:
-        brands = db_session.query(Brand).all()
-        categories = db_session.query(Category).all()
-
-        form.brand_id.choices = [('new', 'Create new brand')] + [(b.id, b.name) for b in brands]
-        form.category_id.choices = [('new', 'Create new category')] + [(c.id, c.name) for c in categories]
-
     if form.validate_on_submit():
         name = form.name.data
         description = form.description.data
         price = form.price.data
         quantity = form.quantity.data
-        brand_id = form.brand_id.data
-        new_brand_name = form.new_brand_name.data
-        category_id = form.category_id.data
-        new_category_name = form.new_category_name.data
-
-        if not name or not description:
-            flash('Name and description are required.')
-            return redirect(url_for('main.add_product'))
-
-        if brand_id == 'new' and not new_brand_name:
-            flash('Brand name is required for new brand.')
-            return redirect(url_for('main.add_product'))
-
-        if category_id == 'new' and not new_category_name:
-            flash('Category name is required for new category.')
-            return redirect(url_for('main.add_product'))
+        brand_name = form.brand_id.data
+        category_name = form.category_id.data
 
         with get_db_session() as db_session:
-            if brand_id == 'new':
-                existing_brand = db_session.query(Brand).filter_by(name=new_brand_name).first()
-                if existing_brand:
-                    flash('Brand name already exists. Please provide a different name.')
-                    return redirect(url_for('main.add_product'))
-                new_brand = Brand(name=new_brand_name)
-                db_session.add(new_brand)
-                db_session.commit()
-                brand_id = new_brand.id
-            elif brand_id == 'new':
-                flash('Please provide a name for the new brand.')
-                return redirect(url_for('main.add_product'))
-
-            if category_id == 'new':
-                existing_category = db_session.query(Category).filter_by(name=new_category_name).first()
-                if existing_category:
-                    flash('Category name already exists. Please provide a different name.')
-                    return redirect(url_for('main.add_product'))
-                new_category = Category(name=new_category_name)
-                db_session.add(new_category)
-                db_session.commit()
-                category_id = new_category.id
-
-            try:
-                if brand_id and brand_id != 'new':
-                    brand_id = int(brand_id)
-                if category_id and category_id != 'new':
-                    category_id = int(category_id)
-            except ValueError:
-                flash('Invalid brand or category ID.')
-                return redirect(url_for('main.add_product'))
-
-            brand = db_session.query(Brand).filter_by(id=brand_id).first() if brand_id and brand_id != 'new' else None
-            category = db_session.query(Category).filter_by(
-                id=category_id).first() if category_id and category_id != 'new' else None
-
+            # Verifica se il brand esiste già, altrimenti crea un nuovo brand
+            brand = db_session.query(Brand).filter_by(name=brand_name).first()
             if not brand:
-                flash('Invalid brand ID.')
-                return redirect(url_for('main.add_product'))
+                brand = Brand(name=brand_name)
+                db_session.add(brand)
+                db_session.commit()
 
+            # Verifica se la categoria esiste già, altrimenti crea una nuova categoria
+            category = db_session.query(Category).filter_by(name=category_name).first()
             if not category:
-                flash('Invalid category ID.')
-                return redirect(url_for('main.add_product'))
+                category = Category(name=category_name)
+                db_session.add(category)
+                db_session.commit()
 
+            # Creazione del prodotto
             new_product = Product(
                 name=name,
                 description=description,

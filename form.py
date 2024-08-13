@@ -83,8 +83,11 @@ class ProductForm(FlaskForm):
         ValidateAndSanitize(value_type='int', min_value=1, max_value=1000000, error_message='Invalid quantity.',
                             is_html=False)
     ])
-    brand_id = SelectField('Brand')
-    category_id = SelectField('Category')
-    new_brand_name = StringField('New Brand Name')
-    new_category_name = StringField('New Category Name')
-    seller_id = SelectField('Seller')
+    brand_id = StringField('Brand', validators=[
+        ValidateAndSanitize(value_type='string', min_value=1, max_value=255, allowed_chars_pattern=r'^[a-zA-Z0-9 &]*$',
+                            error_message='Invalid brand name.', is_html=True)
+    ])
+    category_id = StringField('Category', validators=[
+        ValidateAndSanitize(value_type='string', min_value=1, max_value=255, allowed_chars_pattern=r'^[a-zA-Z0-9 &]*$',
+                            error_message='Invalid category name.', is_html=True)
+    ])

@@ -21,40 +21,36 @@
             <label for="name">Product Name:</label>
             {{ form.name(class="form-control", id="name") }}
         </div>
+
         <div class="mb-3">
             <label for="description">Description:</label>
             {{ form.description(class="form-control", id="description") }}
         </div>
+
         <div class="mb-3">
             <label for="price" class="form-label">Price:</label>
             {{ form.price(class="form-control", id="price", min="0.01", max="1000000", step="0.01") }}
             <div id="priceHelp" class="form-text">Enter a price between $0.01 and $1,000,000.</div>
             <div id="price-error" class="invalid-feedback" style="display: none;">Please enter a valid price between $0.01 and $1,000,000.</div>
         </div>
+
         <div class="mb-3">
             <label for="quantity" class="form-label">Quantity:</label>
             {{ form.quantity(class="form-control", id="quantity", min="1", max="1000000") }}
             <div id="quantityHelp" class="form-text">Enter a quantity between 1 and 1,000,000.</div>
             <div id="quantity-error" class="invalid-feedback" style="display: none;">Please enter a valid quantity between 1 and 1,000,000.</div>
         </div>
-        <div class="form-group">
-            <label for="brand_id">Brand</label>
-            {{ form.brand_id(class="form-control", id="brand_id", onchange="toggleNewBrandInput(this)") }}
-            <button type="button" class="btn btn-secondary mt-2" onclick="showNewBrandInput()">Create new brand</button>
-            <div class="form-group" id="new_brand_name_group" style="display: none;">
-                {{ form.new_brand_name.label(class="form-label", for="new_brand_name") }}
-                {{ form.new_brand_name(class="form-control", id="new_brand_name") }}
-            </div>
+
+        <div class="mb-3">
+            <label for="brand_id">Brand:</label>
+            {{ form.brand_id(class="form-control", id="brand_id") }}
         </div>
-        <div class="form-group">
-            <label for="category_id">Category</label>
-            {{ form.category_id(class="form-control", id="category_id", onchange="toggleNewCategoryInput(this)") }}
-            <button type="button" class="btn btn-secondary mt-2" onclick="showNewCategoryInput()">Create new category</button>
-            <div class="form-group" id="new_category_name_group" style="display: none;">
-                {{ form.new_category_name.label(class="form-label", for="new_category_name") }}
-                {{ form.new_category_name(class="form-control", id="new_category_name") }}
-            </div>
+
+        <div class="mb-3">
+            <label for="category_id">Category:</label>
+            {{ form.category_id(class="form-control", id="category_id") }}
         </div>
+
         <div>
             <button type="submit" class="btn btn-primary">Add Product</button>
         </div>
@@ -62,81 +58,81 @@
 </div>
 
 <script>
-function toggleNewBrandInput(select) {
-    var newBrandGroup = document.getElementById('new_brand_name_group');
-    if (select.value === 'new') {
-        newBrandGroup.style.display = 'block';
-    } else {
-        newBrandGroup.style.display = 'none';
-    }
-}
-
-function toggleNewCategoryInput(select) {
-    var newCategoryGroup = document.getElementById('new_category_name_group');
-    if (select.value === 'new') {
-        newCategoryGroup.style.display = 'block';
-    } else {
-        newCategoryGroup.style.display = 'none';
-    }
-}
-
-function showNewBrandInput() {
-    document.getElementById('new_brand_name_group').style.display = 'block';
-}
-
-function showNewCategoryInput() {
-    document.getElementById('new_category_name_group').style.display = 'block';
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    var alertMessage = document.getElementById('alert-message');
-    if (alertMessage) {
-        setTimeout(function() {
-            alertMessage.style.display = 'none';
-        }, 5000); // Hide after 5 seconds
+    function toggleNewBrandInput(select) {
+        var newBrandGroup = document.getElementById('new_brand_name_group');
+        if (select.value === 'new') {
+            newBrandGroup.style.display = 'block';
+        } else {
+            newBrandGroup.style.display = 'none';
+        }
     }
 
-    var priceInput = document.getElementById('price');
-    var priceError = document.getElementById('price-error');
-    priceInput.addEventListener('input', function() {
+    function toggleNewCategoryInput(select) {
+        var newCategoryGroup = document.getElementById('new_category_name_group');
+        if (select.value === 'new') {
+            newCategoryGroup.style.display = 'block';
+        } else {
+            newCategoryGroup.style.display = 'none';
+        }
+    }
+
+    function showNewBrandInput() {
+        document.getElementById('new_brand_name_group').style.display = 'block';
+    }
+
+    function showNewCategoryInput() {
+        document.getElementById('new_category_name_group').style.display = 'block';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var alertMessage = document.getElementById('alert-message');
+        if (alertMessage) {
+            setTimeout(function() {
+                alertMessage.style.display = 'none';
+            }, 5000); // Hide after 5 seconds
+        }
+
+        var priceInput = document.getElementById('price');
+        var priceError = document.getElementById('price-error');
+        priceInput.addEventListener('input', function() {
+            var price = parseFloat(priceInput.value);
+            if (isNaN(price) || price < 0.01 || price > 1000000) {
+                priceError.style.display = 'block';
+            } else {
+                priceError.style.display = 'none';
+            }
+        });
+
+        var quantityInput = document.getElementById('quantity');
+        var quantityError = document.getElementById('quantity-error');
+        quantityInput.addEventListener('input', function() {
+            var quantity = parseInt(quantityInput.value);
+            if (isNaN(quantity) || quantity < 1 || quantity > 1000000) {
+                quantityError.style.display = 'block';
+            } else {
+                quantityError.style.display = 'none';
+            }
+        });
+    });
+
+    function validateForm() {
+        var priceInput = document.getElementById('price');
+        var priceError = document.getElementById('price-error');
         var price = parseFloat(priceInput.value);
         if (isNaN(price) || price < 0.01 || price > 1000000) {
             priceError.style.display = 'block';
-        } else {
-            priceError.style.display = 'none';
+            return false;
         }
-    });
 
-    var quantityInput = document.getElementById('quantity');
-    var quantityError = document.getElementById('quantity-error');
-    quantityInput.addEventListener('input', function() {
+        var quantityInput = document.getElementById('quantity');
+        var quantityError = document.getElementById('quantity-error');
         var quantity = parseInt(quantityInput.value);
         if (isNaN(quantity) || quantity < 1 || quantity > 1000000) {
             quantityError.style.display = 'block';
-        } else {
-            quantityError.style.display = 'none';
+            return false;
         }
-    });
-});
 
-function validateForm() {
-    var priceInput = document.getElementById('price');
-    var priceError = document.getElementById('price-error');
-    var price = parseFloat(priceInput.value);
-    if (isNaN(price) || price < 0.01 || price > 1000000) {
-        priceError.style.display = 'block';
-        return false;
+        return true;
     }
-
-    var quantityInput = document.getElementById('quantity');
-    var quantityError = document.getElementById('quantity-error');
-    var quantity = parseInt(quantityInput.value);
-    if (isNaN(quantity) || quantity < 1 || quantity > 1000000) {
-        quantityError.style.display = 'block';
-        return false;
-    }
-
-    return true;
-}
 </script>
 {% endblock %}

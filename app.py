@@ -25,6 +25,8 @@ if not os.path.exists(UPLOAD_FOLDER):
 app.config['SESSION_TYPE'] = 'filesystem'
 
 # Abilita la protezione CSRF
+# Configura la chiave segreta
+# app.config['SECRET_KEY'] = 'your_secret_key_here'  # Cambia con una chiave segreta sicura e complessa
 # csrf = CSRFProtect(app)
 Session(app)
 
