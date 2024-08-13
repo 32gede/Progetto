@@ -523,7 +523,7 @@ def edit_product(product_id):
             product.brand_id = brand_id
             product.category_id = category_id
             file = request.files.get('image')
-            print('dentro')
+            print(file)
             if file:
                 print('dentro')
             if file:
