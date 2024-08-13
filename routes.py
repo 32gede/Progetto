@@ -8,7 +8,7 @@ import sys
 import bleach
 from bleach.sanitizer import ALLOWED_TAGS
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 from collegamento_drive import carica_imm
 # IMPORT FROM OTHER FILES #
 
