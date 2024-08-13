@@ -1,10 +1,12 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, DecimalField, IntegerField, SelectField, TextAreaField
-from wtforms.validators import DataRequired, NumberRange, ValidationError
+from wtforms.fields.simple import SubmitField
+from wtforms.validators import DataRequired, NumberRange, Length, Optional, ValidationError, Regexp
 import re
 import bleach
 from markupsafe import escape
 
+'''
 ALLOWED_TAGS = ['b', 'i', 'u', 'a', 'p', 'strong', 'em']  # Define allowed HTML tags for sanitization
 
 
@@ -59,35 +61,41 @@ class ValidateAndSanitize:
 
         else:
             raise ValidationError("Invalid value_type specified. Must be 'string', 'int', or 'float'.")
-
+'''
 
 class ProductForm(FlaskForm):
-    name = StringField('Product Name', validators=[
-        DataRequired(),
-        ValidateAndSanitize(value_type='string', min_value=1, max_value=255, error_message='Invalid product name.',
-                            is_html=True)
+    name = StringField('Name', validators=[
+        DataRequired(message='Product name is required.'),
+        Length(min=1, max=255, message='Product name must be between 1 and 255 characters.')
     ])
+
     description = TextAreaField('Description', validators=[
-        ValidateAndSanitize(value_type='string', min_value=1, max_value=255,
-                            error_message='Invalid product description.', is_html=True)
+        DataRequired(message='Product description is required.'),
+        Length(min=1, max=255, message='Product description must be between 1 and 255 characters.')
     ])
+
     price = DecimalField('Price', validators=[
-        DataRequired(),
-        NumberRange(min=0.01, max=1000000, message='Invalid price.'),
-        ValidateAndSanitize(value_type='float', min_value=0.01, max_value=1000000, error_message='Invalid price.',
-                            is_html=False)
+        DataRequired(message='Price is required.'),
+        NumberRange(min=0.01, max=1000000, message='Price must be between 0.01 and 1,000,000.')
     ])
+
     quantity = IntegerField('Quantity', validators=[
-        DataRequired(),
-        NumberRange(min=1, max=1000000, message='Invalid quantity.'),
-        ValidateAndSanitize(value_type='int', min_value=1, max_value=1000000, error_message='Invalid quantity.',
-                            is_html=False)
+        DataRequired(message='Quantity is required.'),
+        NumberRange(min=1, max=1000000, message='Quantity must be between 1 and 1,000,000.')
     ])
-    brand_id = StringField('Brand', validators=[
-        ValidateAndSanitize(value_type='string', min_value=1, max_value=255, allowed_chars_pattern=r'^[a-zA-Z0-9 &]*$',
-                            error_message='Invalid brand name.', is_html=True)
+
+    brand_id = SelectField('Brand', coerce=int, validators=[Optional()])
+    new_brand_name = StringField('New Brand Name', validators=[
+        Optional(),
+        Length(min=1, max=255, message='New brand name must be between 1 and 255 characters.'),
+        Regexp(r'^[a-zA-Z0-9 &]*$', message='Invalid new brand name.')
     ])
-    category_id = StringField('Category', validators=[
-        ValidateAndSanitize(value_type='string', min_value=1, max_value=255, allowed_chars_pattern=r'^[a-zA-Z0-9 &]*$',
-                            error_message='Invalid category name.', is_html=True)
+    create_new_brand = SubmitField('Create New Brand')
+
+    category_id = SelectField('Category', coerce=int, validators=[Optional()])
+    new_category_name = StringField('New Category Name', validators=[
+        Optional(),
+        Length(min=1, max=255, message='New category name must be between 1 and 255 characters.'),
+        Regexp(r'^[a-zA-Z0-9 &]*$', message='Invalid new category name.')
     ])
+    create_new_category = SubmitField('Create New Category')

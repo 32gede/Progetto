@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify, current_app
 from markupsafe import escape
+from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
 from functools import wraps
 from flask_login import login_user, login_required, current_user, logout_user
@@ -18,8 +19,11 @@ from search import search_products
 from form import ProductForm
 
 # DEFINE BLUEPRINT #
-
-
+import traceback
+import logging
+# Configura il logging
+logging.basicConfig()
+# logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 main_routes = Blueprint('main', __name__)
 
 UPLOAD_FOLDER = 'static/avatars'
@@ -328,168 +332,110 @@ def view_product(product_id):
 @login_required
 @role_required('seller')
 def add_product():
-    print('entra')
-    if request.method == 'POST':
-        name = validate_and_sanitize(
-            request.form['name'],
-            value_type='string',
-            min_value=1,
-            max_value=255,
-            error_message='Invalid product name.',
-            is_html=True
-        )
-        description = validate_and_sanitize(
-            request.form['description'],
-            value_type='string',
-            min_value=1,
-            max_value=255,
-            error_message='Invalid product description.',
-            is_html=True
-        )
-        price = validate_and_sanitize(
-            request.form['price'],
-            value_type='float',
-            min_value=0.01,
-            max_value=1000000,
-            error_message='Invalid price.',
-            is_html=True
-        )
-        quantity = validate_and_sanitize(
-            request.form['quantity'],
-            value_type='int',
-            min_value=1,
-            max_value=1000000,
-            error_message='Invalid quantity.',
-            is_html=True
-        )
-        brand_id = validate_and_sanitize(
-            request.form['brand_id'],
-            value_type='string',
-            min_value=0,
-            max_value=255,
-            allowed_chars_pattern=r'^[a-zA-Z0-9 &]*$',
-            error_message='Invalid brand name.',
-            is_html=True
-        )
-        new_brand_name = validate_and_sanitize(
-            request.form['new_brand_name'],
-            value_type='string',
-            min_value=0,
-            max_value=255,
-            allowed_chars_pattern=r'^[a-zA-Z0-9 &]*$',
-            error_message='Invalid new brand name.',
-            is_html=True
-        )
-        category_id = validate_and_sanitize(
-            request.form['category_id'],
-            value_type='string',
-            min_value=0,
-            max_value=255,
-            allowed_chars_pattern=r'^[a-zA-Z0-9 &]*$',
-            error_message='Invalid category name.',
-            is_html=True
-        )
-        new_category_name = validate_and_sanitize(
-            request.form['new_category_name'],
-            value_type='string',
-            min_value=0,
-            max_value=255,
-            allowed_chars_pattern=r'^[a-zA-Z0-9 &]*$',
-            error_message='Invalid new category name.',
-            is_html=True
-        )
-        file = request.files['image']
-        id_immagine = ''
-        if file:
-            if allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-                file.save(file_path)
-                id_immagine = carica_imm(file_path, filename)
-            else:
-                flash('Invalid file type.', 'error')
-        else:
-            id_immagine = '1Hv34hUD0h4XOi74ETwjRFkiFIuJA-RJz'
-
-        with get_db_session() as db_session:
-            if not name or not description:
-                flash('Name and description are required.')
-                return redirect(url_for('main.add_product'))
-
-            if not brand_id and not new_brand_name:
-                flash('Brand is required.')
-                return redirect(url_for('main.add_product'))
-
-            if not category_id and not new_category_name:
-                flash('Category is required.')
-                return redirect(url_for('main.add_product'))
-
-            if not brand_id and new_brand_name:
-                flash('Please select a brand from the list.')
-                return redirect(url_for('main.add_product'))
-
-            if not category_id and new_category_name:
-                flash('Please select a category from the list.')
-                return redirect(url_for('main.add_product'))
-
-            if not brand_id and not new_brand_name:
-                flash('Please provide a name for the new brand.')
-                return redirect(url_for('main.add_product'))
-
-            if not category_id and not new_category_name:
-                flash('Please provide a name for the new category.')
-                return redirect(url_for('main.add_product'))
-
-            if brand_id == 'new' and new_brand_name:
-                existing_brand = db_session.query(Brand).filter_by(name=new_brand_name).first()
-                if existing_brand:
-                    flash('Brand name already exists. Please provide a different name.')
-                    return redirect(url_for('main.add_product'))
-                new_brand = Brand(name=new_brand_name)
-                db_session.add(new_brand)
-                db_session.commit()
-                brand_id = new_brand.id
-            elif brand_id == 'new':
-                flash('Please provide a name for the new brand.')
-                return redirect(url_for('main.add_product'))
-
-            if category_id == 'new' and new_category_name:
-                existing_category = db_session.query(Category).filter_by(name=new_category_name).first()
-                if existing_category:
-                    flash('Category name already exists. Please provide a different name.')
-                    return redirect(url_for('main.add_product'))
-                new_category = Category(name=new_category_name)
-                db_session.add(new_category)
-                db_session.commit()
-                category_id = new_category.id
-            elif category_id == 'new':
-                flash('Please provide a name for the new category.')
-                return redirect(url_for('main.add_product'))
-
-            new_product = Product(
-                name=name,
-                description=description,
-                price=price,
-                quantity=quantity,
-                brand_id=brand_id,
-                category_id=category_id,
-                seller_id=current_user.id,
-                image=id_immagine
-            )
-            db_session.add(new_product)
-            try:
-                db_session.commit()
-                flash('Product added successfully.')
-                return redirect(url_for('main.view_products_seller'))
-            except Exception as e:
-                db_session.rollback()
-                flash(f'An error occurred while adding the product: {e}')
+    form = ProductForm()
 
     with get_db_session() as db_session:
-        brands = db_session.query(Brand).all()
-        categories = db_session.query(Category).all()
-        return render_template('add_product.html', brands=brands, categories=categories)
+        # Populate choices for brand and category
+        form.brand_id.choices = [(str(brand.id), brand.name) for brand in db_session.query(Brand).all()]
+        form.category_id.choices = [(str(category.id), category.name) for category in db_session.query(Category).all()]
+        form.brand_id.choices.insert(0, ('0', 'Create New Brand'))
+        form.category_id.choices.insert(0, ('0', 'Create New Category'))
 
+        if form.validate_on_submit():
+            # Handle brand creation
+            if form.brand_id.data == '0' and form.new_brand_name.data:
+                new_brand = Brand(name=form.new_brand_name.data)
+                db_session.add(new_brand)
+                db_session.commit()
+                brand_id = str(new_brand.id)
+            else:
+                brand_id = form.brand_id.data
+
+            # Handle category creation
+            if form.category_id.data == '0' and form.new_category_name.data:
+                new_category = Category(name=form.new_category_name.data)
+                db_session.add(new_category)
+                db_session.commit()
+                category_id = str(new_category.id)
+            else:
+                category_id = form.category_id.data
+
+            # Ensure valid IDs
+            if brand_id == '0' or category_id == '0':
+                flash('Invalid brand or category selection. Please try again.', 'error')
+                return redirect(url_for('main.add_product'))
+
+            # Create the product
+            new_product = Product(
+                name=form.name.data,
+                description=form.description.data,
+                price=form.price.data,
+                quantity=form.quantity.data,
+                brand_id=int(brand_id),
+                category_id=int(category_id),
+                seller_id=current_user.id
+            )
+            db_session.add(new_product)
+            db_session.commit()
+            flash('Product added successfully!', 'success')
+            return redirect(url_for('main.view_products_seller'))
+
+    return render_template('add_product.html', form=form)
+
+
+def get_or_create_brand(db_session, brand_name):
+    """Retrieve a brand by name or create it if it doesn't exist."""
+    brand = db_session.query(Brand).filter_by(name=brand_name).first()
+    if not brand:
+        brand = Brand(name=brand_name)
+        db_session.add(brand)
+        try:
+            db_session.commit()
+        except IntegrityError:
+            db_session.rollback()
+            brand = db_session.query(Brand).filter_by(name=brand_name).first()
+    return brand
+
+
+def get_or_create_category(db_session, category_name):
+    """Retrieve a category by name or create it if it doesn't exist."""
+    category = db_session.query(Category).filter_by(name=category_name).first()
+    if not category:
+        category = Category(name=category_name)
+        db_session.add(category)
+        try:
+            db_session.commit()
+        except IntegrityError:
+            db_session.rollback()
+            category = db_session.query(Category).filter_by(name=category_name).first()
+    return category
+
+
+@main_routes.route('/create_brand', methods=['POST'])
+@login_required
+@role_required('seller')
+def create_brand():
+    data = request.get_json()
+    brand_name = data.get('name')
+    if not brand_name:
+        return jsonify(success=False, error="Brand name is required"), 400
+
+    with get_db_session() as db_session:
+        brand = get_or_create_brand(db_session, brand_name)
+        return jsonify(success=True, brand_id=brand.id)
+
+@main_routes.route('/create_category', methods=['POST'])
+@login_required
+@role_required('seller')
+def create_category():
+    data = request.get_json()
+    category_name = data.get('name')
+    if not category_name:
+        return jsonify(success=False, error="Category name is required"), 400
+
+    with get_db_session() as db_session:
+        category = get_or_create_category(db_session, category_name)
+        return jsonify(success=True, category_id=category.id)
 
 @main_routes.route('/remove_product/<int:product_id>', methods=['POST'])
 @login_required
@@ -879,6 +825,7 @@ def edit_cart():
 @role_required('buyer')
 def order_history():
     with get_db_session() as db_session:
+        # Recupera gli ordini dell'utente
         orders = db_session.query(Order).filter_by(user_id=current_user.id).all()
 
         # Carica anche gli articoli per ciascun ordine

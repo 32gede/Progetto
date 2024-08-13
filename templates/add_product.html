@@ -1,4 +1,3 @@
-<!-- templates/add_product.html -->
 {% extends "base.html" %}
 
 {% block title %}Add Product - E-commerce{% endblock %}
@@ -13,163 +12,169 @@
                     <p>{{ message }}</p>
                 {% endfor %}
             </div>
-            <br>
         {% endif %}
     {% endwith %}
-    <form method="POST" enctype="multipart/form-data" onsubmit="return validateForm()" >
-        <div class="mb-3">
-            <label for="name">Product Name:</label>
-            <input type="text" id="name" name="name" required>
-        </div>
-        <div class="mb-3">
-            <label for="description">Description:</label>
-            <textarea id="description" name="description"></textarea>
-        </div>
-        <div class="mb-3">
-            <label for="price" class="form-label">Price:</label>
-            <input type="number" class="form-control" id="price" name="price" min="0.01" max="1000000" step="0.01" required aria-describedby="priceHelp">
-            <div id="priceHelp" class="form-text">Enter a price between $0.01 and $1,000,000.</div>
-            <div id="price-error" class="invalid-feedback" style="display: none;">Please enter a valid price between $0.01 and $1,000,000.</div>
-        </div>
-        <div class="mb-3">
-            <label for="quantity" class="form-label">Quantity:</label>
-            <input type="number" class="form-control" id="quantity" name="quantity" min="1" max="1000000" required aria-describedby="quantityHelp">
-            <div id="quantityHelp" class="form-text">Enter a quantity between 1 and 1,000,000.</div>
-            <div id="quantity-error" class="invalid-feedback" style="display: none;">Please enter a valid quantity between 1 and 1,000,000.</div>
-        </div>
+    <form method="POST" action="{{ url_for('main.add_product') }}">
+        {{ form.hidden_tag() }}
+
         <div class="form-group">
-            <label for="brand_id">Brand</label>
-            <select class="form-control" id="brand_id" name="brand_id" onchange="toggleNewBrandInput(this)">
-                <option value="" disabled selected>Select a brand</option>
-                {% for brand in brands %}
-                    <option value="{{ brand.id }}">{{ brand.name }}</option>
-                {% endfor %}
-                <option value="new">Create new brand</option>
-            </select>
+            {{ form.name.label }}
+            {{ form.name(class_="form-control") }}
+            {% for error in form.name.errors %}
+                <div class="text-danger">{{ error }}</div>
+            {% endfor %}
         </div>
-        <div class="form-group" id="new_brand_name_group" style="display: none;">
-            <label for="new_brand_name">New Brand Name</label>
-            <input type="text" class="form-control" id="new_brand_name" name="new_brand_name">
-        </div>
+
         <div class="form-group">
-            <label for="category_id">Category</label>
-            <select class="form-control" id="category_id" name="category_id" onchange="toggleNewCategoryInput(this)">
-                <option value="" disabled selected>Select a category</option>
-                {% for category in categories %}
-                    <option value="{{ category.id }}">{{ category.name }}</option>
+            {{ form.description.label }}
+            {{ form.description(class_="form-control") }}
+            {% for error in form.description.errors %}
+                <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.price.label }}
+            {{ form.price(class_="form-control") }}
+            {% for error in form.price.errors %}
+                <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.quantity.label }}
+            {{ form.quantity(class_="form-control") }}
+            {% for error in form.quantity.errors %}
+                <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.brand_id.label }}
+            <div class="input-group">
+                {{ form.brand_id(class_="form-control", onchange="toggleNewBrandInput(this)") }}
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-outline-secondary" onclick="createNewBrand()">+</button>
+                </div>
+            </div>
+            {% for error in form.brand_id.errors %}
+                <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+            <div id="new_brand_name_group" style="display:none;">
+                {{ form.new_brand_name.label }}
+                {{ form.new_brand_name(class_="form-control") }}
+                {% for error in form.new_brand_name.errors %}
+                    <div class="text-danger">{{ error }}</div>
                 {% endfor %}
-                <option value="new">Create new category</option>
-            </select>
+            </div>
         </div>
-        <div class="form-group" id="new_category_name_group" style="display: none;">
-            <label for="new_category_name">New Category Name</label>
-            <input type="text" class="form-control" id="new_category_name" name="new_category_name">
+
+        <div class="form-group">
+            {{ form.category_id.label }}
+            <div class="input-group">
+                {{ form.category_id(class_="form-control", onchange="toggleNewCategoryInput(this)") }}
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-outline-secondary" onclick="createNewCategory()">+</button>
+                </div>
+            </div>
+            {% for error in form.category_id.errors %}
+                <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+            <div id="new_category_name_group" style="display:none;">
+                {{ form.new_category_name.label }}
+                {{ form.new_category_name(class_="form-control") }}
+                {% for error in form.new_category_name.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
         </div>
-        <div class="mb-3">
-            <label for="image" class="form-label">Image:</label>
-            <input type="file" class="form-control" name="image" id="image" onchange="previewAvatar(this)">
-        </div>
-        <div class="mb-3">
-            <img id="avatar-preview" src="{{ current_user.gravatar(150) }}" alt="Avatar" class="img-thumbnail" width="50">
-        </div>
-        <div>
-            <button type="submit" class="btn btn-primary">Add Product</button>
-        </div>
+
+        <button type="submit" class="btn btn-primary">Add Product</button>
     </form>
 </div>
+{% endblock %}
 
+{% block custom_js %}
 <script>
-function toggleNewBrandInput(select) {
-    var newBrandGroup = document.getElementById('new_brand_name_group');
-    if (select.value === 'new') {
-        newBrandGroup.style.display = 'block';
-    } else {
-        newBrandGroup.style.display = 'none';
-    }
-}
+    document.addEventListener('DOMContentLoaded', function () {
+        function toggleNewBrandInput(select) {
+            var newBrandGroup = document.getElementById('new_brand_name_group');
+            if (select.value === '0') {
+                newBrandGroup.style.display = 'block';
+            } else {
+                newBrandGroup.style.display = 'none';
+            }
+        }
 
-function toggleNewCategoryInput(select) {
-    var newCategoryGroup = document.getElementById('new_category_name_group');
-    if (select.value === 'new') {
-        newCategoryGroup.style.display = 'block';
-    } else {
-        newCategoryGroup.style.display = 'none';
-    }
-}
+        function toggleNewCategoryInput(select) {
+            var newCategoryGroup = document.getElementById('new_category_name_group');
+            if (select.value === '0') {
+                newCategoryGroup.style.display = 'block';
+            } else {
+                newCategoryGroup.style.display = 'none';
+            }
+        }
 
-document.addEventListener('DOMContentLoaded', function() {
-    var alertMessage = document.getElementById('alert-message');
-    if (alertMessage) {
-        setTimeout(function() {
-            alertMessage.style.display = 'none';
-        }, 5000); // Hide after 5 seconds
-    }
+        function createNewBrand() {
+            var brandName = prompt("Enter new brand name:");
+            if (brandName) {
+                fetch("{{ url_for('main.create_brand') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify({ name: brandName })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Brand created successfully!");
+                        location.reload();
+                    } else {
+                        alert("Error creating brand: " + data.error);
+                    }
+                });
+            }
+        }
 
-    var priceInput = document.getElementById('price');
-    var priceError = document.getElementById('price-error');
-    priceInput.addEventListener('input', function() {
-        var price = parseFloat(priceInput.value);
-        if (isNaN(price) || price < 0.01 || price > 1000000) {
-            priceError.classList.remove('d-none');
-            priceError.classList.add('d-block');
-        } else {
-            priceError.classList.remove('d-block');
-            priceError.classList.add('d-none');
+        function createNewCategory() {
+            var categoryName = prompt("Enter new category name:");
+            if (categoryName) {
+                fetch("{{ url_for('main.create_category') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify({ name: categoryName })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Category created successfully!");
+                        location.reload();
+                    } else {
+                        alert("Error creating category: " + data.error);
+                    }
+                });
+            }
+        }
+
+        var brandSelect = document.querySelector('select[name="brand_id"]');
+        var categorySelect = document.querySelector('select[name="category_id"]');
+
+        if (brandSelect) {
+            brandSelect.addEventListener('change', function () {
+                toggleNewBrandInput(this);
+            });
+        }
+
+        if (categorySelect) {
+            categorySelect.addEventListener('change', function () {
+                toggleNewCategoryInput(this);
+            });
         }
     });
-
-    var quantityInput = document.getElementById('quantity');
-    var quantityError = document.getElementById('quantity-error');
-    quantityInput.addEventListener('input', function() {
-        var quantity = parseInt(quantityInput.value);
-        if (isNaN(quantity) || quantity < 1 || quantity > 1000000) {
-            quantityError.classList.remove('d-none');
-            quantityError.classList.add('d-block');
-        } else {
-            quantityError.classList.remove('d-block');
-            quantityError.classList.add('d-none');
-        }
-    });
-});
-
-function validateForm() {
-    var priceInput = document.getElementById('price');
-    var priceError = document.getElementById('price-error');
-    var price = parseFloat(priceInput.value);
-    if (isNaN(price) || price < 0.01 || price > 1000000) {
-        priceError.classList.remove('d-none');
-        priceError.classList.add('d-block');
-        return false;
-    }
-
-    var quantityInput = document.getElementById('quantity');
-    var quantityError = document.getElementById('quantity-error');
-    var quantity = parseInt(quantityInput.value);
-    if (isNaN(quantity) || quantity < 1 || quantity > 1000000) {
-        quantityError.classList.remove('d-none');
-        quantityError.classList.add('d-block');
-        return false;
-    }
-
-    return true;
-}
-
-function previewAvatar(input) {
-    var file = input.files[0];
-    var reader = new FileReader();
-    reader.onload = function(e) {
-        document.getElementById('avatar-preview').src = e.target.result;
-    }
-    reader.readAsDataURL(file);
-}
-
-function previewDefaultAvatar(select) {
-    var avatar = select.value;
-    if (avatar) {
-        document.getElementById('avatar-preview').src = "{{ url_for('static', filename='avatars/') }}" + avatar;
-    } else {
-        document.getElementById('avatar-preview').src = "{{ current_user.gravatar(150) }}";
-    }
-}
 </script>
 {% endblock %}
