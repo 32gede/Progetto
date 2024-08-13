@@ -27,7 +27,7 @@
             <label for="brand_id" class="form-label">Brand</label>
             <select class="form-control" id="brand_id" name="brand_id" required>
                 {% for brand in brands %}
-                    <option value="{{ brand.id|e }}" {% if (brand.id|e) == (product.brand_id|e) %}selected{% endif %}>{{ brand.name|e }}</option>
+                    <option value="{{ brand.id }}" {% if (brand.id) == (product.brand_id) %}selected{% endif %}>{{ brand.name}}</option>
                 {% endfor %}
             </select>
         </div>
@@ -35,11 +35,43 @@
             <label for="category_id" class="form-label">Category</label>
             <select class="form-control" id="category_id" name="category_id" required>
                 {% for category in categories %}
-                    <option value="{{ category.id|e }}" {% if (category.id|e) == (product.category_id|e) %}selected{% endif %}>{{ category.name|e }}</option>
+                    <option value="{{ category.id }}" {% if (category.id) == (product.category_id) %}selected{% endif %}>{{ category.name }}</option>
                 {% endfor %}
             </select>
         </div>
-        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <div class="mb-3">
+            <label for="image" class="form-label">Image:</label>
+            <input type="file" class="form-control" id="image" name="image" onchange="previewAvatar(this)">
+        </div>
+        <div class="mb-3">
+            {% if product.image %}
+                <img id="avatar-preview" src="https://drive.google.com/thumbnail?id={{ product.image }}" alt="Avatar" class="img-thumbnail" width="100">
+            {% else %}
+                <img id="avatar-preview" src="{{ current_user.gravatar(150) }}" alt="Avatar" class="img-thumbnail" width="100">
+            {% endif %}
+        </div>
+    <button type="submit" class="btn btn-primary">Save Changes</button>
     </form>
 </div>
 {% endblock %}
+
+<script>
+function previewAvatar(input) {
+    var file = input.files[0];
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById('avatar-preview').src = e.target.result;
+    }
+    reader.readAsDataURL(file);
+}
+
+function previewDefaultAvatar(select) {
+    var avatar = select.value;
+    if (avatar) {
+        document.getElementById('avatar-preview').src = "{{ url_for('static', filename='avatars/') }}" + avatar;
+    } else {
+        document.getElementById('avatar-preview').src = "{{ current_user.gravatar(150) }}";
+    }
+}
+</script>
+

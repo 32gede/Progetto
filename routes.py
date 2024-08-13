@@ -522,6 +522,20 @@ def edit_product(product_id):
             product.quantity = quantity
             product.brand_id = brand_id
             product.category_id = category_id
+            file = request.files.get('image')
+            if file:
+                print('dentro')
+                if allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                    try:
+                        file.save(file_path)
+                        product.image = carica_imm(file_path, filename)
+                        db_session.commit()  # Ensure commit here to save avatar changes
+                        flash('Your profile has been updated.', 'success')
+                    except Exception as e:
+                        db_session.rollback()
+
             db_session.commit()
             return redirect(url_for('main.view_product', product_id=product.id))
 
