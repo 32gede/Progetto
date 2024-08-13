@@ -1,5 +1,5 @@
 __pycache__/app.cpython-312.pyc
 flask_session
 static
-credential.json
+/credential.json
 uploads
