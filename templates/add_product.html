@@ -1,4 +1,3 @@
-<!-- templates/add_product.html -->
 {% extends "base.html" %}
 
 {% block title %}Add Product - E-commerce{% endblock %}
@@ -16,53 +15,45 @@
         {% endif %}
     {% endwith %}
     <form method="POST" onsubmit="return validateForm()">
+        {{ form.hidden_tag() }}  <!-- Include the CSRF token here -->
+
         <div class="mb-3">
             <label for="name">Product Name:</label>
-            <input type="text" id="name" name="name" required>
+            {{ form.name(class="form-control", id="name") }}
         </div>
         <div class="mb-3">
             <label for="description">Description:</label>
-            <textarea id="description" name="description"></textarea>
+            {{ form.description(class="form-control", id="description") }}
         </div>
         <div class="mb-3">
             <label for="price" class="form-label">Price:</label>
-            <input type="number" class="form-control" id="price" name="price" min="0.01" max="1000000" step="0.01" required aria-describedby="priceHelp">
+            {{ form.price(class="form-control", id="price", min="0.01", max="1000000", step="0.01") }}
             <div id="priceHelp" class="form-text">Enter a price between $0.01 and $1,000,000.</div>
             <div id="price-error" class="invalid-feedback" style="display: none;">Please enter a valid price between $0.01 and $1,000,000.</div>
         </div>
         <div class="mb-3">
             <label for="quantity" class="form-label">Quantity:</label>
-            <input type="number" class="form-control" id="quantity" name="quantity" min="1" max="1000000" required aria-describedby="quantityHelp">
+            {{ form.quantity(class="form-control", id="quantity", min="1", max="1000000") }}
             <div id="quantityHelp" class="form-text">Enter a quantity between 1 and 1,000,000.</div>
             <div id="quantity-error" class="invalid-feedback" style="display: none;">Please enter a valid quantity between 1 and 1,000,000.</div>
         </div>
         <div class="form-group">
             <label for="brand_id">Brand</label>
-            <select class="form-control" id="brand_id" name="brand_id" onchange="toggleNewBrandInput(this)">
-                <option value="" disabled selected>Select a brand</option>
-                {% for brand in brands %}
-                    <option value="{{ brand.id|e }}">{{ brand.name|e }}</option>
-                {% endfor %}
-                <option value="new">Create new brand</option>
-            </select>
-        </div>
-        <div class="form-group" id="new_brand_name_group" style="display: none;">
-            <label for="new_brand_name">New Brand Name</label>
-            <input type="text" class="form-control" id="new_brand_name" name="new_brand_name">
+            {{ form.brand_id(class="form-control", id="brand_id", onchange="toggleNewBrandInput(this)") }}
+            <button type="button" class="btn btn-secondary mt-2" onclick="showNewBrandInput()">Create new brand</button>
+            <div class="form-group" id="new_brand_name_group" style="display: none;">
+                {{ form.new_brand_name.label(class="form-label", for="new_brand_name") }}
+                {{ form.new_brand_name(class="form-control", id="new_brand_name") }}
+            </div>
         </div>
         <div class="form-group">
             <label for="category_id">Category</label>
-            <select class="form-control" id="category_id" name="category_id" onchange="toggleNewCategoryInput(this)">
-                <option value="" disabled selected>Select a category</option>
-                {% for category in categories %}
-                    <option value="{{ category.id|e }}">{{ category.name|e }}</option>
-                {% endfor %}
-                <option value="new">Create new category</option>
-            </select>
-        </div>
-        <div class="form-group" id="new_category_name_group" style="display: none;">
-            <label for="new_category_name">New Category Name</label>
-            <input type="text" class="form-control" id="new_category_name" name="new_category_name">
+            {{ form.category_id(class="form-control", id="category_id", onchange="toggleNewCategoryInput(this)") }}
+            <button type="button" class="btn btn-secondary mt-2" onclick="showNewCategoryInput()">Create new category</button>
+            <div class="form-group" id="new_category_name_group" style="display: none;">
+                {{ form.new_category_name.label(class="form-label", for="new_category_name") }}
+                {{ form.new_category_name(class="form-control", id="new_category_name") }}
+            </div>
         </div>
         <div>
             <button type="submit" class="btn btn-primary">Add Product</button>
@@ -87,6 +78,14 @@ function toggleNewCategoryInput(select) {
     } else {
         newCategoryGroup.style.display = 'none';
     }
+}
+
+function showNewBrandInput() {
+    document.getElementById('new_brand_name_group').style.display = 'block';
+}
+
+function showNewCategoryInput() {
+    document.getElementById('new_category_name_group').style.display = 'block';
 }
 
 document.addEventListener('DOMContentLoaded', function() {

@@ -15,6 +15,7 @@ from collegamento_drive import carica_imm
 from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem
 from database import get_db_session
 from search import search_products
+from form import ProductForm
 
 # DEFINE BLUEPRINT #
 
@@ -327,106 +328,39 @@ def view_product(product_id):
 @login_required
 @role_required('seller')
 def add_product():
-    if request.method == 'POST':
-        name = validate_and_sanitize(
-            request.form['name'],
-            value_type='string',
-            min_value=1,
-            max_value=255,
-            error_message='Invalid product name.',
-            is_html=True
-        )
-        description = validate_and_sanitize(
-            request.form['description'],
-            value_type='string',
-            min_value=1,
-            max_value=255,
-            error_message='Invalid product description.',
-            is_html=True
-        )
-        price = validate_and_sanitize(
-            request.form['price'],
-            value_type='float',
-            min_value=0.01,
-            max_value=1000000,
-            error_message='Invalid price.',
-            is_html=True
-        )
-        quantity = validate_and_sanitize(
-            request.form['quantity'],
-            value_type='int',
-            min_value=1,
-            max_value=1000000,
-            error_message='Invalid quantity.',
-            is_html=True
-        )
-        brand_id = validate_and_sanitize(
-            request.form['brand_id'],
-            value_type='string',
-            min_value=0,
-            max_value=255,
-            allowed_chars_pattern=r'^[a-zA-Z0-9 &]*$',
-            error_message='Invalid brand name.',
-            is_html=True
-        )
-        new_brand_name = validate_and_sanitize(
-            request.form['new_brand_name'],
-            value_type='string',
-            min_value=0,
-            max_value=255,
-            allowed_chars_pattern=r'^[a-zA-Z0-9 &]*$',
-            error_message='Invalid new brand name.',
-            is_html=True
-        )
-        category_id = validate_and_sanitize(
-            request.form['category_id'],
-            value_type='string',
-            min_value=0,
-            max_value=255,
-            allowed_chars_pattern=r'^[a-zA-Z0-9 &]*$',
-            error_message='Invalid category name.',
-            is_html=True
-        )
-        new_category_name = validate_and_sanitize(
-            request.form['new_category_name'],
-            value_type='string',
-            min_value=0,
-            max_value=255,
-            allowed_chars_pattern=r'^[a-zA-Z0-9 &]*$',
-            error_message='Invalid new category name.',
-            is_html=True
-        )
+    form = ProductForm()
+
+    with get_db_session() as db_session:
+        brands = db_session.query(Brand).all()
+        categories = db_session.query(Category).all()
+
+        form.brand_id.choices = [('new', 'Create new brand')] + [(b.id, b.name) for b in brands]
+        form.category_id.choices = [('new', 'Create new category')] + [(c.id, c.name) for c in categories]
+
+    if form.validate_on_submit():
+        name = form.name.data
+        description = form.description.data
+        price = form.price.data
+        quantity = form.quantity.data
+        brand_id = form.brand_id.data
+        new_brand_name = form.new_brand_name.data
+        category_id = form.category_id.data
+        new_category_name = form.new_category_name.data
+
+        if not name or not description:
+            flash('Name and description are required.')
+            return redirect(url_for('main.add_product'))
+
+        if brand_id == 'new' and not new_brand_name:
+            flash('Brand name is required for new brand.')
+            return redirect(url_for('main.add_product'))
+
+        if category_id == 'new' and not new_category_name:
+            flash('Category name is required for new category.')
+            return redirect(url_for('main.add_product'))
 
         with get_db_session() as db_session:
-            if not name or not description:
-                flash('Name and description are required.')
-                return redirect(url_for('main.add_product'))
-
-            if not brand_id and not new_brand_name:
-                flash('Brand is required.')
-                return redirect(url_for('main.add_product'))
-
-            if not category_id and not new_category_name:
-                flash('Category is required.')
-                return redirect(url_for('main.add_product'))
-
-            if not brand_id and new_brand_name:
-                flash('Please select a brand from the list.')
-                return redirect(url_for('main.add_product'))
-
-            if not category_id and new_category_name:
-                flash('Please select a category from the list.')
-                return redirect(url_for('main.add_product'))
-
-            if not brand_id and not new_brand_name:
-                flash('Please provide a name for the new brand.')
-                return redirect(url_for('main.add_product'))
-
-            if not category_id and not new_category_name:
-                flash('Please provide a name for the new category.')
-                return redirect(url_for('main.add_product'))
-
-            if brand_id == 'new' and new_brand_name:
+            if brand_id == 'new':
                 existing_brand = db_session.query(Brand).filter_by(name=new_brand_name).first()
                 if existing_brand:
                     flash('Brand name already exists. Please provide a different name.')
@@ -439,7 +373,7 @@ def add_product():
                 flash('Please provide a name for the new brand.')
                 return redirect(url_for('main.add_product'))
 
-            if category_id == 'new' and new_category_name:
+            if category_id == 'new':
                 existing_category = db_session.query(Category).filter_by(name=new_category_name).first()
                 if existing_category:
                     flash('Category name already exists. Please provide a different name.')
@@ -448,8 +382,26 @@ def add_product():
                 db_session.add(new_category)
                 db_session.commit()
                 category_id = new_category.id
-            elif category_id == 'new':
-                flash('Please provide a name for the new category.')
+
+            try:
+                if brand_id and brand_id != 'new':
+                    brand_id = int(brand_id)
+                if category_id and category_id != 'new':
+                    category_id = int(category_id)
+            except ValueError:
+                flash('Invalid brand or category ID.')
+                return redirect(url_for('main.add_product'))
+
+            brand = db_session.query(Brand).filter_by(id=brand_id).first() if brand_id and brand_id != 'new' else None
+            category = db_session.query(Category).filter_by(
+                id=category_id).first() if category_id and category_id != 'new' else None
+
+            if not brand:
+                flash('Invalid brand ID.')
+                return redirect(url_for('main.add_product'))
+
+            if not category:
+                flash('Invalid category ID.')
                 return redirect(url_for('main.add_product'))
 
             new_product = Product(
@@ -457,18 +409,20 @@ def add_product():
                 description=description,
                 price=price,
                 quantity=quantity,
-                brand_id=brand_id,
-                category_id=category_id,
+                brand_id=brand.id,
+                category_id=category.id,
                 seller_id=current_user.id
             )
             db_session.add(new_product)
-            db_session.commit()
-            return redirect(url_for('main.view_products_seller'))
+            try:
+                db_session.commit()
+                flash('Product added successfully.')
+                return redirect(url_for('main.view_products_seller'))
+            except Exception as e:
+                db_session.rollback()
+                flash(f'An error occurred while adding the product: {e}')
 
-    with get_db_session() as db_session:
-        brands = db_session.query(Brand).all()
-        categories = db_session.query(Category).all()
-        return render_template('add_product.html', brands=brands, categories=categories)
+    return render_template('add_product.html', form=form)
 
 
 @main_routes.route('/remove_product/<int:product_id>', methods=['POST'])
@@ -859,6 +813,7 @@ def edit_cart():
 @role_required('buyer')
 def order_history():
     with get_db_session() as db_session:
+        # Recupera gli ordini dell'utente
         orders = db_session.query(Order).filter_by(user_id=current_user.id).all()
 
         # Carica anche gli articoli per ciascun ordine
@@ -867,11 +822,13 @@ def order_history():
 
         # Supponiamo che il tempo di spedizione stimato sia di 5 giorni lavorativi
         estimated_delivery_days = 5
+
         return render_template('order_history.html', orders=orders, estimated_delivery_days=estimated_delivery_days)
 
 
 @main_routes.route('/checkout', methods=['GET', 'POST'])
 @login_required
+@role_required('buyer', 'seller')
 def checkout():
     with get_db_session() as db_session:
         # Ottieni gli articoli del carrello dell'utente
