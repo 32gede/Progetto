@@ -41,13 +41,13 @@
         </div>
         <div class="mb-3">
             <label for="image" class="form-label">Image:</label>
-            <input type="file" class="form-control" id="image" name="image" onchange="previewAvatar(this)">
+            <input type="file" class="form-control" id="image" name="image" onchange="previewImage(this)">
         </div>
         <div class="mb-3">
             {% if product.image %}
-                <img id="avatar-preview" src="https://drive.google.com/thumbnail?id={{ product.image }}" alt="Avatar" class="img-thumbnail" width="100">
+                <img id="image-preview" src="https://drive.google.com/thumbnail?id={{ product.image }}" alt="Image" class="img-thumbnail" width="100">
             {% else %}
-                <img id="avatar-preview" src="{{ current_user.gravatar(150) }}" alt="Avatar" class="img-thumbnail" width="100">
+                <img id="image-preview" src="{{ product.gravatar(150) }}" alt="Image" class="img-thumbnail" width="100">
             {% endif %}
         </div>
     <button type="submit" class="btn btn-primary">Save Changes</button>
@@ -56,21 +56,21 @@
 {% endblock %}
 
 <script>
-function previewAvatar(input) {
+function previewImage(input) {
     var file = input.files[0];
     var reader = new FileReader();
     reader.onload = function(e) {
-        document.getElementById('avatar-preview').src = e.target.result;
+        document.getElementById('image-preview').src = e.target.result;
     }
     reader.readAsDataURL(file);
 }
 
-function previewDefaultAvatar(select) {
-    var avatar = select.value;
-    if (avatar) {
-        document.getElementById('avatar-preview').src = "{{ url_for('static', filename='avatars/') }}" + avatar;
+function previewDefaultImage(select) {
+    var image = select.value;
+    if (image) {
+        document.getElementById('image-preview').src = "{{ url_for('static', filename='image/') }}" + image;
     } else {
-        document.getElementById('avatar-preview').src = "{{ current_user.gravatar(150) }}";
+        document.getElementById('image-preview').src = "{{ product.gravatar(150) }}";
     }
 }
 </script>
