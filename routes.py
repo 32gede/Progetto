@@ -898,39 +898,45 @@ def checkout():
         # Ottieni gli articoli del carrello dell'utente
         cart_items = db_session.query(CartItem).filter_by(user_id=current_user.id).all()
 
-        # Recupera l'indirizzo dell'utente
-        user_buyer = db_session.query(UserBuyer).filter_by(id=current_user.id).first()
-
         if request.method == 'POST':
             if not cart_items:
                 flash('Il carrello è vuoto. Non puoi completare l\'ordine.', 'warning')
                 return redirect(url_for('main.view_products_buyer'))
 
-            # Calcola il totale dell'ordine
-            total = sum(item.product.price * item.quantity for item in cart_items)
-
-            # Crea un nuovo ordine
-            new_order = Order(user_id=current_user.id, total=total)
-            db_session.add(new_order)
-            db_session.commit()
-
-            # Aggiungi gli articoli all'ordine e rimuovi dal carrello
+            # Raggruppa gli articoli del carrello per venditore
+            items_by_seller = {}
             for item in cart_items:
-                order_item = OrderItem(
-                    order_id=new_order.id,
-                    product_id=item.product_id,
-                    quantity=item.quantity,
-                    price=item.product.price  # Assicurati di passare il prezzo qui
-                )
-                db_session.add(order_item)
+                seller_id = item.product.seller_id
+                if seller_id not in items_by_seller:
+                    items_by_seller[seller_id] = []
+                items_by_seller[seller_id].append(item)
 
-                # Rimuovi l'item dal carrello
-                db_session.delete(item)
+            # Crea un ordine separato per ogni venditore
+            for seller_id, items in items_by_seller.items():
+                total = sum(item.product.price * item.quantity for item in items)
+
+                # Crea un nuovo ordine per questo venditore
+                new_order = Order(user_id=current_user.id, total=total)
+                db_session.add(new_order)
+                db_session.commit()
+
+                # Aggiungi gli articoli all'ordine e rimuovi dal carrello
+                for item in items:
+                    order_item = OrderItem(
+                        order_id=new_order.id,
+                        product_id=item.product_id,
+                        quantity=item.quantity,
+                        price=item.product.price
+                    )
+                    db_session.add(order_item)
+                    db_session.delete(item)
 
             db_session.commit()
             flash('Ordine completato con successo!', 'success')
             return redirect(url_for('main.order_history'))  # Reindirizza alla pagina degli ordini
 
+        # Recupera l'indirizzo dell'utente per visualizzare nella pagina di checkout
+        user_buyer = db_session.query(UserBuyer).filter_by(id=current_user.id).first()
         return render_template('checkout.html', cart_items=cart_items, user_buyer=user_buyer)
 
 
