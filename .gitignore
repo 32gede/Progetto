@@ -1,5 +1,14 @@
-__pycache__/app.cpython-312.pyc
+# Ignora tutti i file di cache di Python
+__pycache__/
+
+# Ignora le sessioni di Flask
 flask_session
-static
-/credential.json
-uploads
+
+# Ignora la directory static
+static/
+
+# Ignora il file delle credenziali
+credential.json
+
+# Ignora la directory uploads
+uploads/
