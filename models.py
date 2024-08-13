@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship, declarative_base, Mapped, mapped_column
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from datetime import datetime, timedelta
 
 Base = declarative_base()
 
@@ -20,7 +21,7 @@ class User(UserMixin, Base):
     role: Mapped[str] = mapped_column(String(255), nullable=False)
     avatar: Mapped[bytes] = mapped_column(String(255), nullable=True)
 
-    seller: Mapped["UserSeller"] = relationship("UserSeller", uselist=False, back_populates="user")
+    seller: Mapped["UserSeller"] = relationship("UserSeller", uselist=False, back_populates="user", lazy='joined')  # Eager loading
     buyer: Mapped["UserBuyer"] = relationship("UserBuyer", uselist=False, back_populates="user")
     reviews: Mapped[list["Review"]] = relationship("Review", back_populates="user")
     cart_items: Mapped["CartItem"] = relationship("CartItem", back_populates="user")
@@ -67,7 +68,8 @@ class UserSeller(Base):
     id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), primary_key=True)
     seller_rating: Mapped[int] = mapped_column(Integer, nullable=False)
     user: Mapped["User"] = relationship("User", back_populates="seller")
-    products: Mapped["Product"] = relationship("Product", back_populates="seller")
+    products: Mapped[list["Product"]] = relationship("Product", back_populates="seller")  # Assicurati che qui ci sia 'list'
+
 
 
 class UserBuyer(Base):
@@ -154,11 +156,21 @@ class Order(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+    confirmed_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)  # Data di conferma
     total: Mapped[float] = mapped_column(Float, nullable=False)
-    status: Mapped[str] = mapped_column(String(50), default='pending')  # Stati dell'ordine
+    status: Mapped[str] = mapped_column(String(50), default='In attesa')  # Stati dell'ordine
 
     user: Mapped["User"] = relationship("User", back_populates="orders")
     order_items: Mapped[list["OrderItem"]] = relationship("OrderItem", back_populates="order")
+
+    def update_status_based_on_time(self):
+        if self.status == 'Confermato' and self.confirmed_at:
+            # Aggiorna lo stato a "Spedito" dopo 2 giorni
+            if datetime.utcnow() >= self.confirmed_at + timedelta(days=2):
+                self.status = 'Spedito'
+            # Aggiorna lo stato a "Consegnato" dopo 5 giorni
+            if datetime.utcnow() >= self.confirmed_at + timedelta(days=5):
+                self.status = 'Consegnato'
 
 
 class OrderItem(Base):

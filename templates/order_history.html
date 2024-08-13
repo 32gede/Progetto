@@ -17,7 +17,7 @@
                             <th>ID Ordine</th>
                             <th>Data Ordine</th>
                             <th>Totale</th>
-                            <th>Tempo di consegna stimato</th>
+                            <th>Stato</th>
                             <th>Dettagli</th>
                         </tr>
                     </thead>
@@ -27,7 +27,7 @@
                                 <td>{{ order.id }}</td>
                                 <td>{{ order.created_at.strftime('%Y-%m-%d') }}</td>
                                 <td>{{ order.total }} €</td>
-                                <td>5 giorni lavorativi</td>
+                                <td>{{ order.status }}</td>
                                 <td>
                                     <a href="#" onclick="toggleDetails({{ order.id }})">Mostra Dettagli</a>
                                     <div id="details-{{ order.id }}" class="order-details" style="display: none;">

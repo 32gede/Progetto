@@ -8,7 +8,7 @@ import sys
 import bleach
 from bleach.sanitizer import ALLOWED_TAGS
 import re
-
+from datetime import datetime, timedelta
 from collegamento_drive import carica_imm
 # IMPORT FROM OTHER FILES #
 
@@ -564,6 +564,53 @@ def edit_product(product_id):
         return render_template('edit_product.html', product=product, brands=brands, categories=categories)
 
 
+@main_routes.route('/seller/orders')
+@login_required
+@role_required('seller')
+def manage_orders():
+    with get_db_session() as db_session:
+        seller = db_session.query(UserSeller).filter_by(id=current_user.seller.id).first()
+
+        if seller:
+            seller_products = [product.id for product in seller.products]
+            orders = db_session.query(Order).join(OrderItem).filter(OrderItem.product_id.in_(seller_products)).all()
+        else:
+            orders = []
+
+        # Aggiorna lo stato degli ordini
+        update_order_status()
+
+        return render_template('manage_orders.html', orders=orders)
+
+@main_routes.route('/seller/orders/confirm/<int:order_id>', methods=['POST'])
+@login_required
+@role_required('seller')
+def confirm_order(order_id):
+    with get_db_session() as db_session:
+        order = db_session.query(Order).filter_by(id=order_id).first()
+        if order and order.status == 'In attesa':
+            order.status = 'Confermato'
+            order.confirmed_at = datetime.utcnow()  # Assicurati di avere questo campo nella tua tabella
+            db_session.commit()
+            flash('Ordine confermato con successo.', 'success')
+        else:
+            flash('Impossibile confermare l\'ordine.', 'danger')
+        return redirect(url_for('main.manage_orders'))
+
+
+def update_order_status():
+    with get_db_session() as db_session:
+        orders = db_session.query(Order).all()  # Controlla tutti gli ordini
+        for order in orders:
+            order.update_status_based_on_time()
+        db_session.commit()
+@main_routes.route('/admin/update_orders', methods=['POST'])
+@login_required
+@role_required('admin')  # Assicurati che solo l'admin possa fare questo
+def update_orders():
+    update_order_status()
+    flash('Stato degli ordini aggiornato con successo.', 'success')
+    return redirect(url_for('main.manage_orders'))
 # REVIEW ROUTES #
 
 @main_routes.route('/product/<int:product_id>/reviews')
