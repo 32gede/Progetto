@@ -66,8 +66,8 @@ Come segnare qualcosa di fatto:
 
 1. [X] **Creare ordini**: Implementare la funzionalità di creazione dell'ordine durante il checkout.
 2. [x] **Visualizzare cronologia ordini**: Consentire agli utenti di visualizzare la cronologia dei propri ordini.
-3. [ ] **Aggiornare stato dell'ordine**: Consentire ai venditori di aggiornare lo stato degli ordini dei prodotti che hanno venduto.
-4. [ ] **Notifiche ordini**: Implementare un sistema di notifiche che informi gli utenti degli aggiornamenti sugli ordini (es. ordine spedito, ordine consegnato).
+3. [X] **Aggiornare stato dell'ordine**: Consentire ai venditori di aggiornare lo stato degli ordini dei prodotti che hanno venduto.
+4. [X] **Notifiche ordini**: Implementare un sistema di notifiche che informi gli utenti degli aggiornamenti sugli ordini (es. ordine spedito, ordine consegnato).
 
 ## Recensioni e Valutazioni
 

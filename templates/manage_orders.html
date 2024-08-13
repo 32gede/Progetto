@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Gestione Ordini - E-commerce{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header">
+            <h1>Gestione Ordini</h1>
+        </div>
+        <div class="card-body">
+            {% if orders %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID Ordine</th>
+                            <th>Data Ordine</th>
+                            <th>Totale</th>
+                            <th>Stato</th>
+                            <th>Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                            <tr>
+                                <td>{{ order.id }}</td>
+                                <td>{{ order.created_at.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ order.total }} €</td>
+                                <td>{{ order.status }}</td>
+                                <td>
+                                    {% if order.status == 'In attesa' %}
+                                        <form action="{{ url_for('main.confirm_order', order_id=order.id) }}" method="post" style="display:inline;">
+                                            <button type="submit" class="btn btn-success btn-sm">Conferma Ordine</button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Non ci sono ordini da gestire.</p>
+            {% endif %}
+        </div>
+        <div class="card-footer text-end">
+            <a class="btn btn-link" href="{{ url_for('main.view_products_seller') }}">Torna al Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
