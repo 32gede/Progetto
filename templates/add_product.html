@@ -67,7 +67,7 @@
         </div>
         <div class="mb-3">
             <label for="image" class="form-label">Image:</label>
-            <input type="file" class="form-control" name="image"  onchange="previewAvatar(this)">
+            <input type="file" class="form-control" name="image" id="image" onchange="previewAvatar(this)">
         </div>
         <div class="mb-3">
             <img id="avatar-preview" src="{{ current_user.gravatar(150) }}" alt="Avatar" class="img-thumbnail" width="50">
