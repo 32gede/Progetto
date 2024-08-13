@@ -16,7 +16,7 @@
             <br>
         {% endif %}
     {% endwith %}
-    <form method="POST" onsubmit="return validateForm()">
+    <form method="POST" enctype="multipart/form-data" onsubmit="return validateForm()" >
         <div class="mb-3">
             <label for="name">Product Name:</label>
             <input type="text" id="name" name="name" required>
@@ -42,7 +42,7 @@
             <select class="form-control" id="brand_id" name="brand_id" onchange="toggleNewBrandInput(this)">
                 <option value="" disabled selected>Select a brand</option>
                 {% for brand in brands %}
-                    <option value="{{ brand.id|e }}">{{ brand.name|e }}</option>
+                    <option value="{{ brand.id }}">{{ brand.name }}</option>
                 {% endfor %}
                 <option value="new">Create new brand</option>
             </select>
@@ -56,7 +56,7 @@
             <select class="form-control" id="category_id" name="category_id" onchange="toggleNewCategoryInput(this)">
                 <option value="" disabled selected>Select a category</option>
                 {% for category in categories %}
-                    <option value="{{ category.id|e }}">{{ category.name|e }}</option>
+                    <option value="{{ category.id }}">{{ category.name }}</option>
                 {% endfor %}
                 <option value="new">Create new category</option>
             </select>
@@ -67,7 +67,7 @@
         </div>
         <div class="mb-3">
             <label for="image" class="form-label">Image:</label>
-            <input type="file" class="form-control" id="image" name="image"  onchange="previewAvatar(this)">
+            <input type="file" class="form-control" name="image"  onchange="previewAvatar(this)">
         </div>
         <div class="mb-3">
             <img id="avatar-preview" src="{{ current_user.gravatar(150) }}" alt="Avatar" class="img-thumbnail" width="50">

@@ -328,6 +328,7 @@ def view_product(product_id):
 @login_required
 @role_required('seller')
 def add_product():
+    print('entra')
     if request.method == 'POST':
         name = validate_and_sanitize(
             request.form['name'],
