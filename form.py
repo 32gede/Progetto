@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, DecimalField, IntegerField, SelectField, TextAreaField
+from flask_wtf.file import FileField, FileRequired, FileAllowed
+from wtforms import StringField, DecimalField, IntegerField, SelectField, TextAreaField,SubmitField
 from wtforms.fields.simple import SubmitField
 from wtforms.validators import DataRequired, NumberRange, Length, Optional, ValidationError, Regexp
 import re
@@ -63,6 +64,7 @@ class ValidateAndSanitize:
             raise ValidationError("Invalid value_type specified. Must be 'string', 'int', or 'float'.")
 '''
 
+
 class ProductForm(FlaskForm):
     name = StringField('Name', validators=[
         DataRequired(message='Product name is required.'),
@@ -98,4 +100,9 @@ class ProductForm(FlaskForm):
         Length(min=1, max=255, message='New category name must be between 1 and 255 characters.'),
         Regexp(r'^[a-zA-Z0-9 &]*$', message='Invalid new category name.')
     ])
+    image = FileField('Product Image', validators=[
+        FileRequired(message='Image is required.'),
+        FileAllowed(['jpg', 'jpeg', 'png'], 'Images only!')
+    ])
     create_new_category = SubmitField('Create New Category')
+    submit = SubmitField('Submit')

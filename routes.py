@@ -21,6 +21,7 @@ from form import ProductForm
 # DEFINE BLUEPRINT #
 import traceback
 import logging
+
 # Configura il logging
 logging.basicConfig()
 # logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
@@ -340,6 +341,7 @@ def add_product():
         form.category_id.choices = [(str(category.id), category.name) for category in db_session.query(Category).all()]
         form.brand_id.choices.insert(0, ('0', 'Create New Brand'))
         form.category_id.choices.insert(0, ('0', 'Create New Category'))
+        print(form.validate_on_submit())
 
         if form.validate_on_submit():
             # Handle brand creation
@@ -350,7 +352,7 @@ def add_product():
                 brand_id = str(new_brand.id)
             else:
                 brand_id = form.brand_id.data
-
+            print('prova')
             # Handle category creation
             if form.category_id.data == '0' and form.new_category_name.data:
                 new_category = Category(name=form.new_category_name.data)
@@ -365,6 +367,24 @@ def add_product():
                 flash('Invalid brand or category selection. Please try again.', 'error')
                 return redirect(url_for('main.add_product'))
 
+            file = form.image.data
+            image_id = ''
+            if file:
+                if allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                    try:
+                        file.save(file_path)
+                        image_id = carica_imm(file_path, filename)
+                    except Exception as e:
+                        db_session.rollback()
+                        flash('Failed to upload image.', 'error')
+                        return redirect(url_for('main.add_product'))
+                else:
+                    flash('Invalid file type.', 'error')
+                    return redirect(url_for('main.add_product'))
+            else:
+                image_id = '1tvBMvCFzeZ14Kcr7z3iZ0yS6QfQOCFzQ'
             # Create the product
             new_product = Product(
                 name=form.name.data,
@@ -373,7 +393,8 @@ def add_product():
                 quantity=form.quantity.data,
                 brand_id=int(brand_id),
                 category_id=int(category_id),
-                seller_id=current_user.id
+                seller_id=current_user.id,
+                image=image_id
             )
             db_session.add(new_product)
             db_session.commit()
@@ -424,6 +445,7 @@ def create_brand():
         brand = get_or_create_brand(db_session, brand_name)
         return jsonify(success=True, brand_id=brand.id)
 
+
 @main_routes.route('/create_category', methods=['POST'])
 @login_required
 @role_required('seller')
@@ -436,6 +458,7 @@ def create_category():
     with get_db_session() as db_session:
         category = get_or_create_category(db_session, category_name)
         return jsonify(success=True, category_id=category.id)
+
 
 @main_routes.route('/remove_product/<int:product_id>', methods=['POST'])
 @login_required
@@ -565,6 +588,7 @@ def manage_orders():
 
         return render_template('manage_orders.html', orders=orders)
 
+
 @main_routes.route('/seller/orders/confirm/<int:order_id>', methods=['POST'])
 @login_required
 @role_required('seller')
@@ -587,6 +611,8 @@ def update_order_status():
         for order in orders:
             order.update_status_based_on_time()
         db_session.commit()
+
+
 @main_routes.route('/admin/update_orders', methods=['POST'])
 @login_required
 @role_required('admin')  # Assicurati che solo l'admin possa fare questo
@@ -594,6 +620,8 @@ def update_orders():
     update_order_status()
     flash('Stato degli ordini aggiornato con successo.', 'success')
     return redirect(url_for('main.manage_orders'))
+
+
 # REVIEW ROUTES #
 
 @main_routes.route('/product/<int:product_id>/reviews')
