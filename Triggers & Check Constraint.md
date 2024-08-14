@@ -22,6 +22,29 @@
 7. [ ] **Verifica della disponibilità del prodotto**:
    - Prima di aggiungere un prodotto al carrello, verificare che il prodotto sia ancora disponibile in quantità sufficiente.
 
+8. [ ] **Aggiornamento del prezzo del prodotto**: 
+   - Quando il prezzo di un prodotto viene aggiornato, aggiornare il prezzo di tutti gli ordini che contengono quel prodotto.
+
+9. [ ] **Blocco di utenti inattivi**:
+   - Disattivare automaticamente gli account utente che non sono stati utilizzati per un certo periodo di tempo.
+
+10. [ ] **Calcolo del totale ordine**:
+    - Calcolare automaticamente l'importo totale di un ordine in base ai prodotti aggiunti al carrello.
+
+11. [ ] **Notifiche di rimborso**:
+    - Inviare una notifica all'utente quando viene emesso un rimborso per un ordine.
+
+12. [ ] **Aggiornamento dello stato dell'ordine**:
+    - Quando viene effettuato un pagamento, aggiornare lo stato dell'ordine da 'in attesa' a 'pagato'.
+
+13. [ ] **Controllo del limite di credito**:
+    - Impedire agli utenti di effettuare ordini se superano il loro limite di credito.
+
+14. [ ] **Calcolo del totale speso**:
+    - Calcolare automaticamente l'importo totale speso da un utente in base ai suoi ordini.
+
+15. [ ] 
+
 ## Check Constraint
 
 1. [ ] **Vincolo sul prezzo del prodotto**:
@@ -53,3 +76,15 @@
 
 10. [ ] **Vincolo sulla categoria del prodotto**:
     - La categoria del prodotto deve esistere nella tabella delle categorie.
+
+11. [ ] **Vincolo sullo stato dell'ordine**:
+    - Lo stato di un ordine deve essere uno tra 'in attesa', 'in lavorazione', 'spedito', 'consegnato' o 'cancellato'.
+
+12. [ ] **Vincolo sulle credenziali utente**:
+    - Le credenziali degli utenti (es. password) devono rispettare determinati criteri di sicurezza (es. lunghezza minima, caratteri speciali).
+
+13. [ ] **Vincolo sulla valuta del prezzo**:
+    - Il prezzo di un prodotto deve essere espresso nella stessa valuta (es. USD, EUR).
+
+14. [ ] **Vincolo sulle recensioni**:
+    - Le recensioni devono essere accompagnate da una valutazione e non possono essere lasciate dagli acquirenti per i propri prodotti.
