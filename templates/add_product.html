@@ -50,44 +50,30 @@
         </div>
 
         <div class="form-group">
-            {{ form.brand_id.label }}
-            <div class="input-group">
-                {{ form.brand_id(class_="form-control", onchange="toggleNewBrandInput(this)") }}
-                <div class="input-group-append">
-                    <button type="button" class="btn btn-outline-secondary" onclick="createNewBrand()">+</button>
-                </div>
-            </div>
-            {% for error in form.brand_id.errors %}
-                <div class="text-danger">{{ error }}</div>
-            {% endfor %}
-            <div id="new_brand_name_group" style="display:none;">
-                {{ form.new_brand_name.label }}
-                {{ form.new_brand_name(class_="form-control") }}
-                {% for error in form.new_brand_name.errors %}
-                    <div class="text-danger">{{ error }}</div>
-                {% endfor %}
-            </div>
-        </div>
+    <label for="brand_id">Brand</label>
+    <input list="brand-list" name="brand_id" id="brand_id" class="form-control" placeholder="Enter or select a brand">
+    <datalist id="brand-list">
+        {% for brand in brands %}
+            <option value="{{ brand.name }}"></option>
+        {% endfor %}
+    </datalist>
+    {% for error in form.brand_id.errors %}
+        <div class="text-danger">{{ error }}</div>
+    {% endfor %}
+</div>
 
-        <div class="form-group">
-            {{ form.category_id.label }}
-            <div class="input-group">
-                {{ form.category_id(class_="form-control", onchange="toggleNewCategoryInput(this)") }}
-                <div class="input-group-append">
-                    <button type="button" class="btn btn-outline-secondary" onclick="createNewCategory()">+</button>
-                </div>
-            </div>
-            {% for error in form.category_id.errors %}
-                <div class="text-danger">{{ error }}</div>
-            {% endfor %}
-            <div id="new_category_name_group" style="display:none;">
-                {{ form.new_category_name.label }}
-                {{ form.new_category_name(class_="form-control") }}
-                {% for error in form.new_category_name.errors %}
-                    <div class="text-danger">{{ error }}</div>
-                {% endfor %}
-            </div>
-        </div>
+<div class="form-group">
+    <label for="category_id">Category</label>
+    <input list="category-list" name="category_id" id="category_id" class="form-control" placeholder="Enter or select a category">
+    <datalist id="category-list">
+        {% for category in categories %}
+            <option value="{{ category.name }}"></option>
+        {% endfor %}
+    </datalist>
+    {% for error in form.category_id.errors %}
+        <div class="text-danger">{{ error }}</div>
+    {% endfor %}
+</div>
 
         <div class="form-group">
             {{ form.image.label }}
@@ -108,23 +94,48 @@
 
 {% block custom_js %}
 <script>
-    function toggleNewBrandInput(select) {
-        var newBrandGroup = document.getElementById('new_brand_name_group');
-        if (select.value === '0') {
-            newBrandGroup.style.display = 'block';
-        } else {
-            newBrandGroup.style.display = 'none';
-        }
+    function toggleBrandDropdown() {
+    var dropdown = document.getElementById('brand_dropdown');
+    var input = document.getElementById('brand_id_input');
+    if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+        dropdown.style.display = 'block';
+        input.disabled = true;
+    } else {
+        dropdown.style.display = 'none';
+        input.disabled = false;
     }
+}
 
-    function toggleNewCategoryInput(select) {
-        var newCategoryGroup = document.getElementById('new_category_name_group');
-        if (select.value === '0') {
-            newCategoryGroup.style.display = 'block';
-        } else {
-            newCategoryGroup.style.display = 'none';
-        }
+function selectBrand() {
+    var select = document.getElementById('brand_select');
+    var input = document.getElementById('brand_id_input');
+    if (select.value) {
+        input.value = select.value;
     }
+    toggleBrandDropdown(); // Nascondi il menu a discesa dopo la selezione
+}
+
+function toggleCategoryDropdown() {
+    var dropdown = document.getElementById('category_dropdown');
+    var input = document.getElementById('category_id_input');
+    if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+        dropdown.style.display = 'block';
+        input.disabled = true;
+    } else {
+        dropdown.style.display = 'none';
+        input.disabled = false;
+    }
+}
+
+function selectCategory() {
+    var select = document.getElementById('category_select');
+    var input = document.getElementById('category_id_input');
+    if (select.value) {
+        input.value = select.value;
+    }
+    toggleCategoryDropdown(); // Nascondi il menu a discesa dopo la selezione
+}
+
 
     function createNewBrand() {
         var brandName = prompt("Enter new brand name:");

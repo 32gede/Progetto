@@ -86,23 +86,17 @@ class ProductForm(FlaskForm):
         NumberRange(min=1, max=1000000, message='Quantity must be between 1 and 1,000,000.')
     ])
 
-    brand_id = SelectField('Brand', coerce=int, validators=[Optional()])
-    new_brand_name = StringField('New Brand Name', validators=[
-        Optional(),
-        Length(min=1, max=255, message='New brand name must be between 1 and 255 characters.'),
-        Regexp(r'^[a-zA-Z0-9 &]*$', message='Invalid new brand name.')
+    # Cambia SelectField a StringField per permettere l'input manuale
+    brand_id = StringField('Brand', validators=[
+        DataRequired(message='Enter or select a brand.')
     ])
-    create_new_brand = SubmitField('Create New Brand')
 
-    category_id = SelectField('Category', coerce=int, validators=[Optional()])
-    new_category_name = StringField('New Category Name', validators=[
-        Optional(),
-        Length(min=1, max=255, message='New category name must be between 1 and 255 characters.'),
-        Regexp(r'^[a-zA-Z0-9 &]*$', message='Invalid new category name.')
+    category_id = StringField('Category', validators=[
+        DataRequired(message='Enter or select a category.')
     ])
+
     image = FileField('Product Image', validators=[
-        FileRequired(message='Image is required.'),
         FileAllowed(['jpg', 'jpeg', 'png'], 'Images only!')
     ])
-    create_new_category = SubmitField('Create New Category')
-    submit = SubmitField('Submit')
+
+    submit = SubmitField('Add Product')

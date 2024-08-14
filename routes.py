@@ -336,63 +336,49 @@ def add_product():
     form = ProductForm()
 
     with get_db_session() as db_session:
-        # Populate choices for brand and category
-        form.brand_id.choices = [(str(brand.id), brand.name) for brand in db_session.query(Brand).all()]
-        form.category_id.choices = [(str(category.id), category.name) for category in db_session.query(Category).all()]
-        form.brand_id.choices.insert(0, ('0', 'Create New Brand'))
-        form.category_id.choices.insert(0, ('0', 'Create New Category'))
-        print(form.validate_on_submit())
+        brands = db_session.query(Brand).all()
+        categories = db_session.query(Category).all()
 
         if form.validate_on_submit():
-            # Handle brand creation
-            if form.brand_id.data == '0' and form.new_brand_name.data:
-                new_brand = Brand(name=form.new_brand_name.data)
-                db_session.add(new_brand)
+            # Gestisci brand
+            brand = db_session.query(Brand).filter_by(name=form.brand_id.data).first()
+            if not brand:
+                brand = Brand(name=form.brand_id.data)
+                db_session.add(brand)
                 db_session.commit()
-                brand_id = str(new_brand.id)
-            else:
-                brand_id = form.brand_id.data
-            print('prova')
-            # Handle category creation
-            if form.category_id.data == '0' and form.new_category_name.data:
-                new_category = Category(name=form.new_category_name.data)
-                db_session.add(new_category)
+            brand_id = brand.id
+
+            # Gestisci categoria
+            category = db_session.query(Category).filter_by(name=form.category_id.data).first()
+            if not category:
+                category = Category(name=form.category_id.data)
+                db_session.add(category)
                 db_session.commit()
-                category_id = str(new_category.id)
-            else:
-                category_id = form.category_id.data
+            category_id = category.id
 
-            # Ensure valid IDs
-            if brand_id == '0' or category_id == '0':
-                flash('Invalid brand or category selection. Please try again.', 'error')
-                return redirect(url_for('main.add_product'))
-
+            # Gestisci l'immagine
             file = form.image.data
-            image_id = ''
-            if file:
-                if allowed_file(file.filename):
-                    filename = secure_filename(file.filename)
-                    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-                    try:
-                        file.save(file_path)
-                        image_id = carica_imm(file_path, filename)
-                    except Exception as e:
-                        db_session.rollback()
-                        flash('Failed to upload image.', 'error')
-                        return redirect(url_for('main.add_product'))
-                else:
-                    flash('Invalid file type.', 'error')
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                try:
+                    file.save(file_path)
+                    image_id = carica_imm(file_path, filename)
+                except Exception as e:
+                    db_session.rollback()
+                    flash('Failed to upload image.', 'error')
                     return redirect(url_for('main.add_product'))
             else:
-                image_id = '1tvBMvCFzeZ14Kcr7z3iZ0yS6QfQOCFzQ'
-            # Create the product
+                image_id = '1tvBMvCFzeZ14Kcr7z3iZ0yS6QfQOCFzQ'  # Default image ID
+
+            # Crea il prodotto
             new_product = Product(
                 name=form.name.data,
                 description=form.description.data,
                 price=form.price.data,
                 quantity=form.quantity.data,
-                brand_id=int(brand_id),
-                category_id=int(category_id),
+                brand_id=brand_id,
+                category_id=category_id,
                 seller_id=current_user.id,
                 image=image_id
             )
@@ -401,7 +387,8 @@ def add_product():
             flash('Product added successfully!', 'success')
             return redirect(url_for('main.view_products_seller'))
 
-    return render_template('add_product.html', form=form)
+    return render_template('add_product.html', form=form, brands=brands, categories=categories)
+
 
 
 def get_or_create_brand(db_session, brand_name):
