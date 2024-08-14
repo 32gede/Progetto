@@ -13,13 +13,20 @@
             <div class="col-md-4">
                 <div class="card mb-4">
                     <div class="card-body">
-                        <h5 class="card-title">{{ product.name|e }}</h5>
-                        <p class="card-text">{{ product.description|e }}</p>
-                        <p class="card-text">Price: ${{ product.price|e }}</p>
-                        <div class="d-flex justify-content-start gap-2">
-                            <a href="{{ url_for('main.view_product', product_id=product.id|e) }}" class="btn btn-primary">View Product</a>
-                            <form action="{{ url_for('main.remove_product', product_id=product.id|e) }}" method="POST">
-                                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this product?');">Delete Product</button>
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="card-title">{{ product.name|e }}</h5>
+                                <p class="card-text">{{ product.description|e }}</p>
+                                <p class="card-text">Price: ${{ product.price|e }}</p>
+                            </div>
+                            <div class="ms-3">
+                                <img id="image-preview" src="https://drive.google.com/thumbnail?id={{ product.image }}" alt="Image" class="img-thumbnail" width="100">
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between gap-2">
+                            <a href="{{ url_for('main.view_product', product_id=product.id|e) }}" class="btn btn-primary flex-grow-1">View Product</a>
+                            <form action="{{ url_for('main.remove_product', product_id=product.id) }}" method="POST" class="flex-grow-1">
+                                <button type="submit" class="btn btn-danger w-100" onclick="return confirm('Are you sure you want to delete this product?');">Delete Product</button>
                             </form>
                         </div>
                     </div>
