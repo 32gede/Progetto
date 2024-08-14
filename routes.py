@@ -16,7 +16,7 @@ from collegamento_drive import carica_imm
 from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem
 from database import get_db_session
 from search import search_products
-from form import ProductForm
+from form import ProductForm, ProfileForm, RegistrationForm, LoginForm
 
 # DEFINE BLUEPRINT #
 import traceback
@@ -133,104 +133,75 @@ def index():
 
 @main_routes.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        email = validate_and_sanitize(
-            request.form['email'],
-            value_type='string',
-            min_value=3,
-            max_value=255,
-            error_message='Invalid email address.',
-            is_html=True
-        )
-        password = validate_and_sanitize(
-            request.form['password'],
-            value_type='string',
-            min_value=1,
-            max_value=128,
-            error_message="Invalid password.",
-            is_html=True
-        )
-
+    form = LoginForm()
+    if form.validate_on_submit():
         with get_db_session() as db_session:
-            user = db_session.query(User).filter_by(email=email).first()
-            if user and user.check_password(password):
+            user = db_session.query(User).filter_by(email=form.email.data).first()
+            if user and user.check_password(form.password.data):
                 session['id'] = user.id
                 login_user(user)
                 return redirect(url_for('main.index'))
             else:
-                return render_template('login.html', error='Invalid email or password.')
-    return render_template('login.html')
+                return render_template('login.html', form=form, error='Invalid email or password.')
+    return render_template('login.html', form=form)
 
 
 @main_routes.route('/registration', methods=['GET', 'POST'])
 def registration():
-    if request.method == 'POST':
-        email = validate_and_sanitize(
-            request.form['email'],
-            value_type='string',
-            min_value=3,
-            max_value=255,
-            error_message='Invalid email address.',
-            is_html=True
-        )
-        password = validate_and_sanitize(
-            request.form['password'],
-            value_type='string',
-            min_value=1,
-            max_value=128,
-            error_message="Invalid password.",
-            is_html=True
-        )
-        role = validate_and_sanitize(
-            request.form['role'],
-            value_type='string',
-            min_value=4,
-            max_value=10,
-            error_message='Invalid role.',
-            is_html=True
-        )
-        avatar_choice = request.form['avatar_choice']
-        print(avatar_choice)
+    form = RegistrationForm()
+    print("Form created")  # Debugging line
 
-        if role == 'buyer':
-            city = validate_and_sanitize(
-                request.form['city'],
-                value_type='string',
-                min_value=2,
-                max_value=255,
-                error_message='Invalid street.',
-                is_html=True
-            )
-            address = validate_and_sanitize(
-                request.form['address'],
-                value_type='string',
-                min_value=2,
-                max_value=255,
-                error_message='Invalid city.',
-                is_html=True
-            )
+    if form.validate_on_submit():
+        print("Form validated")  # Debugging line
         with get_db_session() as db_session:
-            existing_user = db_session.query(User).filter_by(email=email).first()
+            existing_user = db_session.query(User).filter_by(email=form.email.data).first()
             if not existing_user:
                 new_user = User(
-                    email=email,
-                    role=role,
-                    avatar=avatar_choice
+                    name=form.name.data,
+                    username=form.username.data,
+                    email=form.email.data,
+                    password=form.password.data,
+                    role=form.role.data,
+                    address=form.address.data,
+                    city=form.city.data,
+                    avatar=form.avatar_choice.data
                 )
-                new_user.password_hash = password  # Hash the password
+                new_user.password_hash = form.password.data  # Hash the password
+                print("New user created")  # Debugging line
                 db_session.add(new_user)
                 db_session.commit()
 
-                if role == "seller":
+                if form.role.data == "seller":
                     new_seller = UserSeller(id=new_user.id, seller_rating=0)
                     db_session.add(new_seller)
-                elif role == "buyer":
-                    new_buyer = UserBuyer(id=new_user.id, buyer_rating=0, city=city, address=address)
+                elif form.role.data == "buyer":
+                    new_buyer = UserBuyer(id=new_user.id, buyer_rating=0)
                     db_session.add(new_buyer)
                 db_session.commit()
+                print("User committed")  # Debugging line
                 return redirect(url_for('main.login'))
-            return render_template('registration.html', error='User already exists.')
-    return render_template('registration.html')
+            else:
+                print("User already exists")  # Debugging line
+                flash('User already exists.')
+                return render_template('registration.html', form=form)
+    else:
+        print("Form not validated")  # Debugging line
+        print(form.errors)  # Print form errors
+
+    return render_template('registration.html', form=form)
+
+
+@main_routes.route('/check-username', methods=['POST'])
+def check_username():
+    data = request.get_json()
+    username = data.get('username')
+
+    with get_db_session() as db_session:
+        user = db_session.query(User).filter_by(username=username).first()
+        if user:
+            return jsonify({'exists': True})
+        else:
+            return jsonify({'exists': False})
 
 
 @main_routes.route('/logout')
@@ -241,18 +212,31 @@ def logout():
     return redirect(url_for('main.index'))
 
 
-@main_routes.route('/profile', methods=['GET', 'POST'])
+@main_routes.route('/profile', methods=['GET'])
 @login_required
-def profile():
-    if request.method == 'POST':
+@role_required('buyer', 'seller')
+def profile_view():
+    return render_template('profile.html')
+
+
+@main_routes.route('/profile/edit', methods=['GET', 'POST'])
+@login_required
+@role_required('buyer', 'seller')
+def edit_profile():
+    form = ProfileForm(obj=current_user)
+
+    if form.validate_on_submit():
         with get_db_session() as db_session:
             user = db_session.query(User).filter_by(id=current_user.id).first()
-            file = request.files.get('avatar')
 
-            if file:
-                if allowed_file(file.filename):
+            if user:
+                # Process the file upload
+                file = request.files.get('avatar')
+
+                if file and allowed_file(file.filename):
                     filename = secure_filename(file.filename)
                     file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+
                     try:
                         file.save(file_path)
                         user.avatar = carica_imm(file_path, filename)
@@ -264,33 +248,19 @@ def profile():
                 else:
                     flash('Invalid file type.', 'error')
 
-            if user.role == 'buyer':
+                # Update user information
                 try:
-                    city = validate_and_sanitize(
-                        request.form['city'],
-                        value_type='string',
-                        min_value=2,
-                        max_value=255,
-                        error_message='Invalid city.',
-                        is_html=True
-                    )
-                    address = validate_and_sanitize(
-                        request.form['address'],
-                        value_type='string',
-                        min_value=2,
-                        max_value=255,
-                        error_message='Invalid address.',
-                        is_html=True
-                    )
-                    user.city = city
-                    user.address = address
-                    db_session.commit()  # Commit here for city and address changes
+                    user.username = form.username.data
+                    user.name = form.name.data
+                    user.city = form.city.data
+                    user.address = form.address.data
+                    db_session.commit()
                     flash('Your profile has been updated.', 'success')
                 except Exception as e:
-                    db_session.rollback()  # Rollback in case of error
+                    db_session.rollback()
                     flash(f'Failed to update the profile: {e}', 'error')
 
-    return render_template('profile.html', avatar_data=current_user.avatar)
+    return render_template('profile.html', form=form)
 
 
 # PRODUCT ROUTES #
@@ -557,58 +527,6 @@ def edit_product(product_id):
         return render_template('edit_product.html', product=product, brands=brands, categories=categories)
 
 
-@main_routes.route('/seller/orders')
-@login_required
-@role_required('seller')
-def manage_orders():
-    with get_db_session() as db_session:
-        seller = db_session.query(UserSeller).filter_by(id=current_user.seller.id).first()
-
-        if seller:
-            seller_products = [product.id for product in seller.products]
-            orders = db_session.query(Order).join(OrderItem).filter(OrderItem.product_id.in_(seller_products)).all()
-        else:
-            orders = []
-
-        # Aggiorna lo stato degli ordini
-        update_order_status()
-
-        return render_template('manage_orders.html', orders=orders)
-
-
-@main_routes.route('/seller/orders/confirm/<int:order_id>', methods=['POST'])
-@login_required
-@role_required('seller')
-def confirm_order(order_id):
-    with get_db_session() as db_session:
-        order = db_session.query(Order).filter_by(id=order_id).first()
-        if order and order.status == 'In attesa':
-            order.status = 'Confermato'
-            order.confirmed_at = datetime.utcnow()  # Assicurati di avere questo campo nella tua tabella
-            db_session.commit()
-            flash('Ordine confermato con successo.', 'success')
-        else:
-            flash('Impossibile confermare l\'ordine.', 'danger')
-        return redirect(url_for('main.manage_orders'))
-
-
-def update_order_status():
-    with get_db_session() as db_session:
-        orders = db_session.query(Order).all()  # Controlla tutti gli ordini
-        for order in orders:
-            order.update_status_based_on_time()
-        db_session.commit()
-
-
-@main_routes.route('/admin/update_orders', methods=['POST'])
-@login_required
-@role_required('admin')  # Assicurati che solo l'admin possa fare questo
-def update_orders():
-    update_order_status()
-    flash('Stato degli ordini aggiornato con successo.', 'success')
-    return redirect(url_for('main.manage_orders'))
-
-
 # REVIEW ROUTES #
 
 @main_routes.route('/product/<int:product_id>/reviews')
@@ -852,23 +770,6 @@ def edit_cart():
         return redirect(url_for('main.cart'))
 
 
-@main_routes.route('/order_history')
-@login_required
-@role_required('buyer')
-def order_history():
-    with get_db_session() as db_session:
-        # Recupera gli ordini dell'utente
-        orders = db_session.query(Order).filter_by(user_id=current_user.id).all()
-
-        # Carica anche gli articoli per ciascun ordine
-        for order in orders:
-            order.items = db_session.query(OrderItem).filter_by(order_id=order.id).all()
-
-        # Supponiamo che il tempo di spedizione stimato sia di 5 giorni lavorativi
-        estimated_delivery_days = 5
-        return render_template('order_history.html', orders=orders, estimated_delivery_days=estimated_delivery_days)
-
-
 @main_routes.route('/checkout', methods=['GET', 'POST'])
 @login_required
 @role_required('buyer', 'seller')
@@ -918,6 +819,77 @@ def checkout():
         user_buyer = db_session.query(UserBuyer).filter_by(id=current_user.id).first()
         return render_template('checkout.html', cart_items=cart_items, user_buyer=user_buyer)
 
+
+@main_routes.route('/order_history')
+@login_required
+@role_required('buyer')
+def order_history():
+    with get_db_session() as db_session:
+        # Recupera gli ordini dell'utente
+        orders = db_session.query(Order).filter_by(user_id=current_user.id).all()
+
+        # Carica anche gli articoli per ciascun ordine
+        for order in orders:
+            order.items = db_session.query(OrderItem).filter_by(order_id=order.id).all()
+
+        # Supponiamo che il tempo di spedizione stimato sia di 5 giorni lavorativi
+        estimated_delivery_days = 5
+        return render_template('order_history.html', orders=orders, estimated_delivery_days=estimated_delivery_days)
+
+
+@main_routes.route('/seller/orders')
+@login_required
+@role_required('seller')
+def manage_orders():
+    with get_db_session() as db_session:
+        seller = db_session.query(UserSeller).filter_by(id=current_user.seller.id).first()
+
+        if seller:
+            seller_products = [product.id for product in seller.products]
+            orders = db_session.query(Order).join(OrderItem).filter(OrderItem.product_id.in_(seller_products)).all()
+        else:
+            orders = []
+
+        # Aggiorna lo stato degli ordini
+        update_order_status()
+
+        return render_template('manage_orders.html', orders=orders)
+
+
+@main_routes.route('/seller/orders/confirm/<int:order_id>', methods=['POST'])
+@login_required
+@role_required('seller')
+def confirm_order(order_id):
+    with get_db_session() as db_session:
+        order = db_session.query(Order).filter_by(id=order_id).first()
+        if order and order.status == 'In attesa':
+            order.status = 'Confermato'
+            order.confirmed_at = datetime.utcnow()  # Assicurati di avere questo campo nella tua tabella
+            db_session.commit()
+            flash('Ordine confermato con successo.', 'success')
+        else:
+            flash('Impossibile confermare l\'ordine.', 'danger')
+        return redirect(url_for('main.manage_orders'))
+
+
+def update_order_status():
+    with get_db_session() as db_session:
+        orders = db_session.query(Order).all()  # Controlla tutti gli ordini
+        for order in orders:
+            order.update_status_based_on_time()
+        db_session.commit()
+
+
+@main_routes.route('/admin/update_orders', methods=['POST'])
+@login_required
+@role_required('admin')  # Assicurati che solo l'admin possa fare questo
+def update_orders():
+    update_order_status()
+    flash('Stato degli ordini aggiornato con successo.', 'success')
+    return redirect(url_for('main.manage_orders'))
+
+
+# SEARCH AND FILTER ROUTES #
 
 @main_routes.route('/products', methods=['GET'])
 @login_required

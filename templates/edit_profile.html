@@ -1,0 +1,102 @@
+<!-- templates/profile_edit.html -->
+{% extends "base.html" %}
+
+{% block title %}Edit Profile - E-commerce{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-header">
+                <h1>Edit Profile</h1>
+            </div>
+            {% if form.errors %}
+                <div class="alert alert-danger">
+                    <ul>
+                        {% for field, errors in form.errors.items() %}
+                            {% for error in errors %}
+                                <li>{{ form[field].label.text }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ current_user.email }}" readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        {{ form.username(class_="form-control", id="username") }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Full Name</label>
+                        {{ form.name(class_="form-control", id="name") }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.address.label }}
+                        {{ form.address(class_="form-control", id="address") }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.city.label }}
+                        {{ form.city(class_="form-control", id="city") }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.avatar.label }}
+                        {{ form.avatar(class_="form-control") }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="avatar" class="form-label">Avatar</label>
+                        <input type="file" class="form-control" id="avatar" name="avatar" onchange="previewAvatar(this)">
+                    </div>
+
+                    <div class="mb-3">
+                        {% if current_user.avatar %}
+                            <img id="avatar-preview" src="https://drive.google.com/thumbnail?id={{ current_user.avatar }}" alt="Avatar" class="img-thumbnail" width="100">
+                        {% else %}
+                            <img id="avatar-preview" src="{{ current_user.gravatar(150) }}" alt="Avatar" class="img-thumbnail" width="50">
+                        {% endif %}
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+                </form>
+            </div>
+            {% if current_user.role == 'buyer' %}
+                <div class="card-footer text-end">
+                    <a class="btn btn-link" href="{{ url_for('main.order_history') }}">Order History</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if get_flashed_messages() %}
+    <div class="container mt-3">
+        {% for message in get_flashed_messages() %}
+            <div class="alert alert-info" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <script>
+        function previewAvatar(input) {
+            var file = input.files[0];
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('avatar-preview').src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    </script>
+{% endblock %}

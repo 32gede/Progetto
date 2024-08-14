@@ -3,76 +3,155 @@
 {% block title %}Registration - E-commerce{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h1>Registration</h1>
-    <form method="POST" enctype="multipart/form-data">
-        <div class="mb-3">
-            <label for="email" class="form-label">Email</label>
-            <input type="email" class="form-control" id="email" name="email" required>
-        </div>
-        <div class="mb-3">
-            <label for="password" class="form-label">Password</label>
-            <input type="password" class="form-control" id="password" name="password" required>
-        </div>
-        <div class="mb-3">
-            <label for="role" class="form-label">Role</label>
-            <select class="form-select" id="role" name="role" required onchange="toggleAddressFields()">
-                <option value="seller">Seller</option>
-                <option value="buyer">Buyer</option>
-            </select>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Choose a Default Avatar</label>
-            <div id="avatar-selection" class="d-flex flex-wrap">
-                <div class="avatar-option me-3 mb-3">
-                    <input type="radio" id="avatar1" name="avatar_choice" value="1yOOHEp8xJx7S_vbZmRe5K3nbia1XMVL6" checked>
-                    <label for="avatar1">
-                        <img src="https://drive.google.com/thumbnail?id=1yOOHEp8xJx7S_vbZmRe5K3nbia1XMVL6" alt="Avatar 1" class="img-thumbnail">
-                    </label>
-                </div>
-                <div class="avatar-option me-3 mb-3">
-                    <input type="radio" id="avatar2" name="avatar_choice" value="1A8BXdiu2XE7FaAz8NmtYTYL4zYyIRsD7">
-                    <label for="avatar2">
-                        <img src="https://drive.google.com/thumbnail?id=1A8BXdiu2XE7FaAz8NmtYTYL4zYyIRsD7" alt="Avatar 2" class="img-thumbnail">
-                    </label>
-                </div>
+    <div class="container mt-5">
+        <h1>Registration</h1>
+        {% if form.errors %}
+            <div class="alert alert-danger">
+                <ul>
+                    {% for field, errors in form.errors.items() %}
+                        {% for error in errors %}
+                            <li>{{ form[field].label.text }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
             </div>
-        </div>
-        <div id="address-fields" style="display: none;">
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('main.registration') }}" enctype="multipart/form-data" id="registration-form">
+            {{ form.hidden_tag() }}
+
             <div class="mb-3">
-                <label for="city" class="form-label">Street</label>
-                <input type="text" class="form-control" id="city" name="city">
+                {{ form.name.label }}
+                {{ form.name(class_="form-control") }}
+                {% for error in form.name.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
             </div>
+
             <div class="mb-3">
-                <label for="address" class="form-label">Address</label>
-                <input type="text" class="form-control" id="address" name="address">
+                {{ form.username.label }}
+                {{ form.username(class_="form-control") }}
+                {% for error in form.username.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
             </div>
-        </div>
-        <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
-    </form>
-</div>
+
+            <div class="mb-3">
+                {{ form.email.label }}
+                {{ form.email(class_="form-control") }}
+                {% for error in form.email.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="mb-3">
+                {{ form.password.label }}
+                {{ form.password(class_="form-control") }}
+                {% for error in form.password.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="mb-3">
+                {{ form.confirm_password.label }}
+                {{ form.confirm_password(class_="form-control") }}
+                {% for error in form.confirm_password.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="mb-3">
+                {{ form.role.label }}
+                {{ form.role(class_="form-select", id="role") }}
+                {% for error in form.role.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Choose a Default Avatar</label>
+
+                <div id="avatar-selection" class="d-flex flex-wrap">
+                    <div class="avatar-option me-3 mb-3">
+                        <input type="radio" id="avatar1" name="avatar_choice" value="1yOOHEp8xJx7S_vbZmRe5K3nbia1XMVL6" checked>
+                        <label for="avatar1">
+                            <img src="https://drive.google.com/thumbnail?id=1yOOHEp8xJx7S_vbZmRe5K3nbia1XMVL6" alt="Avatar 1" class="img-thumbnail">
+                        </label>
+                    </div>
+
+                    <div class="avatar-option me-3 mb-3">
+                        <input type="radio" id="avatar2" name="avatar_choice" value="1A8BXdiu2XE7FaAz8NmtYTYL4zYyIRsD7">
+                        <label for="avatar2">
+                            <img src="https://drive.google.com/thumbnail?id=1A8BXdiu2XE7FaAz8NmtYTYL4zYyIRsD7" alt="Avatar 2" class="img-thumbnail">
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="mb-3">
+                {{ form.city.label }}
+                {{ form.city(class_="form-control", id="city") }}
+                {% for error in form.city.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="mb-3">
+                {{ form.address.label }}
+                {{ form.address(class_="form-control", id="address") }}
+                {% for error in form.address.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            {% if error %}
+                <div class="alert alert-danger" role="alert">{{ error }}</div>
+            {% endif %}
+            <button type="submit" class="w-100 btn btn-lg btn-primary" id="submit-button">{{ form.submit.label }}</button>
+        </form>
+    </div>
 <br>
-<script>
-function toggleAddressFields() {
-    const role = document.getElementById('role').value;
-    const addressFields = document.getElementById('address-fields');
-    const address = document.getElementById('address');
-    const city = document.getElementById('city');
+{% endblock %}
 
-    if (role === 'buyer') {
-        addressFields.style.display = 'block';
-        address.required = true;
-        city.required = true;
-    } else {
-        addressFields.style.display = 'none';
-        address.required = false;
-        city.required = false;
-    }
-}
+{% block scripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('registration-form');
+            const submitButton = document.getElementById('submit-button');
+            const usernameField = document.getElementById('username');
 
-// Initialize address fields visibility on page load based on the default role
-document.addEventListener('DOMContentLoaded', function() {
-    toggleAddressFields();
-});
-</script>
+            usernameField.addEventListener('input', function() {
+                const username = usernameField.value;
+
+                // Disable the submit button while checking
+                submitButton.disabled = true;
+
+                fetch('/check-username', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token() }}' // Include CSRF token
+                    },
+                    body: JSON.stringify({ username: username })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exists) {
+                        // Username exists
+                        submitButton.disabled = true;
+                        usernameField.classList.add('is-invalid');
+                    } else {
+                        // Username does not exist
+                        submitButton.disabled = false;
+                        usernameField.classList.remove('is-invalid');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    submitButton.disabled = false;
+                });
+            });
+        });
+    </script>
 {% endblock %}

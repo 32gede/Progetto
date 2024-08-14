@@ -20,7 +20,13 @@ class User(UserMixin, Base):
     role: Mapped[str] = mapped_column(String(255), nullable=False)
     avatar: Mapped[bytes] = mapped_column(String(255), nullable=True)
 
-    seller: Mapped["UserSeller"] = relationship("UserSeller", uselist=False, back_populates="user", lazy='joined')  # Eager loading
+    # New fields
+    name: Mapped[str] = mapped_column(String(255), nullable=True)
+    username: Mapped[str] = mapped_column(String(255), nullable=True, unique=True)
+    address: Mapped[str] = mapped_column(String(255), nullable=True)
+    city: Mapped[str] = mapped_column(String(255), nullable=True)
+
+    seller: Mapped["UserSeller"] = relationship("UserSeller", uselist=False, back_populates="user", lazy='joined') # Eager loading
     buyer: Mapped["UserBuyer"] = relationship("UserBuyer", uselist=False, back_populates="user")
     reviews: Mapped[list["Review"]] = relationship("Review", back_populates="user")
     cart_items: Mapped["CartItem"] = relationship("CartItem", back_populates="user")
@@ -67,8 +73,7 @@ class UserSeller(Base):
     id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), primary_key=True)
     seller_rating: Mapped[int] = mapped_column(Integer, nullable=False)
     user: Mapped["User"] = relationship("User", back_populates="seller")
-    products: Mapped[list["Product"]] = relationship("Product", back_populates="seller")  # Assicurati che qui ci sia 'list'
-
+    products: Mapped[list["Product"]] = relationship("Product", back_populates="seller")
 
 
 class UserBuyer(Base):
@@ -77,8 +82,6 @@ class UserBuyer(Base):
     id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), primary_key=True)
     buyer_rating: Mapped[int] = mapped_column(Integer, nullable=False)
     user: Mapped["User"] = relationship("User", back_populates="buyer")
-    city: Mapped[str] = mapped_column(String, nullable=False)
-    address: Mapped[str] = mapped_column(String, nullable=False)
 
 
 # -------------- Prodotti:
