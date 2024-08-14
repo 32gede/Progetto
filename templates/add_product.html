@@ -50,30 +50,30 @@
         </div>
 
         <div class="form-group">
-            <label for="brand_id">Brand</label>
-            <input list="brand-list" name="brand_id" id="brand_id" class="form-control" placeholder="Enter or select a brand">
-            <datalist id="brand-list">
-                {% for brand in brands %}
-                    <option value="{{ brand.name }}"></option>
-                {% endfor %}
-            </datalist>
-            {% for error in form.brand_id.errors %}
-                <div class="text-danger">{{ error }}</div>
-            {% endfor %}
-        </div>
+    <label for="brand_id">Brand</label>
+    <input list="brand-list" name="brand_id" id="brand_id" class="form-control" placeholder="Enter or select a brand">
+    <datalist id="brand-list">
+        {% for brand in brands %}
+            <option value="{{ brand.name }}"></option>
+        {% endfor %}
+    </datalist>
+    {% for error in form.brand_id.errors %}
+        <div class="text-danger">{{ error }}</div>
+    {% endfor %}
+</div>
 
-        <div class="form-group">
-            <label for="category_id">Category</label>
-            <input list="category-list" name="category_id" id="category_id" class="form-control" placeholder="Enter or select a category">
-            <datalist id="category-list">
-                {% for category in categories %}
-                    <option value="{{ category.name }}"></option>
-                {% endfor %}
-            </datalist>
-            {% for error in form.category_id.errors %}
-                <div class="text-danger">{{ error }}</div>
-            {% endfor %}
-        </div>
+<div class="form-group">
+    <label for="category_id">Category</label>
+    <input list="category-list" name="category_id" id="category_id" class="form-control" placeholder="Enter or select a category">
+    <datalist id="category-list">
+        {% for category in categories %}
+            <option value="{{ category.name }}"></option>
+        {% endfor %}
+    </datalist>
+    {% for error in form.category_id.errors %}
+        <div class="text-danger">{{ error }}</div>
+    {% endfor %}
+</div>
 
         <div class="form-group">
             {{ form.image.label }}
@@ -93,48 +93,48 @@
 {% endblock %}
 
 {% block custom_js %}
-    <script>
-        function toggleBrandDropdown() {
-        var dropdown = document.getElementById('brand_dropdown');
-        var input = document.getElementById('brand_id_input');
-        if (dropdown.style.display === 'none' || dropdown.style.display === '') {
-            dropdown.style.display = 'block';
-            input.disabled = true;
-        } else {
-            dropdown.style.display = 'none';
-            input.disabled = false;
-        }
+<script>
+    function toggleBrandDropdown() {
+    var dropdown = document.getElementById('brand_dropdown');
+    var input = document.getElementById('brand_id_input');
+    if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+        dropdown.style.display = 'block';
+        input.disabled = true;
+    } else {
+        dropdown.style.display = 'none';
+        input.disabled = false;
     }
+}
 
-    function selectBrand() {
-        var select = document.getElementById('brand_select');
-        var input = document.getElementById('brand_id_input');
-        if (select.value) {
-            input.value = select.value;
-        }
-        toggleBrandDropdown(); // Nascondi il menu a discesa dopo la selezione
+function selectBrand() {
+    var select = document.getElementById('brand_select');
+    var input = document.getElementById('brand_id_input');
+    if (select.value) {
+        input.value = select.value;
     }
+    toggleBrandDropdown(); // Nascondi il menu a discesa dopo la selezione
+}
 
-    function toggleCategoryDropdown() {
-        var dropdown = document.getElementById('category_dropdown');
-        var input = document.getElementById('category_id_input');
-        if (dropdown.style.display === 'none' || dropdown.style.display === '') {
-            dropdown.style.display = 'block';
-            input.disabled = true;
-        } else {
-            dropdown.style.display = 'none';
-            input.disabled = false;
-        }
+function toggleCategoryDropdown() {
+    var dropdown = document.getElementById('category_dropdown');
+    var input = document.getElementById('category_id_input');
+    if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+        dropdown.style.display = 'block';
+        input.disabled = true;
+    } else {
+        dropdown.style.display = 'none';
+        input.disabled = false;
     }
+}
 
-    function selectCategory() {
-        var select = document.getElementById('category_select');
-        var input = document.getElementById('category_id_input');
-        if (select.value) {
-            input.value = select.value;
-        }
-        toggleCategoryDropdown(); // Nascondi il menu a discesa dopo la selezione
+function selectCategory() {
+    var select = document.getElementById('category_select');
+    var input = document.getElementById('category_id_input');
+    if (select.value) {
+        input.value = select.value;
     }
+    toggleCategoryDropdown(); // Nascondi il menu a discesa dopo la selezione
+}
 
 
     function createNewBrand() {
