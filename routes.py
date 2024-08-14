@@ -260,7 +260,7 @@ def edit_profile():
                     db_session.rollback()
                     flash(f'Failed to update the profile: {e}', 'error')
 
-    return render_template('profile.html', form=form)
+    return render_template('edit_profile.html', form=form)
 
 
 # PRODUCT ROUTES #
