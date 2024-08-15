@@ -37,7 +37,23 @@ Come segnare qualcosa di fatto:
 1. [x] **Registrazione degli utenti**: Implementare la funzionalità di registrazione che consente agli utenti di creare un account scegliendo tra i ruoli di buyer e seller.
 2. [x] **Autenticazione degli utenti**: Implementare la funzionalità di login che consente agli utenti di accedere al proprio account.
 3. [ ] **Gestione dei profili**: Consentire agli utenti di aggiornare le informazioni del proprio profilo.
+   1. [ ] **Permettere di modificare email**: Implementare la funzionalità per modificare l'email degli utenti.
+   2. [ ] **Permettere di modificare ruolo**: Implementare la funzionalità per modificare il ruolo degli utenti.
+   3. [ ] **Permettere di modificare nome**: Implementare la funzionalità per modificare il nome degli utenti.
+   4. [ ] **Permettere di modificare cognome**: Implementare la funzionalità per modificare il cognome degli utenti.
+   5. [ ] **Permettere di modificare indirizzo**: Implementare la funzionalità per modificare l'indirizzo degli utenti.
+   6. [ ] **Permettere di modificare città**: Implementare la funzionalità per modificare la città degli utenti.
+   7. [ ] **Permettere di modificare CAP**: Implementare la funzionalità per modificare il CAP degli utenti.
+   8. [ ] **Permettere di modificare provincia**: Implementare la funzionalità per modificare la provincia degli utenti.
+   9. [ ] **Permettere di modificare telefono**: Implementare la funzionalità per modificare il telefono degli utenti.
+   10. [ ] **Permettere di modificare data di nascita**: Implementare la funzionalità per modificare la data di nascita degli utenti.
+   11. [ ] **Permettere di modificare sesso**: Implementare la funzionalità per modificare il sesso degli utenti.
+   12. [ ] **Permettere di modificare codice fiscale**: Implementare la funzionalità per modificare il codice fiscale degli utenti.
+   13. [ ] **Permettere di modificare partita IVA**: Implementare la funzionalità per modificare la partita IVA degli utenti.
+   14. [ ] **Permettere di modificare descrizione**: Implementare la funzionalità per modificare la descrizione degli utenti.
+   15. [ ] **Permettere di modificare immagine profilo**: Implementare la funzionalità per modificare l'immagine profilo degli utenti.
 4. [ ] **Reset della password**: Implementare la funzionalità di reset della password per consentire agli utenti di recuperare l'accesso al proprio account.
+5. [ ] **Permettere di eliminare account**: Implementare la funzionalità per eliminare l'account degli utenti.
 
 ## Gestione dei prodotti
 
@@ -46,13 +62,21 @@ Come segnare qualcosa di fatto:
 3. [x] **Eliminare prodotti**: Consentire ai venditori di eliminare i propri prodotti.
 4. [x] **Visualizzare prodotti**: Consentire a tutti gli utenti di visualizzare l'elenco dei prodotti disponibili.
 5. [x] **Filtrare e ordinare prodotti**: Implementare la funzionalità di filtro e ordinamento dei prodotti per facilitare la ricerca agli utenti.
-6. [ ] **Immagine Prodotto**: Consentire ai venditori di aggiungere un'immagine per ciascun prodotto.
+6. [x] **Immagine Prodotto**: Consentire ai venditori di aggiungere un'immagine per ciascun prodotto.
+7. [ ] **Gestione delle categorie**: Implementare un sistema di categorie per organizzare i prodotti e facilitare la navigazione.
+8. [ ] **Prodotti in offerta**: Consentire ai venditori di contrassegnare i prodotti in offerta e visualizzarli in un'apposita sezione.
+9. [ ] **Prodotti più venduti**: Implementare un sistema per tracciare i prodotti più venduti e visualizzarli in un'apposita sezione.
+10. [ ] **Prodotti consigliati**: Implementare un sistema per suggerire prodotti in base agli acquisti precedenti o alle preferenze dell'utente.
 
 ## Ricerca e Filtri
 
 1. [x] **Ricerca per parole chiave**: Implementare la ricerca dei prodotti basata su parole chiave che cercano nel nome e nella descrizione dei prodotti.
 2. [x] **Filtri per attributi**: Implementare filtri basati su attributi come prezzo, brand, categoria, ecc.
 3. [x] **Interfaccia di ricerca avanzata**: Creare un'interfaccia utente per la ricerca avanzata che consenta agli utenti di combinare vari criteri di ricerca e filtro
+4. [ ] **Ricerca per recensioni**: Consentire agli utenti di cercare prodotti in base alle recensioni e alle valutazioni.
+5. [ ] **Ricerca per venditori**: Implementare la ricerca di prodotti in base al venditore che li ha inseriti.
+6. [ ] **Ricerca per località**: Consentire agli utenti di cercare prodotti in base alla loro posizione geografica.
+7. [ ] **Ricerca fuzzy**: Implementare la ricerca fuzzy per correggere gli errori di battitura e restituire risultati simili.
 
 ## Carrello della spesa
 
@@ -61,6 +85,15 @@ Come segnare qualcosa di fatto:
 3. [x] **Rimuovere dal carrello**: Consentire agli utenti di rimuovere prodotti dal carrello.
 4. [x] **Visualizzare il carrello**: Creare una pagina del carrello dove gli utenti possono vedere i prodotti aggiunti e il totale dell'ordine.
 5. [x] **Procedere al pagamento**: Implementare la funzionalità di checkout per permettere agli utenti di finalizzare l'acquisto.
+6. [ ] **Coupon e sconti**: Consentire agli utenti di applicare coupon e sconti durante il checkout.
+7. [ ] **Spedizione e tasse**: Calcolare automaticamente le spese di spedizione e le tasse durante il checkout.
+8. [ ] **Salvare il carrello**: Consentire agli utenti di salvare il carrello per completare l'acquisto in un secondo momento.
+9. [ ] **Pagamenti multipli**: Implementare la possibilità di effettuare pagamenti multipli (es. carta di credito, PayPal, bonifico bancario).
+10. [ ] **Indirizzi di spedizione**: Consentire agli utenti di aggiungere e gestire diversi indirizzi di spedizione per gli ordini.
+11. [ ] **Conferma dell'ordine**: Invia una conferma dell'ordine via email all'utente dopo il checkout.
+12. [ ] **Notifiche di rimborso**: Invia notifiche agli utenti quando un ordine viene rimborsato o annullato.
+13. [ ] **Ordini salvati**: Consentire agli utenti di visualizzare e ripetere gli ordini salvati in precedenza.
+14. [ ] **Lista dei desideri**: Implementare una lista dei desideri per consentire agli utenti di salvare i prodotti per un acquisto futuro.
 
 ## Gestione degli ordini
 
@@ -81,13 +114,21 @@ Come segnare qualcosa di fatto:
 8. [ ] **Valutazioni per venditori**: Consentire agli acquirenti di valutare i venditori e lasciare feedback sulla loro esperienza complessiva.
 9. [ ] **Recensioni più utili**: Implementare un sistema per votare le recensioni più utili e visualizzare le recensioni più votate in cima all'elenco.
 10. [ ] **Recensioni con immagini**: Consentire agli utenti di aggiungere immagini alle recensioni per mostrare il prodotto in uso.
-11. [ ] **Problema rimozione recensioni**: Problema quando c'è solo una recensione
+11. [ ] **Problema rimozione recensioni**: Problema quando c'è solo una recensione, divisione per 0.
 
 ## Design del Database
 
 1. [x] **Schema del database**: Progettare lo schema del database con tutte le tabelle necessarie (utenti, prodotti, carrelli, ordini, recensioni, ecc.).
 2. [ ] **Vincoli e chiavi esterne**: Definire vincoli di integrità e chiavi esterne per garantire la consistenza dei dati.
 3. [ ] **Trigger e transazioni**: Implementare trigger e transazioni per garantire l'integrità dei dati e automatizzare alcune operazioni (es. aggiornare le date di modifica).
+4. [ ] **Ottimizzazione delle query**: Ottimizzare le query del database per migliorare le prestazioni e ridurre i tempi di risposta.
+   1. [ ] Utilizzare EXPLAIN per analizzare le query e identificare le aree di miglioramento.
+   2. [ ] Utilizzare indici per velocizzare le query che coinvolgono colonne comuni.
+   3. [ ] Evitare le query nidificate e le query complesse che coinvolgono molte tabelle.
+   4. [ ] Utilizzare le transazioni per garantire la coerenza dei dati e prevenire problemi di concorrenza.
+   5. [ ] Limitare il numero di record restituiti dalle query per ridurre il carico sul database.
+   6. [ ] Utilizzare cache per memorizzare i risultati delle query frequenti e ridurre i tempi di risposta.
+5. [ ] **Backup e ripristino**: Implementare un sistema di backup e ripristino per proteggere i dati da perdite accidentali o danni.
 
 ## Front-end
 

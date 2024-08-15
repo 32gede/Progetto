@@ -4,64 +4,65 @@
 {% block title %}Edit Product - E-commerce{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h1>Edit Product</h1>
-    <form action="{{ url_for('main.edit_product', product_id=product.id) }}" method="POST" enctype="multipart/form-data">
-        <div class="mb-3">
-            <label for="name" class="form-label">Name</label>
-            <input type="text" class="form-control" id="name" name="name" value="{{ product.name }}" required>
-        </div>
-        <div class="mb-3">
-            <label for="description" class="form-label">Description</label>
-            <textarea class="form-control" id="description" name="description" required>{{ product.description }}</textarea>
-        </div>
-        <div class="mb-3">
-            <label for="price" class="form-label">Price</label>
-            <input type="number" class="form-control" id="price" name="price" value="{{ product.price }}" required>
-        </div>
-        <div class="mb-3">
-            <label for="quantity" class="form-label">Quantity</label>
-            <input type="number" class="form-control" id="quantity" name="quantity" value="{{ product.quantity }}" required>
-        </div>
-        <div class="mb-3">
-            <label for="brand_id" class="form-label">Brand</label>
-            <select class="form-control" id="brand_id" name="brand_id" required>
-                {% for brand in brands %}
-                    <option value="{{ brand.id }}" {% if brand.id == product.brand_id %}selected{% endif %}>{{ brand.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="category_id" class="form-label">Category</label>
-            <select class="form-control" id="category_id" name="category_id" required>
-                {% for category in categories %}
-                    <option value="{{ category.id }}" {% if category.id == product.category_id %}selected{% endif %}>{{ category.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="image" class="form-label">Image</label>
-            <input type="file" class="form-control" id="image" name="image" onchange="previewImage(this)">
-        </div>
-        <div class="mb-3">
-            {% if product.image %}
-                <img id="image-preview" src="https://drive.google.com/thumbnail?id={{ product.image }}" alt="Image" class="img-thumbnail" width="100">
-            {% else %}
-                <img id="image-preview" src="{{ product.gravatar(150) }}" alt="Image" class="img-thumbnail" width="100">
-            {% endif %}
-        </div>
-        <button type="submit" class="btn btn-primary">Save Changes</button>
-    </form>
-</div>
-{% endblock %}
+    <div class="container mt-5">
+        <h1>Edit Product</h1>
+        <form action="{{ url_for('main.edit_product', product_id=product.id) }}" method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ product.name }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea class="form-control" id="description" name="description" required>{{ product.description }}</textarea>
+            </div>
+            <div class="mb-3">
+                <label for="price" class="form-label">Price</label>
+                <input type="number" class="form-control" id="price" name="price" value="{{ product.price }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="quantity" class="form-label">Quantity</label>
+                <input type="number" class="form-control" id="quantity" name="quantity" value="{{ product.quantity }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="brand_id" class="form-label">Brand</label>
+                <select class="form-control" id="brand_id" name="brand_id" required>
+                    {% for brand in brands %}
+                        <option value="{{ brand.id }}" {% if brand.id == product.brand_id %}selected{% endif %}>{{ brand.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="category_id" class="form-label">Category</label>
+                <select class="form-control" id="category_id" name="category_id" required>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}" {% if category.id == product.category_id %}selected{% endif %}>{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="image" class="form-label">Image</label>
+                <input type="file" class="form-control" id="image" name="image" onchange="previewImage(this)">
+            </div>
+            <div class="mb-3">
+                {% if product.image %}
+                    <img id="image-preview" src="https://drive.google.com/thumbnail?id={{ product.image }}" alt="Product Image" class="img-thumbnail" width="100">
+                {% else %}
+                    <p>No image available</p>
+                {% endif %}
+            </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+    </div>
+    {% endblock %}
 
-<script>
-function previewImage(input) {
-    var file = input.files[0];
-    var reader = new FileReader();
-    reader.onload = function(e) {
-        document.getElementById('image-preview').src = e.target.result;
+    <script>
+    function previewImage(input) {
+        var file = input.files[0];
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('image-preview').src = e.target.result;
+        }
+        reader.readAsDataURL(file);
     }
-    reader.readAsDataURL(file);
-}
 </script>
