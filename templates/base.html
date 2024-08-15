@@ -21,6 +21,25 @@
             padding: 1rem;
             background: #f8f9fa;
         }
+
+        .card-link {
+            text-decoration: none; /* Rimuove la sottolineatura dal link */
+            color: inherit; /* Fa sì che il colore del testo segua il colore del testo della card */
+        }
+
+        .card {
+            transition: border-color 0.3s; /* Aggiunge una transizione fluida per il cambiamento di colore del bordo */
+            border: 1px solid #ddd; /* Colore del bordo iniziale */
+        }
+
+        .card:hover {
+            border-color: #007bff; /* Colore del bordo al passaggio del mouse (puoi scegliere il colore che preferisci) */
+        }
+
+        .card-body {
+            cursor: pointer; /* Cambia il cursore per indicare che è cliccabile */
+        }
+
     </style>
 </head>
 <body>
