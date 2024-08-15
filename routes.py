@@ -443,8 +443,10 @@ def remove_product(product_id):
 def edit_product(product_id):
     with get_db_session() as db_session:
         product = db_session.query(Product).filter_by(id=product_id).first()
+        print(f'Product Retrieved: {product}')  # Check if the product is found
 
         if not product or product.seller_id != current_user.id:
+            print('Product not found or unauthorized access attempt.')
             return redirect(url_for('main.index'))
 
         if request.method == 'POST':
@@ -496,34 +498,48 @@ def edit_product(product_id):
                 error_message='Invalid category name.',
                 is_html=True
             )
+
+            # Log form data
+            print(
+                f'Form Data: name={name}, description={description}, price={price}, quantity={quantity}, brand_id={brand_id}, category_id={category_id}')
+
             product.name = name
             product.description = description
             product.price = price
             product.quantity = quantity
             product.brand_id = brand_id
             product.category_id = category_id
+
+
             file = request.files.get('image')
-            print(file)
+            print(f'File Received: {file}')  # Log if file is received
+
             if file:
-                print('dentro')
-            if file:
-                print('dentro')
+                print('File upload initiated.')
                 if allowed_file(file.filename):
+                    print(f'File is allowed: {file.filename}')
                     filename = secure_filename(file.filename)
                     file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
                     try:
                         file.save(file_path)
+                        print(f'File saved to: {file_path}')
                         product.image = carica_imm(file_path, filename)
+                        print(f'File uploaded to Google Drive with ID: {product.image}')
                         db_session.commit()  # Ensure commit here to save avatar changes
                         flash('Your profile has been updated.', 'success')
                     except Exception as e:
                         db_session.rollback()
+                        print(f'Error during file upload: {e}')
 
             db_session.commit()
+            print(f'Changes committed for product ID: {product.id}')
             return redirect(url_for('main.view_product', product_id=product.id))
 
         brands = db_session.query(Brand).all()
         categories = db_session.query(Category).all()
+        print(f'Brands: {brands}')  # Log retrieved brands
+        print(f'Categories: {categories}')  # Log retrieved categories
+
         return render_template('edit_product.html', product=product, brands=brands, categories=categories)
 
 
