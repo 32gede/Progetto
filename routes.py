@@ -812,6 +812,10 @@ def manage_orders():
         else:
             orders = []
 
+        # Fetch the buyer's address and city for each order
+        for order in orders:
+            order.user = db_session.query(User).filter_by(id=order.user_id).first()
+
         # Aggiorna lo stato degli ordini
         update_order_status()
 
