@@ -806,7 +806,7 @@ def checkout():
                 db_session.add(new_order)
                 db_session.commit()
 
-                # Aggiungi gli articoli all'ordine e rimuovi dal carrello
+                # Aggiungi gli articoli all'ordine, aggiorna l'inventario e rimuovi dal carrello
                 for item in items:
                     order_item = OrderItem(
                         order_id=new_order.id,
@@ -815,6 +815,14 @@ def checkout():
                         price=item.product.price
                     )
                     db_session.add(order_item)
+
+                    # Aggiorna l'inventario
+                    product = db_session.query(Product).filter_by(id=item.product_id).first()
+                    if product.quantity < item.quantity:
+                        flash('Quantità insufficiente per il prodotto: {}'.format(product.name), 'danger')
+                        return redirect(url_for('main.cart'))
+                    product.quantity -= item.quantity
+
                     db_session.delete(item)
 
             db_session.commit()
@@ -824,7 +832,6 @@ def checkout():
         # Recupera l'indirizzo dell'utente per visualizzare nella pagina di checkout
         user_buyer = db_session.query(UserBuyer).filter_by(id=current_user.id).first()
         return render_template('checkout.html', cart_items=cart_items, user_buyer=user_buyer)
-
 
 @main_routes.route('/order_history')
 @login_required
