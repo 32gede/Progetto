@@ -261,12 +261,12 @@ def edit_profile():
 @login_required
 @role_required('seller')
 def view_products_seller():
+    form = ProductForm()  # Create a form instance
     with get_db_session() as db_session:
         products = db_session.query(Product).filter_by(seller_id=current_user.id).all()
         if not products:
-            print()
-            return render_template('products_seller.html', error="No products found.")
-        return render_template('products_seller.html', products=products)
+            return render_template('products_seller.html', error="No products found.", form=form)
+        return render_template('products_seller.html', products=products, form=form)
 
 @main_routes.route('/buyer/products')
 @login_required
@@ -380,105 +380,47 @@ def remove_product(product_id):
 @login_required
 @role_required('seller')
 def edit_product(product_id):
+    form = ProductForm()
     with get_db_session() as db_session:
         product = db_session.query(Product).filter_by(id=product_id).first()
-        print(f'Product Retrieved: {product}')  # Check if the product is found
-
         if not product or product.seller_id != current_user.id:
-            print('Product not found or unauthorized access attempt.')
             return redirect(url_for('main.index'))
 
-        if request.method == 'POST':
-            name = validate_and_sanitize(
-                request.form.get('name'),
-                value_type='string',
-                min_value=1,
-                max_value=255,
-                error_message='Invalid product name.',
-                is_html=True
-            )
-            description = validate_and_sanitize(
-                request.form.get('description'),
-                value_type='string',
-                min_value=1,
-                max_value=255,
-                error_message='Invalid product description.',
-                is_html=True
-            )
-            price = validate_and_sanitize(
-                request.form.get('price'),
-                value_type='float',
-                min_value=0.01,
-                max_value=1000000,
-                error_message='Invalid price.',
-                is_html=True
-            )
-            quantity = validate_and_sanitize(
-                request.form.get('quantity'),
-                value_type='int',
-                min_value=1,
-                max_value=1000000,
-                error_message='Invalid quantity.',
-                is_html=True
-            )
-            brand_id = validate_and_sanitize(
-                request.form.get('brand_id'),
-                value_type='string',
-                min_value=1,
-                max_value=255,
-                error_message='Invalid brand name.',
-                is_html=True
-            )
-            category_id = validate_and_sanitize(
-                request.form.get('category_id'),
-                value_type='string',
-                min_value=1,
-                max_value=255,
-                error_message='Invalid category name.',
-                is_html=True
-            )
+        if form.validate_on_submit():
+            product.name = form.name.data
+            product.description = form.description.data
+            product.price = form.price.data
+            product.quantity = form.quantity.data
+            product.brand_id = form.brand_id.data
+            product.category_id = form.category_id.data
 
-            # Log form data
-            print(
-                f'Form Data: name={name}, description={description}, price={price}, quantity={quantity}, brand_id={brand_id}, category_id={category_id}')
-
-            product.name = name
-            product.description = description
-            product.price = price
-            product.quantity = quantity
-            product.brand_id = brand_id
-            product.category_id = category_id
-
-            file = request.files.get('image')
-            print(f'File Received: {file}')  # Log if file is received
-
-            if file:
-                print('File upload initiated.')
-                if allowed_file(file.filename):
-                    print(f'File is allowed: {file.filename}')
-                    filename = secure_filename(file.filename)
-                    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-                    try:
-                        file.save(file_path)
-                        print(f'File saved to: {file_path}')
-                        product.image = carica_imm(file_path, filename)
-                        print(f'File uploaded to Google Drive with ID: {product.image}')
-                        db_session.commit()  # Ensure commit here to save avatar changes
-                        flash('Your profile has been updated.', 'success')
-                    except Exception as e:
-                        db_session.rollback()
-                        print(f'Error during file upload: {e}')
+            file = form.image.data
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                try:
+                    file.save(file_path)
+                    product.image = carica_imm(file_path, filename)
+                except Exception as e:
+                    db_session.rollback()
+                    flash('Failed to upload image.', 'error')
+                    return redirect(url_for('main.edit_product', product_id=product.id))
 
             db_session.commit()
-            print(f'Changes committed for product ID: {product.id}')
+            flash('Product updated successfully.', 'success')
             return redirect(url_for('main.view_product', product_id=product.id))
+
+        form.name.data = product.name
+        form.description.data = product.description
+        form.price.data = product.price
+        form.quantity.data = product.quantity
+        form.brand_id.data = product.brand_id
+        form.category_id.data = product.category_id
 
         brands = db_session.query(Brand).all()
         categories = db_session.query(Category).all()
-        print(f'Brands: {brands}')  # Log retrieved brands
-        print(f'Categories: {categories}')  # Log retrieved categories
 
-        return render_template('edit_product.html', product=product, brands=brands, categories=categories)
+        return render_template('edit_product.html', form=form, product=product, brands=brands, categories=categories)
 
 
 # REVIEW ROUTES #
