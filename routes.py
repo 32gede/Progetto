@@ -19,19 +19,13 @@ from search import search_products
 from form import ProductForm, ProfileForm, RegistrationForm, LoginForm
 
 # DEFINE BLUEPRINT #
-import traceback
 import logging
 
-# Configura il logging
 logging.basicConfig()
-# logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 main_routes = Blueprint('main', __name__)
 
 UPLOAD_FOLDER = 'static/avatars'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-
-
-# HELPER FUNCTIONS #
 
 
 def allowed_file(filename):
@@ -116,7 +110,6 @@ def validate_and_sanitize(value, value_type='string', min_value=None, max_value=
             return float_value
         except ValueError:
             raise ValueError(error_message)
-
     else:
         raise ValueError("Invalid value_type specified. Must be 'string', 'int', or 'float'.")
 
@@ -264,7 +257,6 @@ def edit_profile():
 
 
 # PRODUCT ROUTES #
-
 @main_routes.route('/seller/products')
 @login_required
 @role_required('seller')
@@ -276,7 +268,6 @@ def view_products_seller():
             return render_template('products_seller.html', error="No products found.")
         return render_template('products_seller.html', products=products)
 
-
 @main_routes.route('/buyer/products')
 @login_required
 @role_required('buyer')
@@ -286,7 +277,6 @@ def view_products_buyer():
         if not products:
             return render_template('products_buyer.html', error="No products available.")
         return render_template('products_buyer.html', products=products)
-
 
 @main_routes.route('/products/<int:product_id>')
 @login_required
