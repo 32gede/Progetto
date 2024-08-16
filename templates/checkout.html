@@ -11,15 +11,13 @@
         </div>
         <div class="card-body">
             <h5>Indirizzo di spedizione</h5>
+            {% if user_buyer.address and user_buyer.city %}
+                <p>Indirizzo: {{ user_buyer.address }}</p>
+                <p>Città: {{ user_buyer.city }}</p>
+            {% else %}
+                <p>Indirizzo non disponibile.</p>
+            {% endif %}
             <form method="POST">
-                <div class="mb-3">
-                    <label for="address" class="form-label">Indirizzo</label>
-                    <input type="text" class="form-control" id="address" name="address" value="{{ user_buyer.address }}" required>
-                </div>
-                <div class="mb-3">
-                    <label for="city" class="form-label">Città</label>
-                    <input type="text" class="form-control" id="city" name="city" value="{{ user_buyer.city }}" required>
-                </div>
                 <table class="table">
                     <thead>
                         <tr>

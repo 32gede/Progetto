@@ -18,6 +18,7 @@
                             <th>Quantità</th>
                             <th>Data Ordine</th>
                             <th>Prezzo per Oggetto</th>
+                            <th>Totale</th> <!-- New column header -->
                             <th>Stato</th>
                             <th>Indirizzo di Spedizione</th>
                             <th>Azioni</th>
@@ -32,6 +33,7 @@
                                     <td>{{ item.quantity }}</td>
                                     <td>{{ order.created_at.strftime('%Y-%m-%d') }}</td>
                                     <td>{{ item.price }} €</td>
+                                    <td>{{ item.price * item.quantity }} €</td> <!-- Total cost calculation -->
                                     <td>{{ order.status }}</td>
                                     <td>
                                         {{ order.user.address }}, {{ order.user.city }}
