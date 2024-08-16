@@ -778,7 +778,7 @@ def edit_cart():
 
 @main_routes.route('/checkout', methods=['GET', 'POST'])
 @login_required
-@role_required('buyer', 'seller')
+@role_required('buyer')
 def checkout():
     with get_db_session() as db_session:
         # Ottieni gli articoli del carrello dell'utente
@@ -830,7 +830,7 @@ def checkout():
             return redirect(url_for('main.order_history'))  # Reindirizza alla pagina degli ordini
 
         # Recupera l'indirizzo dell'utente per visualizzare nella pagina di checkout
-        user_buyer = db_session.query(UserBuyer).filter_by(id=current_user.id).first()
+        user_buyer = db_session.query(User).filter_by(id=current_user.id).first()
         return render_template('checkout.html', cart_items=cart_items, user_buyer=user_buyer)
 
 @main_routes.route('/order_history')
