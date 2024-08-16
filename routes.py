@@ -350,80 +350,29 @@ def add_product():
     return render_template('add_product.html', form=form, brands=brands, categories=categories)
 
 
-
-def get_or_create_brand(db_session, brand_name):
-    """Retrieve a brand by name or create it if it doesn't exist."""
-    brand = db_session.query(Brand).filter_by(name=brand_name).first()
-    if not brand:
-        brand = Brand(name=brand_name)
-        db_session.add(brand)
-        try:
-            db_session.commit()
-        except IntegrityError:
-            db_session.rollback()
-            brand = db_session.query(Brand).filter_by(name=brand_name).first()
-    return brand
-
-
-def get_or_create_category(db_session, category_name):
-    """Retrieve a category by name or create it if it doesn't exist."""
-    category = db_session.query(Category).filter_by(name=category_name).first()
-    if not category:
-        category = Category(name=category_name)
-        db_session.add(category)
-        try:
-            db_session.commit()
-        except IntegrityError:
-            db_session.rollback()
-            category = db_session.query(Category).filter_by(name=category_name).first()
-    return category
-
-
-@main_routes.route('/create_brand', methods=['POST'])
-@login_required
-@role_required('seller')
-def create_brand():
-    data = request.get_json()
-    brand_name = data.get('name')
-    if not brand_name:
-        return jsonify(success=False, error="Brand name is required"), 400
-
-    with get_db_session() as db_session:
-        brand = get_or_create_brand(db_session, brand_name)
-        return jsonify(success=True, brand_id=brand.id)
-
-
-@main_routes.route('/create_category', methods=['POST'])
-@login_required
-@role_required('seller')
-def create_category():
-    data = request.get_json()
-    category_name = data.get('name')
-    if not category_name:
-        return jsonify(success=False, error="Category name is required"), 400
-
-    with get_db_session() as db_session:
-        category = get_or_create_category(db_session, category_name)
-        return jsonify(success=True, category_id=category.id)
-
-
 @main_routes.route('/remove_product/<int:product_id>', methods=['POST'])
 @login_required
 def remove_product(product_id):
-    with get_db_session() as db_session:
-        product = db_session.query(Product).filter_by(id=product_id).first()
+    form = ProductForm()
 
-        if not product:
-            flash('Product not found.')
+    if form.validate_on_submit():
+        with get_db_session() as db_session:
+            product = db_session.query(Product).filter_by(id=product_id).first()
+
+            if not product:
+                flash('Product not found.')
+                return redirect(url_for('main.view_products_seller'))
+
+            if product.seller_id != current_user.id:
+                flash('Unauthorized action.')
+                return redirect(url_for('main.view_products_seller'))
+
+            db_session.delete(product)
+            db_session.commit()
+            flash('Product deleted successfully.')
             return redirect(url_for('main.view_products_seller'))
-
-        if product.seller_id != current_user.id:
-            flash('Unauthorized action.')
-            return redirect(url_for('main.view_products_seller'))
-
-        db_session.delete(product)
-        db_session.commit()
-        flash('Product deleted successfully.')
+    else:
+        flash('Invalid form submission.')
         return redirect(url_for('main.view_products_seller'))
 
 
@@ -499,7 +448,6 @@ def edit_product(product_id):
             product.quantity = quantity
             product.brand_id = brand_id
             product.category_id = category_id
-
 
             file = request.files.get('image')
             print(f'File Received: {file}')  # Log if file is received
