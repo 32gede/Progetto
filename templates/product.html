@@ -8,7 +8,7 @@
         <h1>{{ product.name }}</h1>
         <a href="{% if (current_user.role) == 'seller' %}{{ url_for('main.view_products_seller') }}{% else %}{{ url_for('main.view_products_buyer') }}{% endif %}" class="btn btn-secondary">Back to Products</a>
     </div>
-
+<br>
     <div class="row">
         <div class="col-md-8">
             <div class="product-details">
