@@ -731,8 +731,12 @@ def checkout():
     with get_db_session() as db_session:
         # Ottieni gli articoli del carrello dell'utente
         cart_items = db_session.query(CartItem).filter_by(user_id=current_user.id).all()
+        user_buyer = db_session.query(User).filter_by(id=current_user.id).first()
 
         if request.method == 'POST':
+            address = request.form.get('address')
+            city = request.form.get('city')
+
             if not cart_items:
                 flash('Il carrello è vuoto. Non puoi completare l\'ordine.', 'warning')
                 return redirect(url_for('main.view_products_buyer'))
@@ -777,10 +781,7 @@ def checkout():
             flash('Ordine completato con successo!', 'success')
             return redirect(url_for('main.order_history'))  # Reindirizza alla pagina degli ordini
 
-        # Recupera l'indirizzo dell'utente per visualizzare nella pagina di checkout
-        user_buyer = db_session.query(User).filter_by(id=current_user.id).first()
         return render_template('checkout.html', cart_items=cart_items, user_buyer=user_buyer)
-
 @main_routes.route('/order_history')
 @login_required
 @role_required('buyer')
