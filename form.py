@@ -113,3 +113,8 @@ class ProfileForm(FlaskForm):
         FileAllowed(['jpg', 'jpeg', 'png'], 'Images only!')
     ])
     submit = SubmitField('Update Profile')
+
+class ReviewForm(FlaskForm):
+    rating = FloatField('Rating', validators=[DataRequired(), NumberRange(min=0, max=5)])
+    comment = TextAreaField('Comment', validators=[DataRequired(), Length(min=1, max=3000)])
+    submit = SubmitField('Submit')

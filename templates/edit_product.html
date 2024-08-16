@@ -38,14 +38,14 @@
             </div>
             <div class="mb-3">
                 {{ form.brand_id.label(for="brand_id") }}
-                    <input type="text" id="brand_id" class="form-control" value="{{ brand_name }}">
-                    {% for error in form.brand_id.errors %}
-                        <div class="text-danger">{{ error }}</div>
-                    {% endfor %}
+                <input type="text" id="brand_id" name="brand_id" class="form-control" value="{{ form.brand_id.data }}">
+                {% for error in form.brand_id.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
             </div>
             <div class="mb-3">
                 {{ form.category_id.label(for="category_id") }}
-                <input type="text" id="category_id" class="form-control" value="{{ category_name }}">
+                <input type="text" id="category_id" name="category_id" class="form-control" value="{{ form.category_id.data }}">
                 {% for error in form.category_id.errors %}
                     <div class="text-danger">{{ error }}</div>
                 {% endfor %}

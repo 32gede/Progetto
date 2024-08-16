@@ -16,7 +16,7 @@ from collegamento_drive import carica_imm
 from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem
 from database import get_db_session
 from search import search_products
-from form import ProductForm, ProfileForm, RegistrationForm, LoginForm
+from form import ProductForm, ProfileForm, RegistrationForm, LoginForm, ReviewForm
 
 # DEFINE BLUEPRINT #
 import logging
@@ -391,8 +391,14 @@ def edit_product(product_id):
             product.description = form.description.data
             product.price = form.price.data
             product.quantity = form.quantity.data
-            product.brand_id = form.brand_id.data
-            product.category_id = form.category_id.data
+
+            # Update brand and category names
+            brand = db_session.query(Brand).filter_by(id=product.brand_id).first()
+            category = db_session.query(Category).filter_by(id=product.category_id).first()
+            if brand:
+                brand.name = form.brand_id.data
+            if category:
+                category.name = form.category_id.data
 
             file = form.image.data
             if file and allowed_file(file.filename):
@@ -414,13 +420,17 @@ def edit_product(product_id):
         form.description.data = product.description
         form.price.data = product.price
         form.quantity.data = product.quantity
-        form.brand_id.data = product.brand_id
-        form.category_id.data = product.category_id
+
+        brand_name = db_session.query(Brand).filter_by(id=product.brand_id).first().name
+        category_name = db_session.query(Category).filter_by(id=product.category_id).first().name
+
+        form.brand_id.data = brand_name
+        form.category_id.data = category_name
 
         brands = db_session.query(Brand).all()
         categories = db_session.query(Category).all()
 
-        return render_template('edit_product.html', form=form, product=product, brands=brands, categories=categories)
+        return render_template('edit_product.html', form=form, product=product, brand_name=brand_name, category_name=category_name, brands=brands, categories=categories)
 
 
 # REVIEW ROUTES #
@@ -438,44 +448,24 @@ def view_reviews(product_id):
         reviews = product.reviews  # Directly access the reviews attribute
         return render_template('view_reviews.html', product=product, reviews=reviews)
 
-
 @main_routes.route('/product/<int:product_id>/add_review', methods=['GET', 'POST'])
 @login_required
 @role_required('buyer')
 def add_review(product_id):
+    form = ReviewForm()
     with get_db_session() as db_session:
         product = db_session.query(Product).filter_by(id=product_id).first()
 
         if not product:
             return redirect(url_for('main.index'))
 
-        if request.method == 'POST':
-            rating = validate_and_sanitize(
-                request.form.get('rating'),
-                value_type='float',
-                min_value=0,
-                max_value=5,
-                error_message='Invalid rating.',
-                is_html=True
-            )
-            comment = validate_and_sanitize(
-                request.form.get('comment'),
-                value_type='string',
-                min_value=1,
-                max_value=3000,
-                error_message='Invalid comment.',
-                is_html=True
-            )
-
-            if not rating or not comment:
-                flash('Please provide a rating and a review text.')
-                return redirect(url_for('main.view_product', product_id=product.id))
-
+        if form.validate_on_submit():
             new_review = Review(
                 product_id=product.id,
                 user_id=current_user.id,
-                rating=rating,
-                comment=comment)
+                rating=form.rating.data,
+                comment=form.comment.data
+            )
             db_session.add(new_review)
             seller = product.seller
             seller_reviews = db_session.query(Review).join(Product).filter(Product.seller_id == seller.id).all()
@@ -485,58 +475,36 @@ def add_review(product_id):
 
             return redirect(url_for('main.view_product', product_id=product.id))
 
-        return render_template('add_review.html', product=product)
-
+        return render_template('add_review.html', form=form, product=product)
 
 @main_routes.route('/edit_review/<int:product_id>/<int:review_id>', methods=['GET', 'POST'])
 @login_required
 @role_required('buyer')
 def edit_review(product_id, review_id):
+    form = ReviewForm()
     with get_db_session() as db_session:
-        review = db_session.query(Review).filter_by(id=review_id,
-                                                    user_id=current_user.id,
-                                                    product_id=product_id).first()
+        review = db_session.query(Review).filter_by(id=review_id, user_id=current_user.id, product_id=product_id).first()
         product = db_session.query(Product).filter_by(id=product_id).first()
 
         if not review:
             flash('Review not found.')
             return redirect(url_for('main.view_product', product_id=product.id))
 
-        if request.method == 'POST':
-            rating = validate_and_sanitize(
-                request.form.get('rating'),
-                value_type='float',
-                min_value=0,
-                max_value=5,
-                error_message='Invalid rating.',
-                is_html=True
-            )
-            comment = validate_and_sanitize(
-                request.form.get('comment'),
-                value_type='string',
-                min_value=1,
-                max_value=3000,
-                error_message='Invalid comment.',
-                is_html=True
-            )
-
-            if not rating or not comment:
-                flash('Rating and comment are required.')
-                return redirect(url_for('main.edit_review', product_id=product.id, review_id=review_id))
-
-            review.rating = rating
-            review.comment = comment
+        if form.validate_on_submit():
+            review.rating = form.rating.data
+            review.comment = form.comment.data
             seller = product.seller
             seller_reviews = db_session.query(Review).join(Product).filter(Product.seller_id == seller.id).all()
-
             seller_rating = sum(review.rating for review in seller_reviews) / len(seller_reviews)
             seller.seller_rating = seller_rating
-
             db_session.commit()
             flash('Review updated successfully.')
             return redirect(url_for('main.view_product', product_id=product.id))
 
-        return render_template('edit_review.html', review=review, product=product)
+        form.rating.data = review.rating
+        form.comment.data = review.comment
+
+        return render_template('edit_review.html', form=form, product=product)
 
 
 @main_routes.route('/product/<int:product_id>/remove_review/<int:review_id>', methods=['POST'])
