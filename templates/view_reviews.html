@@ -1,23 +1,35 @@
-<!-- templates/view_reviews.html -->
 {% extends "base.html" %}
 
-{% block title %}Reviews - E-commerce{% endblock %}
+{% block title %}Product Reviews{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h1>Reviews for {{ product.name|e }}</h1>
-    {% if reviews %}
-        <ul class="list-group">
-            {% for review in reviews %}
-                <li class="list-group-item">
-                    <strong>Rating:</strong> {{ review.rating|e }}<br>
-                    <strong>Comment:</strong> {{ review.comment|e }}
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No reviews yet.</p>
-    {% endif %}
-    <a href="{{ url_for('main.view_product', product_id=product.id|e) }}" class="btn btn-secondary mt-2">Back to Product</a>
-</div>
+    <div class="container mt-5">
+        <h1>Reviews for {{ product.name }}</h1>
+        <form method="POST" action="{{ url_for('main.view_reviews', product_id=product.id) }}">
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+                {{ form.rating.label(class="form-label") }}
+                {{ form.rating(class="form-control") }}
+                {% for error in form.rating.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="mb-3">
+                {{ form.comment.label(class="form-label") }}
+                {{ form.comment(class="form-control") }}
+                {% for error in form.comment.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+        </form>
+        <hr>
+        <h2>Existing Reviews</h2>
+        {% for review in reviews %}
+            <div class="review">
+                <p><strong>Rating:</strong> {{ review.rating }}</p>
+                <p><strong>Comment:</strong> {{ review.comment }}</p>
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}

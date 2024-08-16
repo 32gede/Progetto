@@ -1,21 +1,27 @@
-<!-- templates/edit_reviews.html -->
 {% extends "base.html" %}
 
-{% block title %}Edit Review - E-commerce{% endblock %}
+{% block title %}Edit Review{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h1>Edit Review</h1>
-    <form action="{{ url_for('main.edit_review', product_id=product.id|e, review_id=review.id|e) }}" method="post">
-        <div class="mb-3">
-            <label for="rating" class="form-label">Rating (1-5)</label>
-            <input type="number" class="form-control" id="rating" name="rating" min="1" max="5" step="0.1" required value="{{ review.rating|e }}">
-        </div>
-        <div class="mb-3">
-            <label for="comment" class="form-label">Review</label>
-            <textarea class="form-control" id="comment" name="comment" rows="4" required>{{ review.comment|e }}</textarea>
-        </div>
-        <button type="submit" class="btn btn-primary">Submit Review</button>
-    </form>
-</div>
+    <div class="container mt-5">
+        <h1>Edit Review for {{ product.name }}</h1>
+        <form method="POST" action="{{ url_for('main.edit_review', product_id=product.id, review_id=review.id) }}">
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+                {{ form.rating.label(class="form-label") }}
+                {{ form.rating(class="form-control") }}
+                {% for error in form.rating.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="mb-3">
+                {{ form.comment.label(class="form-label") }}
+                {{ form.comment(class="form-control") }}
+                {% for error in form.comment.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+        </form>
+    </div>
 {% endblock %}
