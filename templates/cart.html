@@ -3,29 +3,40 @@
 {% block title %}Cart{% endblock %}
 
 {% block content %}
-    <div class="container mt-5">
-        <h1>Your Cart</h1>
-        <hr>
-        <h2>Cart Items</h2>
-        {% for item in cart_items %}
-            <div class="cart-item">
-                <p><strong>Product:</strong> {{ item.product.name }}</p>
-                <p><strong>Quantity:</strong> {{ item.quantity }}</p>
-                <p><strong>Price:</strong> {{ item.product.price }}</p>
-                <form method="POST" action="{{ url_for('main.remove_from_cart', item_id=item.id) }}">
-                    {{ form.hidden_tag() }}
-                    {{ form.item_id(value=item.id) }}
-                    <button type="submit" class="btn btn-danger">{{ form.submit.label }}</button>
-                </form>
-                <form method="POST" action="{{ url_for('main.edit_cart') }}">
-                    {{ form.hidden_tag() }}
-                    {{ form.item_id(value=item.id) }}
-                    {{ form.new_quantity(class_="form-control", value=item.quantity) }}
+<div class="container mt-5">
+    <h1>Your Cart</h1>
+    <hr>
+    <h2>Cart Items</h2>
+    {% for item in cart_items %}
+        <div class="cart-item mb-3 p-3 border rounded position-relative">
+            <form method="POST" action="{{ url_for('main.remove_from_cart', item_id=item.id) }}" class="d-inline position-absolute top-0 end-0" onsubmit="return confirmRemove()">
+                {{ form.hidden_tag() }}
+                {{ form.item_id(value=item.id) }}
+                <button type="submit" class="btn btn-danger rounded-circle" title="Remove">
+                    &times;
+                </button>
+            </form>
+            <p><strong>Product:</strong> {{ item.product.name }}</p>
+            <p><strong>Quantity:</strong> {{ item.quantity }}</p>
+            <p><strong>Price:</strong> {{ item.product.price }}</p>
+            <form method="POST" action="{{ url_for('main.edit_cart') }}" class="d-inline">
+                {{ form.hidden_tag() }}
+                {{ form.item_id(value=item.id) }}
+                <div class="form-group d-flex align-items-center">
+                    <label for="new_quantity_{{ item.id }}" class="mr-3 mb-0">Quantity:&nbsp;</label>
+                    {{ form.new_quantity(id="new_quantity_{{ item.id }}", class_="form-control mr-2", value=item.quantity) }}
                     {{ form.submit(class_="btn btn-primary", value="Update") }}
-                </form>
-            </div>
-        {% endfor %}
-        <h3>Total: {{ cart_total }}</h3>
-        <a href="{{ url_for('main.checkout') }}" class="btn btn-primary">Proceed to Checkout</a>
-    </div>
+                </div>
+            </form>
+        </div>
+    {% endfor %}
+    <h3>Total: {{ cart_total }}</h3>
+    <a href="{{ url_for('main.checkout') }}" class="btn btn-primary">Proceed to Checkout</a>
+</div>
+
+<script>
+function confirmRemove() {
+    return confirm('Are you sure you want to remove this item from your cart?');
+}
+</script>
 {% endblock %}
