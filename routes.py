@@ -267,9 +267,12 @@ def view_products_seller():
     form = ProductForm()  # Create a form instance
     with get_db_session() as db_session:
         products = db_session.query(Product).filter_by(seller_id=current_user.id).all()
-        if not products:
-            return render_template('products_seller.html', error="No products found.", form=form)
-        return render_template('products_seller.html', products=products, form=form)
+
+    # Check if products exist and render the template accordingly
+    if not products:
+        return render_template('products_seller.html', error="No products found.", form=form)
+
+    return render_template('products_seller.html', products=products, form=form)
 
 @main_routes.route('/buyer/products')
 @login_required
@@ -285,11 +288,13 @@ def view_products_buyer():
 @login_required
 @role_required('buyer', 'seller')
 def view_product(product_id):
+
+    form = ProductForm()  # Create a form instance
     with get_db_session() as db_session:
         product = db_session.query(Product).filter_by(id=product_id).first()
         if not product:
-            return render_template('product.html', error="Product not found.")
-        return render_template('product.html', product=product)
+            return render_template('product.html', error="Product not found.",form=form)
+        return render_template('product.html', product=product, form=form)
 
 
 @main_routes.route('/product/add', methods=['GET', 'POST'])
@@ -580,6 +585,11 @@ def cart():
 @role_required('buyer')
 def add_to_cart(product_id):
     form = AddToCartForm()
+
+    # Print form data and validation status for debugging
+    print("Form Data:", form.data)
+    print("Form Errors:", form.errors)
+
     if form.validate_on_submit():
         with get_db_session() as db_session:
             product = db_session.query(Product).filter_by(id=product_id).first()
@@ -602,6 +612,10 @@ def add_to_cart(product_id):
             db_session.commit()
             flash('Product added to cart.')
             return redirect(url_for('main.cart'))
+
+    # If form validation fails, print the errors and redirect
+    flash('Invalid form submission.')
+    return redirect(url_for('main.view_products_buyer'))
 
 
 @main_routes.route('/cart/remove/<int:item_id>', methods=['POST'])
