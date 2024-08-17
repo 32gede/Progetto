@@ -7,8 +7,8 @@
 <div class="container mt-5">
     <h1>Welcome to E-commerce Platform</h1>
     <p>Find the best products and deals!</p>
-    {% if session['user'] %}
-        <p>Welcome, {{ session['user']['username'] }}</p>
+    {% if current_user.is_authenticated %}
+        <p>Welcome, {{ current_user.name }}</p>
     {% else %}
         <p><a href="{{ url_for('main.login') }}">Login</a> or <a href="{{ url_for('main.registration') }}">Register</a> to start shopping!</p>
     {% endif %}
