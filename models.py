@@ -19,6 +19,7 @@ class User(UserMixin, Base):
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(String(255), nullable=False)
     avatar: Mapped[bytes] = mapped_column(String(255), nullable=True)
+    insert_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
 
     # New fields
     name: Mapped[str] = mapped_column(String(255), nullable=True)
