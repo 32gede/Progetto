@@ -321,6 +321,7 @@ def add_product():
 
             # Gestisci l'immagine
             file = form.image.data
+            image_id = '1tvBMvCFzeZ14Kcr7z3iZ0yS6QfQOCFzQ'
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
                 file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
