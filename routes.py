@@ -248,7 +248,6 @@ def edit_profile():
                     user.city = form.city.data
                     user.address = form.address.data
                     db_session.commit()
-                    flash('Your profile has been updated.', 'success')
                 except Exception as e:
                     db_session.rollback()
                     flash(f'Failed to update the profile: {e}', 'error')

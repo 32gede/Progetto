@@ -19,6 +19,7 @@ class User(UserMixin, Base):
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(String(255), nullable=False)
     avatar: Mapped[bytes] = mapped_column(String(255), nullable=True)
+    insert_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
 
     # New fields
     name: Mapped[str] = mapped_column(String(255), nullable=True)
@@ -95,6 +96,7 @@ class Product(Base):
     price: Mapped[float] = mapped_column(Float, nullable=False)
     quantity: Mapped[int] = mapped_column(Integer, nullable=False)
     image: Mapped[bytes] = mapped_column(String(255), nullable=True)
+    insert_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
 
     brand_id: Mapped[int] = mapped_column(Integer, ForeignKey('brands.id'), nullable=True)
     brand: Mapped["Brand"] = relationship("Brand", back_populates="products")

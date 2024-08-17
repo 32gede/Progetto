@@ -111,7 +111,7 @@ class ProfileForm(FlaskForm):
     city = StringField('City', validators=[Optional(), Length(min=2, max=255)])
     address = StringField('Address', validators=[Optional(), Length(min=2, max=255)])
     avatar = FileField('Avatar', validators=[
-        FileAllowed(['jpg', 'jpeg', 'png'], 'Images only!')
+        FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Images only!')
     ])
     submit = SubmitField('Update Profile')
 
