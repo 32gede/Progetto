@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from wtforms import StringField, DecimalField, IntegerField, SelectField, TextAreaField,SubmitField, FloatField
-from wtforms.fields.simple import SubmitField, PasswordField
+from wtforms.fields.simple import SubmitField, PasswordField, HiddenField
 from wtforms.validators import DataRequired, NumberRange, Length, Optional, ValidationError, Regexp, Email, EqualTo
 import re
 import bleach
@@ -100,7 +100,8 @@ class RegistrationForm(FlaskForm):
     ])
     city = StringField('City', validators=[Optional(), Length(min=2, max=255)])
     address = StringField('Address', validators=[Optional(), Length(min=2, max=255)])
-    avatar_choice = SelectField('Avatar', choices=[('1yOOHEp8xJx7S_vbZmRe5K3nbia1XMVL6', 'Avatar 1'), ('1A8BXdiu2XE7FaAz8NmtYTYL4zYyIRsD7', 'Avatar 2')])
+    avatar_choice = SelectField('Avatar',
+                                choices=[('1yOOHEp8xJx7S_vbZmRe5K3nbia1XMVL6', 'Avatar 1'), ('1A8BXdiu2XE7FaAz8NmtYTYL4zYyIRsD7', 'Avatar 2')])
     submit = SubmitField('Register')
 
 
@@ -118,3 +119,30 @@ class ReviewForm(FlaskForm):
     rating = FloatField('Rating', validators=[DataRequired(), NumberRange(min=0, max=5)])
     comment = TextAreaField('Comment', validators=[DataRequired(), Length(min=1, max=3000)])
     submit = SubmitField('Submit')
+
+
+class AddToCartForm(FlaskForm):
+    quantity = IntegerField('Quantity', validators=[
+        DataRequired(),
+        NumberRange(min=1, max=1000000, message='Invalid quantity.')
+    ])
+    submit = SubmitField('Add to Cart')
+
+class EditCartForm(FlaskForm):
+    item_id = HiddenField('Item ID', validators=[DataRequired()])
+    new_quantity = IntegerField('New Quantity', validators=[
+        DataRequired(),
+        NumberRange(min=1, max=1000000, message='Invalid quantity.')
+    ])
+    submit = SubmitField('Update')
+
+class RemoveFromCartForm(FlaskForm):
+    submit = SubmitField('Remove')
+
+class CheckoutForm(FlaskForm):
+    address = StringField('Address', validators=[DataRequired()])
+    city = StringField('City', validators=[DataRequired()])
+    submit = SubmitField('Complete Order')
+
+class ConfirmOrderForm(FlaskForm):
+    submit = SubmitField('Confirm Order')

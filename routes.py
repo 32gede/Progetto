@@ -16,7 +16,7 @@ from collegamento_drive import carica_imm
 from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem
 from database import get_db_session
 from search import search_products
-from form import ProductForm, ProfileForm, RegistrationForm, LoginForm, ReviewForm
+from form import ProductForm, ProfileForm, RegistrationForm, LoginForm, ReviewForm, AddToCartForm, EditCartForm, RemoveFromCartForm
 
 # DEFINE BLUEPRINT #
 import logging
@@ -564,58 +564,54 @@ def remove_review(product_id, review_id):
 @login_required
 @role_required('buyer')
 def cart():
+    form = EditCartForm()
     with get_db_session() as db_session:
         cart_items = db_session.query(CartItem).filter_by(user_id=current_user.id).all()
         cart_total = sum(item.product.price * item.quantity for item in cart_items)
-        return render_template('cart.html', cart_items=cart_items, cart_total=cart_total)
+        return render_template('cart.html', cart_items=cart_items, cart_total=cart_total, form=form)
 
 
 @main_routes.route('/cart/add/<int:product_id>', methods=['POST'])
 @login_required
 @role_required('buyer')
 def add_to_cart(product_id):
-    with get_db_session() as db_session:
-        product = db_session.query(Product).filter_by(id=product_id).first()
-        if not product:
-            flash('Product not found.')
-            return redirect(url_for('main.view_products_buyer'))
+    form = AddToCartForm()
+    if form.validate_on_submit():
+        with get_db_session() as db_session:
+            product = db_session.query(Product).filter_by(id=product_id).first()
+            if not product:
+                flash('Product not found.')
+                return redirect(url_for('main.view_products_buyer'))
 
-        if product.quantity == 0:
-            flash('Product out of stock.')
-            return redirect(url_for('main.view_products_buyer'))
+            if product.quantity == 0:
+                flash('Product out of stock.')
+                return redirect(url_for('main.view_products_buyer'))
 
-        quantity = validate_and_sanitize(
-            request.form.get('quantity'),
-            value_type='int',
-            min_value=1,
-            max_value=1000000,
-            error_message='Invalid quantity.',
-            is_html=True
-        )
+            quantity = form.quantity.data
 
-        cart_item = db_session.query(CartItem).filter_by(product_id=product.id, user_id=current_user.id).first()
-        if cart_item:
-            cart_item.quantity += quantity
-        else:
-            cart_item = CartItem(user_id=current_user.id,
-                                 product_id=product.id,
-                                 quantity=quantity)
-            db_session.add(cart_item)
-        db_session.commit()
-        flash('Product added to cart.')
-        return redirect(url_for('main.cart'))
+            cart_item = db_session.query(CartItem).filter_by(product_id=product.id, user_id=current_user.id).first()
+            if cart_item:
+                cart_item.quantity += quantity
+            else:
+                cart_item = CartItem(user_id=current_user.id, product_id=product.id, quantity=quantity)
+                db_session.add(cart_item)
+            db_session.commit()
+            flash('Product added to cart.')
+            return redirect(url_for('main.cart'))
 
 
 @main_routes.route('/cart/remove/<int:item_id>', methods=['POST'])
 @login_required
 @role_required('buyer')
 def remove_from_cart(item_id):
-    with get_db_session() as db_session:
-        item = db_session.query(CartItem).filter_by(id=item_id, user_id=current_user.id).first()
-        if item:
-            db_session.delete(item)
-            db_session.commit()
-            flash('Item removed from cart.')
+    form = RemoveFromCartForm()
+    if form.validate_on_submit():
+        with get_db_session() as db_session:
+            item = db_session.query(CartItem).filter_by(id=item_id, user_id=current_user.id).first()
+            if item:
+                db_session.delete(item)
+                db_session.commit()
+                flash('Item removed from cart.')
         return redirect(url_for('main.cart'))
 
 
@@ -623,32 +619,21 @@ def remove_from_cart(item_id):
 @login_required
 @role_required('buyer')
 def edit_cart():
-    item_id = validate_and_sanitize(
-        request.form.get('item_id'),
-        value_type='int',
-        min_value=1,
-        error_message="Invalid item ID.",
-        is_html=True
-    )
-    new_quantity = validate_and_sanitize(
-        request.form.get('new_quantity'),
-        value_type='int',
-        min_value=1,
-        max_value=1000000,
-        error_message='Invalid quantity.',
-        is_html=True
-    )
-    if not item_id or not new_quantity:
-        flash('Invalid item ID or quantity.')
-        return redirect(url_for('main.cart'))
+    form = EditCartForm()
+    if form.validate_on_submit():
+        item_id = form.item_id.data
+        new_quantity = form.new_quantity.data
+        if not item_id or not new_quantity:
+            flash('Invalid item ID or quantity.')
+            return redirect(url_for('main.cart'))
 
-    with get_db_session() as db_session:
-        item = db_session.query(CartItem).filter_by(id=item_id, user_id=current_user.id).first()
-        if item:
-            item.quantity = new_quantity
-            db_session.commit()
-        flash('Cart updated.')
-        return redirect(url_for('main.cart'))
+        with get_db_session() as db_session:
+            item = db_session.query(CartItem).filter_by(id=item_id, user_id=current_user.id).first()
+            if item:
+                item.quantity = new_quantity
+                db_session.commit()
+            flash('Cart updated.')
+            return redirect(url_for('main.cart'))
 
 
 @main_routes.route('/checkout', methods=['GET', 'POST'])

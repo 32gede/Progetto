@@ -1,46 +1,33 @@
-<!-- templates/cart.html -->
 {% extends "base.html" %}
 
-{% block title %}Cart - E-commerce{% endblock %}
+{% block title %}Cart{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1>Your Cart</h1>
-    <table class="table cart-table">
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Total</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in cart_items %}
-                <tr>
-                    <td>{{ item.product.name|e }}</td>
-                    <td>
-                        <form method="POST" action="{{ url_for('main.edit_cart') }}">
-                            <input type="hidden" name="item_id" value="{{ item.id }}">
-                            <input type="number" name="new_quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.quantity }}">
-                            <button type="submit" class="btn btn-primary">Update</button>
-                        </form>
-                    </td>
-                    <td>${{ item.product.price }}</td>
-                    <td>${{ (item.product.price) * (item.quantity) }}</td>
-                    <td>
-                        <form method="POST" action="{{ url_for('main.remove_from_cart', item_id=item.id) }}">
-                            <button type="submit" class="btn btn-danger">Remove</button>
-                        </form>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table><br>
-    <div class="cart-total">
-        <p>Total: ${{ cart_total|e }}</p>
+    <div class="container mt-5">
+        <h1>Your Cart</h1>
+        <form method="POST" action="{{ url_for('main.edit_cart') }}">
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+                {{ form.new_quantity.label(class="form-label") }}
+                {{ form.new_quantity(class="form-control") }}
+            </div>
+            <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+        </form>
+        <hr>
+        <h2>Cart Items</h2>
+        {% for item in cart_items %}
+            <div class="cart-item">
+                <p><strong>Product:</strong> {{ item.product.name }}</p>
+                <p><strong>Quantity:</strong> {{ item.quantity }}</p>
+                <p><strong>Price:</strong> {{ item.product.price }}</p>
+                <form method="POST" action="{{ url_for('main.remove_from_cart', item_id=item.id) }}">
+                    {{ form.hidden_tag() }}
+                    {{ form.item_id(value=item.id) }}
+                    <button type="submit" class="btn btn-danger">{{ form.submit.label }}</button>
+                </form>
+            </div>
+        {% endfor %}
+        <h3>Total: {{ cart_total }}</h3>
         <a href="{{ url_for('main.checkout') }}" class="btn btn-primary">Proceed to Checkout</a>
     </div>
-</div>
 {% endblock %}
