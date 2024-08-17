@@ -18,7 +18,7 @@
                             <th>Quantità</th>
                             <th>Data Ordine</th>
                             <th>Prezzo per Oggetto</th>
-                            <th>Totale</th> <!-- New column header -->
+                            <th>Totale</th>
                             <th>Stato</th>
                             <th>Indirizzo di Spedizione</th>
                             <th>Azioni</th>
@@ -33,7 +33,7 @@
                                     <td>{{ item.quantity }}</td>
                                     <td>{{ order.created_at.strftime('%Y-%m-%d') }}</td>
                                     <td>{{ item.price }} €</td>
-                                    <td>{{ item.price * item.quantity }} €</td> <!-- Total cost calculation -->
+                                    <td>{{ item.price * item.quantity }} €</td>
                                     <td>{{ order.status }}</td>
                                     <td>
                                         {{ order.user.address }}, {{ order.user.city }}
@@ -41,6 +41,8 @@
                                     <td>
                                         {% if order.status == 'In attesa' %}
                                             <form action="{{ url_for('main.confirm_order', order_id=order.id) }}" method="POST" style="display:inline;">
+                                                {{ form.hidden_tag() }}
+                                                {{ form.submit(class_="btn btn-success btn-sm", value="Conferma Ordine") }}
                                                 <button type="submit" class="btn btn-success btn-sm">Conferma Ordine</button>
                                             </form>
                                         {% endif %}

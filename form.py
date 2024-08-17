@@ -146,3 +146,8 @@ class CheckoutForm(FlaskForm):
 
 class ConfirmOrderForm(FlaskForm):
     submit = SubmitField('Confirm Order')
+
+class CheckoutForm(FlaskForm):
+    address = StringField('Address', validators=[DataRequired(message="Address is required.")])
+    city = StringField('City', validators=[DataRequired(message="City is required.")])
+    submit = SubmitField('Complete Order')

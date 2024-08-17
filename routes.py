@@ -16,7 +16,8 @@ from collegamento_drive import carica_imm
 from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem
 from database import get_db_session
 from search import search_products
-from form import ProductForm, ProfileForm, RegistrationForm, LoginForm, ReviewForm, AddToCartForm, EditCartForm, RemoveFromCartForm
+from form import ProductForm, ProfileForm, RegistrationForm, LoginForm, ReviewForm, AddToCartForm, EditCartForm, \
+    RemoveFromCartForm, ConfirmOrderForm, CheckoutForm
 
 # DEFINE BLUEPRINT #
 import logging
@@ -639,14 +640,16 @@ def edit_cart():
 @login_required
 @role_required('buyer')
 def checkout():
+    form = CheckoutForm()
+
     with get_db_session() as db_session:
         # Ottieni gli articoli del carrello dell'utente
         cart_items = db_session.query(CartItem).filter_by(user_id=current_user.id).all()
         user_buyer = db_session.query(User).filter_by(id=current_user.id).first()
 
-        if request.method == 'POST':
-            address = request.form.get('address')
-            city = request.form.get('city')
+        if form.validate_on_submit():
+            address = form.address.data
+            city = form.city.data
 
             if not cart_items:
                 flash('Il carrello è vuoto. Non puoi completare l\'ordine.', 'warning')
@@ -692,7 +695,9 @@ def checkout():
             flash('Ordine completato con successo!', 'success')
             return redirect(url_for('main.order_history'))  # Reindirizza alla pagina degli ordini
 
-        return render_template('checkout.html', cart_items=cart_items, user_buyer=user_buyer)
+        return render_template('checkout.html', cart_items=cart_items, user_buyer=user_buyer, form=form)
+
+
 @main_routes.route('/order_history')
 @login_required
 @role_required('buyer')
@@ -714,6 +719,7 @@ def order_history():
 @login_required
 @role_required('seller')
 def manage_orders():
+    form = ConfirmOrderForm()
     with get_db_session() as db_session:
         seller = db_session.query(UserSeller).filter_by(id=current_user.seller.id).first()
 
@@ -730,22 +736,24 @@ def manage_orders():
         # Aggiorna lo stato degli ordini
         update_order_status()
 
-        return render_template('manage_orders.html', orders=orders)
+        return render_template('manage_orders.html', orders=orders, form=form)
 
 
 @main_routes.route('/seller/orders/confirm/<int:order_id>', methods=['POST'])
 @login_required
 @role_required('seller')
 def confirm_order(order_id):
-    with get_db_session() as db_session:
-        order = db_session.query(Order).filter_by(id=order_id).first()
-        if order and order.status == 'In attesa':
-            order.status = 'Confermato'
-            order.confirmed_at = datetime.utcnow()  # Assicurati di avere questo campo nella tua tabella
-            db_session.commit()
-            flash('Ordine confermato con successo.', 'success')
-        else:
-            flash('Impossibile confermare l\'ordine.', 'danger')
+    form = ConfirmOrderForm()
+    if form.validate_on_submit():
+        with get_db_session() as db_session:
+            order = db_session.query(Order).filter_by(id=order_id).first()
+            if order and order.status == 'In attesa':
+                order.status = 'Confermato'
+                order.confirmed_at = datetime.utcnow()  # Assicurati di avere questo campo nella tua tabella
+                db_session.commit()
+                flash('Ordine confermato con successo.', 'success')
+            else:
+                flash('Impossibile confermare l\'ordine.', 'danger')
         return redirect(url_for('main.manage_orders'))
 
 
