@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify, current_app
 from markupsafe import escape
+from sqlalchemy import desc
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
 from functools import wraps
@@ -120,7 +121,9 @@ def validate_and_sanitize(value, value_type='string', min_value=None, max_value=
 
 @main_routes.route('/')
 def index():
-    return render_template('index.html')
+    with get_db_session() as db_session:
+        products = db_session.query(Product).order_by(desc(Product.insert_date)).limit(5).all()
+        return render_template('index.html', products=products)
 
 
 # USER ROUTES #

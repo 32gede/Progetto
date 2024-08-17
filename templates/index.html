@@ -9,6 +9,32 @@
     <p>Find the best products and deals!</p>
     {% if current_user.is_authenticated %}
         <p>Welcome, {{ current_user.name }}</p>
+        {% if current_user.role=='buyer' %}
+            <h1>NEW ARRIVALS</h1>
+            <div class="row">
+                {% for product in products %}
+
+            <div class="col-md-4">
+                <a href="{{ url_for('main.view_product', product_id=product.id) }}" class="card-link">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="card-title">{{ product.name|e }}</h5>
+                                    <p class="card-text">{{ product.description|e }}</p>
+                                    <p class="card-text">Price: ${{ product.price|e }}</p>
+                                </div>
+                                <div class="ms-3">
+                                    <img id="image-preview" src="https://drive.google.com/thumbnail?id={{ product.image }}" alt="Image" class="img-thumbnail" width="100">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        {% endfor %}
+            </div>
+        {% endif %}
     {% else %}
         <p><a href="{{ url_for('main.login') }}">Login</a> or <a href="{{ url_for('main.registration') }}">Register</a> to start shopping!</p>
     {% endif %}
