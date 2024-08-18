@@ -466,7 +466,7 @@ def view_reviews(product_id):
             db_session.commit()
             return redirect(url_for('main.view_reviews', product_id=product.id))
 
-        reviews = product.reviews  # Directly access the reviews attribute
+        reviews = sorted(product.reviews, key=lambda review: review.created_at, reverse=True)  # Sort reviews by created_at
         return render_template('view_reviews.html', product=product, reviews=reviews, form=form)
 
 
