@@ -43,7 +43,6 @@
                                             <form action="{{ url_for('main.confirm_order', order_id=order.id) }}" method="POST" style="display:inline;">
                                                 {{ form.hidden_tag() }}
                                                 {{ form.submit(class_="btn btn-success btn-sm", value="Conferma Ordine") }}
-                                                <button type="submit" class="btn btn-success btn-sm">Conferma Ordine</button>
                                             </form>
                                         {% endif %}
                                     </td>
