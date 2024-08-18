@@ -38,9 +38,11 @@
             </div>
         </div>
     </form>
+    <div class="row mb-3" id="active-filters">
+        <!-- Active filters will be displayed here -->
+    </div>
     <div class="row">
         {% for product in products %}
-
             <div class="col-md-4">
                 <a href="{{ url_for('main.view_product', product_id=product.id) }}" class="card-link">
                     <div class="card mb-4">
@@ -68,6 +70,29 @@ document.getElementById('filter-toggle').addEventListener('click', function() {
     var filterOptions = document.getElementById('filter-options');
     filterOptions.style.display = filterOptions.style.display === 'none' ? 'block' : 'none';
 });
+
+function addFilterTag(name, value) {
+    var filterContainer = document.getElementById('active-filters');
+    var filterTag = document.createElement('div');
+    filterTag.className = 'filter-tag';
+    filterTag.innerHTML = `${name}: ${value} <span class="remove-filter" onclick="removeFilter('${name}')">&times;</span>`;
+    filterContainer.appendChild(filterTag);
+}
+
+function removeFilter(name) {
+    var url = new URL(window.location.href);
+    url.searchParams.delete(name);
+    window.location.href = url.toString();
+}
+
+window.onload = function() {
+    var params = new URLSearchParams(window.location.search);
+    params.forEach((value, key) => {
+        if (value) {
+            addFilterTag(key, value);
+        }
+    });
+};
 
 document.getElementById('brand-filter').addEventListener('focus', function() {
     if (this.value === '') {
