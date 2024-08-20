@@ -16,15 +16,15 @@
             {% else %}
                 <p>Indirizzo non disponibile.</p>
             {% endif %}
-            <form method="POST">
+            <form method="POST" action="{{ url_for('main.update_address') }}">
                 {{ form.hidden_tag() }}
                 <div class="mb-3">
                     {{ form.address.label(class="form-label") }}
-                    {{ form.address(class="form-control") }}
+                    {{ form.address(class="form-control", value=user_buyer.address) }}
                 </div>
                 <div class="mb-3">
                     {{ form.city.label(class="form-label") }}
-                    {{ form.city(class="form-control") }}
+                    {{ form.city(class="form-control", value=user_buyer.city) }}
                 </div>
                 <table class="table">
                     <thead>
@@ -53,6 +53,10 @@
                 {{ form.submit(class_="btn btn-primary btn-block") }}
             </form>
         </div>
+        <form method="POST" action="{{ url_for('main.confirm_order') }}" id="complete-order-form">
+            {{ form.hidden_tag() }}
+            <button type="submit" class="btn btn-primary btn-block">Completa Ordine</button>
+        </form>
         <div class="card-footer text-end">
             <a class="btn btn-link" href="{{ url_for('main.view_products_buyer') }}">Torna ai prodotti</a>
         </div>

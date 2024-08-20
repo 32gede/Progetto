@@ -101,7 +101,8 @@ class RegistrationForm(FlaskForm):
     city = StringField('City', validators=[Optional(), Length(min=2, max=255)])
     address = StringField('Address', validators=[Optional(), Length(min=2, max=255)])
     avatar_choice = SelectField('Avatar',
-                                choices=[('1yOOHEp8xJx7S_vbZmRe5K3nbia1XMVL6', 'Avatar 1'), ('1A8BXdiu2XE7FaAz8NmtYTYL4zYyIRsD7', 'Avatar 2')])
+                                choices=[('1yOOHEp8xJx7S_vbZmRe5K3nbia1XMVL6', 'Avatar 1'),
+                                         ('1A8BXdiu2XE7FaAz8NmtYTYL4zYyIRsD7', 'Avatar 2')])
     submit = SubmitField('Register')
 
 
@@ -114,6 +115,7 @@ class ProfileForm(FlaskForm):
         FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Images only!')
     ])
     submit = SubmitField('Update Profile')
+
 
 class ReviewForm(FlaskForm):
     rating = FloatField('Rating', validators=[DataRequired(), NumberRange(min=0, max=5)])
@@ -128,24 +130,23 @@ class AddToCartForm(FlaskForm):
     ])
     submit = SubmitField('Add to Cart')
 
+
 class EditCartForm(FlaskForm):
-    item_id = HiddenField('Item ID', validators=[DataRequired()])
+    # item_id = HiddenField('Item ID', validators=[DataRequired()])
     new_quantity = IntegerField('New Quantity', validators=[
         DataRequired(),
         NumberRange(min=1, max=1000000, message='Invalid quantity.')
     ])
     submit = SubmitField('Update')
 
+
 class RemoveFromCartForm(FlaskForm):
     submit = SubmitField('Remove')
 
-class CheckoutForm(FlaskForm):
-    address = StringField('Address', validators=[DataRequired()])
-    city = StringField('City', validators=[DataRequired()])
-    submit = SubmitField('Complete Order')
 
 class ConfirmOrderForm(FlaskForm):
     submit = SubmitField('Confirm Order')
+
 
 class CheckoutForm(FlaskForm):
     address = StringField('Address', validators=[DataRequired(message="Address is required.")])

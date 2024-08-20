@@ -631,18 +631,18 @@ def remove_from_cart(item_id):
                 db_session.commit()
                 flash('Item removed from cart.')
         return redirect(url_for('main.cart'))
+    return render_template('cart.html', form=form)
 
 
-@main_routes.route('/cart/edit', methods=['POST'])
+@main_routes.route('/cart/edit/<int:item_id>', methods=['POST'])
 @login_required
 @role_required('buyer')
-def edit_cart():
+def edit_cart(item_id):
     form = EditCartForm()
     if form.validate_on_submit():
-        item_id = form.item_id.data
         new_quantity = form.new_quantity.data
-        if not item_id or not new_quantity:
-            flash('Invalid item ID or quantity.')
+        if not new_quantity:
+            flash('Invalid quantity.')
             return redirect(url_for('main.cart'))
 
         with get_db_session() as db_session:
@@ -652,7 +652,7 @@ def edit_cart():
                 db_session.commit()
             flash('Cart updated.')
             return redirect(url_for('main.cart'))
-
+    return render_template('cart.html', form=form)
 
 @main_routes.route('/checkout', methods=['GET', 'POST'])
 @login_required
@@ -715,6 +715,23 @@ def checkout():
 
         return render_template('checkout.html', cart_items=cart_items, user_buyer=user_buyer, form=form)
 
+
+@main_routes.route('/update_address', methods=['POST'])
+@login_required
+@role_required('buyer')
+def update_address():
+    form = CheckoutForm()
+    if form.validate_on_submit():
+        with get_db_session() as db_session:
+            user_buyer = db_session.query(UserBuyer).filter_by(id=current_user.id).first()
+            if user_buyer:
+                user_buyer.user.address = form.address.data
+                user_buyer.user.city = form.city.data
+                db_session.commit()
+                flash('Indirizzo aggiornato con successo.', 'success')
+            else:
+                flash('Errore durante l\'aggiornamento dell\'indirizzo.', 'danger')
+    return redirect(url_for('main.checkout'))
 
 @main_routes.route('/order_history')
 @login_required

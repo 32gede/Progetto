@@ -8,35 +8,56 @@
     <hr>
     <h2>Cart Items</h2>
     {% for item in cart_items %}
-        <div class="cart-item mb-3 p-3 border rounded position-relative,card">
+        <div class="cart-item mb-3 p-3 border rounded position-relative card">
             <form method="POST" action="{{ url_for('main.remove_from_cart', item_id=item.id) }}" class="d-inline position-absolute top-0 end-0" onsubmit="return confirmRemove()">
                 {{ form.hidden_tag() }}
-                {{ form.item_id(value=item.id) }}
+                <input type="hidden" name="item_id" value="{{ item.id }}">
                 <button type="submit" class="btn btn-danger rounded-circle" title="Remove">
                     &times;
                 </button>
             </form>
             <p><strong>Product:</strong> {{ item.product.name }}</p>
             <p><strong>Quantity:</strong> {{ item.quantity }}</p>
-            <p><strong>Price:</strong> {{ item.product.price }}</p>
-            <form method="POST" action="{{ url_for('main.edit_cart') }}" class="d-inline">
+            <p><strong>Price:</strong> {{ "%.2f"|format(item.product.price) }}</p>
+            <form method="POST" action="{{ url_for('main.edit_cart', item_id=item.id) }}" class="d-inline">
                 {{ form.hidden_tag() }}
-                {{ form.item_id(value=item.id) }}
                 <div class="form-group d-flex align-items-center">
                     <label for="new_quantity_{{ item.id }}" class="mr-3 mb-0">Quantity:&nbsp;</label>
                     {{ form.new_quantity(id="new_quantity_{{ item.id }}", class_="form-control mr-2", value=item.quantity) }}
-                    {{ form.submit(class_="btn btn-primary", value="Update") }}
+                    <button type="submit" class="btn btn-primary">Update</button>
                 </div>
             </form>
         </div>
     {% endfor %}
-    <h3>Total: {{ cart_total }}</h3>
+    <h3>Total: {{ "%.2f"|format(cart_total) }}</h3>
     <a href="{{ url_for('main.checkout') }}" class="btn btn-primary">Proceed to Checkout</a>
 </div>
 
-<script>
-function confirmRemove() {
-    return confirm('Are you sure you want to remove this item from your cart?');
-}
-</script>
+
+    {% if get_flashed_messages() %}
+        <div class="container mt-3">
+            {% for message in get_flashed_messages() %}
+                <div class="alert alert-info" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block custom_js %}
+    <script>
+        function confirmRemove() {
+            return confirm('Are you sure you want to remove this item from your cart?');
+        }
+
+        function toggleDetails(orderId) {
+            const detailsDiv = document.getElementById(`details-${orderId}`);
+            if (detailsDiv.style.display === "none") {
+                detailsDiv.style.display = "block";
+            } else {
+                detailsDiv.style.display = "none";
+            }
+        }
+    </script>
 {% endblock %}
