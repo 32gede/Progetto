@@ -654,6 +654,7 @@ def edit_cart(item_id):
             return redirect(url_for('main.cart'))
     return render_template('cart.html', form=form)
 
+
 @main_routes.route('/checkout', methods=['GET', 'POST'])
 @login_required
 @role_required('buyer')
@@ -663,11 +664,9 @@ def checkout():
     with get_db_session() as db_session:
         # Ottieni gli articoli del carrello dell'utente
         cart_items = db_session.query(CartItem).filter_by(user_id=current_user.id).all()
-        user_buyer = db_session.query(User).filter_by(id=current_user.id).first()
 
         if form.validate_on_submit():
-            address = form.address.data
-            city = form.city.data
+            print("Form validated successfully.")
 
             if not cart_items:
                 flash('Il carrello è vuoto. Non puoi completare l\'ordine.', 'warning')
@@ -689,6 +688,7 @@ def checkout():
                 new_order = Order(user_id=current_user.id, total=total)
                 db_session.add(new_order)
                 db_session.commit()
+                print(f"Order {new_order.id} created.")
 
                 # Aggiungi gli articoli all'ordine, aggiorna l'inventario e rimuovi dal carrello
                 for item in items:
@@ -711,9 +711,34 @@ def checkout():
 
             db_session.commit()
             flash('Ordine completato con successo!', 'success')
-            return redirect(url_for('main.order_history'))  # Reindirizza alla pagina degli ordini
+            return redirect(url_for('main.manage_orders'))  # Reindirizza alla pagina di gestione degli ordini
 
+        else:
+            print("Form validation failed or GET request.")
+            print(form.errors)  # Stampa gli errori del modulo per il debug
+
+        # In caso di errore nella validazione del form, ricarichiamo la pagina di checkout
+        user_buyer = db_session.query(User).filter_by(id=current_user.id).first()
         return render_template('checkout.html', cart_items=cart_items, user_buyer=user_buyer, form=form)
+
+
+@main_routes.route('/complete_order', methods=['POST'])
+@login_required
+@role_required('buyer')
+def complete_order():
+    with get_db_session() as db_session:
+        user_buyer = db_session.query(User).filter_by(id=current_user.id).first()
+        if user_buyer:
+            address = user_buyer.address
+            city = user_buyer.city
+            if not address or not city:
+                flash('Indirizzo o città non disponibili.', 'danger')
+                return redirect(url_for('main.checkout'))
+            # Logic to complete the order using address and city
+            flash('Ordine completato con successo.', 'success')
+        else:
+            flash('Errore durante il completamento dell\'ordine.', 'danger')
+    return redirect(url_for('main.checkout'))
 
 
 @main_routes.route('/update_address', methods=['POST'])
@@ -732,6 +757,7 @@ def update_address():
             else:
                 flash('Errore durante l\'aggiornamento dell\'indirizzo.', 'danger')
     return redirect(url_for('main.checkout'))
+
 
 @main_routes.route('/order_history')
 @login_required
@@ -772,6 +798,9 @@ def manage_orders():
         update_order_status()
 
         return render_template('manage_orders.html', orders=orders, form=form)
+
+
+
 
 
 @main_routes.route('/seller/orders/confirm/<int:order_id>', methods=['POST'])

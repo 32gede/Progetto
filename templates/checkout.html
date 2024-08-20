@@ -16,6 +16,8 @@
             {% else %}
                 <p>Indirizzo non disponibile.</p>
             {% endif %}
+
+            <!-- Form per aggiornare l'indirizzo -->
             <form method="POST" action="{{ url_for('main.update_address') }}">
                 {{ form.hidden_tag() }}
                 <div class="mb-3">
@@ -26,38 +28,43 @@
                     {{ form.city.label(class="form-label") }}
                     {{ form.city(class="form-control", value=user_buyer.city) }}
                 </div>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Prodotto</th>
-                            <th>Quantità</th>
-                            <th>Prezzo</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if cart_items %}
-                            {% for item in cart_items %}
-                                <tr>
-                                    <td>{{ item.product.name }}</td>
-                                    <td>{{ item.quantity }}</td>
-                                    <td>{{ item.product.price * item.quantity }} €</td>
-                                </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="3">Il carrello è vuoto.</td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
-                {{ form.submit(class_="btn btn-primary btn-block") }}
+                <button type="submit" class="btn btn-secondary btn-block">Aggiorna Indirizzo</button>
             </form>
+            <hr>
+
+            <!-- Tabella del carrello -->
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Prodotto</th>
+                        <th>Quantità</th>
+                        <th>Prezzo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if cart_items %}
+                        {% for item in cart_items %}
+                            <tr>
+                                <td>{{ item.product.name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.product.price * item.quantity }} €</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="3">Il carrello è vuoto.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
         </div>
-        <form method="POST" action="{{ url_for('main.confirm_order') }}" id="complete-order-form">
-            {{ form.hidden_tag() }}
-            <button type="submit" class="btn btn-primary btn-block">Completa Ordine</button>
-        </form>
-        <div class="card-footer text-end">
+
+        <!-- Form per completare l'ordine -->
+        <div class="card-footer">
+            <form method="POST" action="{{ url_for('main.complete_order') }}" id="complete-order-form">
+                {{ form.hidden_tag() }}
+                <button type="submit" class="btn btn-primary btn-block">Completa Ordine</button>
+            </form>
             <a class="btn btn-link" href="{{ url_for('main.view_products_buyer') }}">Torna ai prodotti</a>
         </div>
     </div>

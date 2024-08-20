@@ -35,14 +35,13 @@
                                     <td>{{ item.price }} €</td>
                                     <td>{{ item.price * item.quantity }} €</td>
                                     <td>{{ order.status }}</td>
-                                    <td>
-                                        {{ order.user.address }}, {{ order.user.city }}
-                                    </td>
+                                    <td>{{ order.user.address }}, {{ order.user.city }}</td>
                                     <td>
                                         {% if order.status == 'In attesa' %}
+                                            <!-- Form per confermare l'ordine -->
                                             <form action="{{ url_for('main.confirm_order', order_id=order.id) }}" method="POST" style="display:inline;">
                                                 {{ form.hidden_tag() }}
-                                                <button type="submit" class="btn btn-success btn-sm">Conferma Ordine</button>
+                                                <button type="submit" class="btn btn-success btn-sm">{{ form.submit.label }}</button>
                                             </form>
                                         {% endif %}
                                     </td>

@@ -44,21 +44,6 @@ class User(UserMixin, Base):
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
-    @property
-    def is_active(self):
-        # La logica per determinare se l'utente è attivo
-        return True  # Cambia questa logica in base alle tue necessità
-
-    @property
-    def is_authenticated(self):
-        # La logica per determinare se l'utente è autenticato
-        return True  # Cambia questa logica in base alle tue necessità
-
-    @property
-    def is_anonymous(self):
-        # La logica per determinare se l'utente è anonimo
-        return False  # Cambia questa logica in base alle tue necessità
-
     def get_id(self):
         # Restituisce l'ID dell'utente come stringa
         return str(self.id)
