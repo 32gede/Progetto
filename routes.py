@@ -740,7 +740,6 @@ def complete_order():
             flash('Errore durante il completamento dell\'ordine.', 'danger')
     return redirect(url_for('main.checkout'))
 
-
 @main_routes.route('/update_address', methods=['POST'])
 @login_required
 @role_required('buyer')
