@@ -152,3 +152,17 @@ class CheckoutForm(FlaskForm):
     address = StringField('Address', validators=[DataRequired(message="Address is required.")])
     city = StringField('City', validators=[DataRequired(message="City is required.")])
     submit = SubmitField('Complete Order')
+
+class SearchProductForm(FlaskForm):
+    name = StringField('Name', validators=[Optional(), Length(max=255)])
+    description = StringField('Description', validators=[Optional(), Length(max=255)])
+    min_price = FloatField('Min Price', validators=[Optional(), NumberRange(min=0)])
+    max_price = FloatField('Max Price', validators=[Optional(), NumberRange(min=0)])
+    brand_name = StringField('Brand Name', validators=[Optional(), Length(max=255)])
+    category_name = StringField('Category Name', validators=[Optional(), Length(max=255)])
+
+class FilterBrandsForm(FlaskForm):
+    search_term = StringField('Search Term', validators=[Optional(), Length(max=255)])
+
+class FilterCategoriesForm(FlaskForm):
+    search_term = StringField('Search Term', validators=[Optional(), Length(max=255)])

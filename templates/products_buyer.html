@@ -3,195 +3,204 @@
 {% block title %}Products - E-commerce{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h1>Products</h1>
-    <form method="GET" action="{{ url_for('main.search_product') }}">
-        <div class="row mb-3">
-            <div class="col">
-                <input type="text" name="name" class="form-control" placeholder="Product Name" value="{{ request.args.get('name', '')|e }}">
+    <div class="container mt-5">
+        <h1>Products</h1>
+        <form method="GET" action="{{ url_for('main.search_product') }}">
+            {{ form.hidden_tag() }}
+            <div class="row mb-3">
+                <div class="col">
+                    {{ form.name.label(class="sr-only") }}
+                    {{ form.name(class="form-control", placeholder="Product Name") }}
+                </div>
+                <div class="col">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+                <div class="col">
+                    <button type="button" class="btn btn-secondary" id="filter-toggle">Filter</button>
+                </div>
             </div>
-            <div class="col">
-                <button type="submit" class="btn btn-primary">Search</button>
+            <div class="row mb-3" id="filter-options" style="display: none;">
+                <div class="col"></div>
+                <div class="col">
+                    {{ form.description.label(class="sr-only") }}
+                    {{ form.description(class="form-control", placeholder="Description") }}
+                </div>
+                <div class="col">
+                    {{ form.min_price.label(class="sr-only") }}
+                    {{ form.min_price(class="form-control", placeholder="Min Price") }}
+                </div>
+                <div class="col">
+                    {{ form.max_price.label(class="sr-only") }}
+                    {{ form.max_price(class="form-control", placeholder="Max Price") }}
+                </div>
+                <div class="col">
+                    {{ form.brand_name.label(class="sr-only") }}
+                    {{ form.brand_name(class="form-control", placeholder="Select Brand", id="brand-filter") }}
+                    <div id="brand-results" class="list-group" style="max-height: 200px; overflow-y: auto;"></div>
+                </div>
+                <div class="col">
+                    {{ form.category_name.label(class="sr-only") }}
+                    {{ form.category_name(class="form-control", placeholder="Select Category", id="category-filter") }}
+                    <div id="category-results" class="list-group" style="max-height: 200px; overflow-y: auto;"></div>
+                </div>
             </div>
-            <div class="col">
-                <button type="button" class="btn btn-secondary" id="filter-toggle">Filter</button>
-            </div>
+        </form>
+        <div class="row mb-3" id="active-filters">
+            <!-- Active filters will be displayed here -->
         </div>
-        <div class="row mb-3" id="filter-options" style="display: none;">
-            <div class="col"></div>
-            <div class="col">
-                <input type="text" name="description" class="form-control" placeholder="Description" value="{{ request.args.get('description', '')|e }}">
-            </div>
-            <div class="col">
-                <input type="number" name="min_price" class="form-control" placeholder="Min Price" value="{{ request.args.get('min_price', '')|e }}">
-            </div>
-            <div class="col">
-                <input type="number" name="max_price" class="form-control" placeholder="Max Price" value="{{ request.args.get('max_price', '')|e }}">
-            </div>
-            <div class="col">
-                <input type="text" id="brand-filter" name="brand_name" class="form-control" placeholder="Select Brand" value="{{ request.args.get('brand_name', '')|e }}">
-                <div id="brand-results" class="list-group" style="max-height: 200px; overflow-y: auto;"></div>
-            </div>
-            <div class="col">
-                <input type="text" id="category-filter" name="category_name" class="form-control" placeholder="Select Category" value="{{ request.args.get('category_name', '')|e }}">
-                <div id="category-results" class="list-group" style="max-height: 200px; overflow-y: auto;"></div>
-            </div>
-        </div>
-    </form>
-    <div class="row mb-3" id="active-filters">
-        <!-- Active filters will be displayed here -->
-    </div>
-    <div class="row">
-        {% for product in products %}
-            <div class="col-md-4">
-                <a href="{{ url_for('main.view_product', product_id=product.id) }}" class="card-link">
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <div>
-                                    <h5 class="card-title">{{ product.name|e }}</h5>
-                                    <p class="card-text">{{ product.description|e }}</p>
-                                    <p class="card-text">Price: ${{ product.price|e }}</p>
-                                </div>
-                                <div class="ms-3">
-                                    <img id="image-preview" src="https://drive.google.com/thumbnail?id={{ product.image }}" alt="Image" class="img-thumbnail" width="100">
+        <div class="row">
+            {% for product in products %}
+                <div class="col-md-4">
+                    <a href="{{ url_for('main.view_product', product_id=product.id) }}" class="card-link">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h5 class="card-title">{{ product.name|e }}</h5>
+                                        <p class="card-text">{{ product.description|e }}</p>
+                                        <p class="card-text">Price: ${{ product.price|e }}</p>
+                                    </div>
+                                    <div class="ms-3">
+                                        <img id="image-preview" src="https://drive.google.com/thumbnail?id={{ product.image }}" alt="Image" class="img-thumbnail" width="100">
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </a>
-            </div>
-        {% endfor %}
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
     </div>
-</div>
+{% endblock %}
 
-<script>
-document.getElementById('filter-toggle').addEventListener('click', function() {
-    var filterOptions = document.getElementById('filter-options');
-    filterOptions.style.display = filterOptions.style.display === 'none' ? 'block' : 'none';
-});
+{% block custom_js %}
+    <script>
+        document.getElementById('filter-toggle').addEventListener('click', function() {
+            var filterOptions = document.getElementById('filter-options');
+            filterOptions.style.display = filterOptions.style.display === 'none' ? 'block' : 'none';
+        });
 
-function addFilterTag(name, value) {
-    var filterContainer = document.getElementById('active-filters');
-    var filterTag = document.createElement('div');
-    filterTag.className = 'filter-tag';
-    filterTag.innerHTML = `${name}: ${value} <span class="remove-filter" onclick="removeFilter('${name}')">&times;</span>`;
-    filterContainer.appendChild(filterTag);
-}
-
-function removeFilter(name) {
-    var url = new URL(window.location.href);
-    url.searchParams.delete(name);
-    window.location.href = url.toString();
-}
-
-window.onload = function() {
-    var params = new URLSearchParams(window.location.search);
-    params.forEach((value, key) => {
-        if (value) {
-            addFilterTag(key, value);
+        function addFilterTag(name, value) {
+            var filterContainer = document.getElementById('active-filters');
+            var filterTag = document.createElement('div');
+            filterTag.className = 'filter-tag';
+            filterTag.innerHTML = `${name}: ${value} <span class="remove-filter" onclick="removeFilter('${name}')">&times;</span>`;
+            filterContainer.appendChild(filterTag);
         }
-    });
-};
 
-document.getElementById('brand-filter').addEventListener('focus', function() {
-    if (this.value === '') {
-        fetch(`/filter_brands`)
-            .then(response => response.json())
-            .then(data => {
-                var results = document.getElementById('brand-results');
-                results.innerHTML = '';
-                data.forEach(function(brand) {
-                    var item = document.createElement('a');
-                    item.className = 'list-group-item list-group-item-action';
-                    item.textContent = brand;
-                    item.addEventListener('click', function() {
-                        document.getElementById('brand-filter').value = brand;
+        function removeFilter(name) {
+            var url = new URL(window.location.href);
+            url.searchParams.delete(name);
+            window.location.href = url.toString();
+        }
+
+        window.onload = function() {
+            var params = new URLSearchParams(window.location.search);
+            params.forEach((value, key) => {
+                if (value) {
+                    addFilterTag(key, value);
+                }
+            });
+        };
+
+        document.getElementById('brand-filter').addEventListener('focus', function() {
+            if (this.value === '') {
+                fetch(`/filter_brands`)
+                    .then(response => response.json())
+                    .then(data => {
+                        var results = document.getElementById('brand-results');
                         results.innerHTML = '';
+                        data.forEach(function(brand) {
+                            var item = document.createElement('a');
+                            item.className = 'list-group-item list-group-item-action';
+                            item.textContent = brand;
+                            item.addEventListener('click', function() {
+                                document.getElementById('brand-filter').value = brand;
+                                results.innerHTML = '';
+                            });
+                            results.appendChild(item);
+                        });
                     });
-                    results.appendChild(item);
-                });
-            });
-    }
-});
-
-document.getElementById('brand-filter').addEventListener('input', function() {
-    var searchTerm = this.value;
-    var results = document.getElementById('brand-results');
-    if (searchTerm === '') {
-        results.innerHTML = '';
-        return;
-    }
-    fetch(`/filter_brands?search_term=${searchTerm}`)
-        .then(response => response.json())
-        .then(data => {
-            results.innerHTML = '';
-            data.forEach(function(brand) {
-                var item = document.createElement('a');
-                item.className = 'list-group-item list-group-item-action';
-                item.textContent = brand;
-                item.addEventListener('click', function() {
-                    document.getElementById('brand-filter').value = brand;
-                    results.innerHTML = '';
-                });
-                results.appendChild(item);
-            });
+            }
         });
-});
 
-document.getElementById('brand-filter').addEventListener('blur', function() {
-    var results = document.getElementById('brand-results');
-    results.innerHTML = '';
-});
-
-document.getElementById('category-filter').addEventListener('focus', function() {
-    if (this.value === '') {
-        fetch(`/filter_categories`)
-            .then(response => response.json())
-            .then(data => {
-                var results = document.getElementById('category-results');
+        document.getElementById('brand-filter').addEventListener('input', function() {
+            var searchTerm = this.value;
+            var results = document.getElementById('brand-results');
+            if (searchTerm === '') {
                 results.innerHTML = '';
-                data.forEach(function(category) {
-                    var item = document.createElement('a');
-                    item.className = 'list-group-item list-group-item-action';
-                    item.textContent = category;
-                    item.addEventListener('click', function() {
-                        document.getElementById('category-filter').value = category;
-                        results.innerHTML = '';
-                    });
-                    results.appendChild(item);
-                });
-            });
-    }
-});
-
-document.getElementById('category-filter').addEventListener('input', function() {
-    var searchTerm = this.value;
-    var results = document.getElementById('category-results');
-    if (searchTerm === '') {
-        results.innerHTML = '';
-        return;
-    }
-    fetch(`/filter_categories?search_term=${searchTerm}`)
-        .then(response => response.json())
-        .then(data => {
-            results.innerHTML = '';
-            data.forEach(function(category) {
-                var item = document.createElement('a');
-                item.className = 'list-group-item list-group-item-action';
-                item.textContent = category;
-                item.addEventListener('click', function() {
-                    document.getElementById('category-filter').value = category;
+                return;
+            }
+            fetch(`/filter_brands?search_term=${searchTerm}`)
+                .then(response => response.json())
+                .then(data => {
                     results.innerHTML = '';
+                    data.forEach(function(brand) {
+                        var item = document.createElement('a');
+                        item.className = 'list-group-item list-group-item-action';
+                        item.textContent = brand;
+                        item.addEventListener('click', function() {
+                            document.getElementById('brand-filter').value = brand;
+                            results.innerHTML = '';
+                        });
+                        results.appendChild(item);
+                    });
                 });
-                results.appendChild(item);
-            });
         });
-});
 
-document.getElementById('category-filter').addEventListener('blur', function() {
-    var results = document.getElementById('category-results');
-    results.innerHTML = '';
-});
-</script>
+        document.getElementById('brand-filter').addEventListener('blur', function() {
+            var results = document.getElementById('brand-results');
+            results.innerHTML = '';
+        });
+
+        document.getElementById('category-filter').addEventListener('focus', function() {
+            if (this.value === '') {
+                fetch(`/filter_categories`)
+                    .then(response => response.json())
+                    .then(data => {
+                        var results = document.getElementById('category-results');
+                        results.innerHTML = '';
+                        data.forEach(function(category) {
+                            var item = document.createElement('a');
+                            item.className = 'list-group-item list-group-item-action';
+                            item.textContent = category;
+                            item.addEventListener('click', function() {
+                                document.getElementById('category-filter').value = category;
+                                results.innerHTML = '';
+                            });
+                            results.appendChild(item);
+                        });
+                    });
+            }
+        });
+
+        document.getElementById('category-filter').addEventListener('input', function() {
+            var searchTerm = this.value;
+            var results = document.getElementById('category-results');
+            if (searchTerm === '') {
+                results.innerHTML = '';
+                return;
+            }
+            fetch(`/filter_categories?search_term=${searchTerm}`)
+                .then(response => response.json())
+                .then(data => {
+                    results.innerHTML = '';
+                    data.forEach(function(category) {
+                        var item = document.createElement('a');
+                        item.className = 'list-group-item list-group-item-action';
+                        item.textContent = category;
+                        item.addEventListener('click', function() {
+                            document.getElementById('category-filter').value = category;
+                            results.innerHTML = '';
+                        });
+                        results.appendChild(item);
+                    });
+                });
+        });
+
+        document.getElementById('category-filter').addEventListener('blur', function() {
+            var results = document.getElementById('category-results');
+            results.innerHTML = '';
+        });
+    </script>
 {% endblock %}

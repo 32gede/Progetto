@@ -16,9 +16,8 @@ from collegamento_drive import carica_imm
 
 from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem
 from database import get_db_session
-from search import search_products
 from form import ProductForm, ProfileForm, RegistrationForm, LoginForm, ReviewForm, AddToCartForm, EditCartForm, \
-    RemoveFromCartForm, ConfirmOrderForm, CheckoutForm
+    RemoveFromCartForm, ConfirmOrderForm, CheckoutForm, FilterCategoriesForm, FilterBrandsForm, SearchProductForm
 
 # DEFINE BLUEPRINT #
 import logging
@@ -274,26 +273,28 @@ def view_products_seller():
 
     return render_template('products_seller.html', products=products, form=form)
 
+
 @main_routes.route('/buyer/products')
 @login_required
 @role_required('buyer')
 def view_products_buyer():
+    form = SearchProductForm(request.args)
     with get_db_session() as db_session:
         products = db_session.query(Product).all()
         if not products:
-            return render_template('products_buyer.html', error="No products available.")
-        return render_template('products_buyer.html', products=products)
+            return render_template('products_buyer.html', error="No products available.", form=form)
+        return render_template('products_buyer.html', products=products, form=form)
+
 
 @main_routes.route('/products/<int:product_id>')
 @login_required
 @role_required('buyer', 'seller')
 def view_product(product_id):
-
     form = ProductForm()  # Create a form instance
     with get_db_session() as db_session:
         product = db_session.query(Product).filter_by(id=product_id).first()
         if not product:
-            return render_template('product.html', error="Product not found.",form=form)
+            return render_template('product.html', error="Product not found.", form=form)
         return render_template('product.html', product=product, form=form)
 
 
@@ -439,7 +440,8 @@ def edit_product(product_id):
         brands = db_session.query(Brand).all()
         categories = db_session.query(Category).all()
 
-        return render_template('edit_product.html', form=form, product=product, brand_name=brand_name, category_name=category_name, brands=brands, categories=categories)
+        return render_template('edit_product.html', form=form, product=product, brand_name=brand_name,
+                               category_name=category_name, brands=brands, categories=categories)
 
 
 # REVIEW ROUTES #
@@ -466,7 +468,8 @@ def view_reviews(product_id):
             db_session.commit()
             return redirect(url_for('main.view_reviews', product_id=product.id))
 
-        reviews = sorted(product.reviews, key=lambda review: review.created_at, reverse=True)  # Sort reviews by created_at
+        reviews = sorted(product.reviews, key=lambda review: review.created_at,
+                         reverse=True)  # Sort reviews by created_at
         return render_template('view_reviews.html', product=product, reviews=reviews, form=form)
 
 
@@ -499,13 +502,15 @@ def add_review(product_id):
 
         return render_template('add_review.html', form=form, product=product)
 
+
 @main_routes.route('/edit_review/<int:product_id>/<int:review_id>', methods=['GET', 'POST'])
 @login_required
 @role_required('buyer')
 def edit_review(product_id, review_id):
     form = ReviewForm()
     with get_db_session() as db_session:
-        review = db_session.query(Review).filter_by(id=review_id, user_id=current_user.id, product_id=product_id).first()
+        review = db_session.query(Review).filter_by(id=review_id, user_id=current_user.id,
+                                                    product_id=product_id).first()
         product = db_session.query(Product).filter_by(id=product_id).first()
 
         if not review:
@@ -740,6 +745,7 @@ def complete_order():
             flash('Errore durante il completamento dell\'ordine.', 'danger')
     return redirect(url_for('main.checkout'))
 
+
 @main_routes.route('/update_address', methods=['POST'])
 @login_required
 @role_required('buyer')
@@ -799,9 +805,6 @@ def manage_orders():
         return render_template('manage_orders.html', orders=orders, form=form)
 
 
-
-
-
 @main_routes.route('/seller/orders/confirm/<int:order_id>', methods=['POST'])
 @login_required
 @role_required('seller')
@@ -843,111 +846,71 @@ def update_orders():
 @login_required
 @role_required('buyer')
 def search_product():
-    with get_db_session() as db_session:
-        query = validate_and_sanitize(
-            request.args.get('query', ''),
-            value_type='string',
-            min_value=0,
-            max_value=255,
-            error_message='Invalid search query.',
-            is_html=True
-        )
-        name = validate_and_sanitize(
-            request.args.get('name', ''),
-            value_type='string',
-            min_value=0,
-            max_value=255,
-            error_message='Invalid product name.',
-            is_html=True
-        )
-        description = validate_and_sanitize(
-            request.args.get('description', ''),
-            value_type='string',
-            min_value=0,
-            max_value=255,
-            error_message='Invalid product description.',
-            is_html=True
-        )
-        min_price = validate_and_sanitize(
-            request.args.get('min_price', type=float),
-            value_type='float',
-            min_value=0,
-            max_value=1000000,
-            error_message='Invalid minimum price.',
-            is_html=True
-        )
-        max_price = validate_and_sanitize(
-            request.args.get('max_price', type=float),
-            value_type='float',
-            min_value=0,
-            max_value=1000000,
-            error_message='Invalid maximum price.',
-            is_html=True
-        )
-        brand_name = validate_and_sanitize(
-            request.args.get('brand_name', ''),
-            value_type='string',
-            min_value=0,
-            max_value=255,
-            error_message='Invalid brand name.',
-            is_html=True
-        )
-        category_name = validate_and_sanitize(
-            request.args.get('category_name', ''),
-            value_type='string',
-            min_value=0,
-            max_value=255,
-            error_message='Invalid category name.',
-            is_html=True
-        )
+    form = SearchProductForm(request.args)
+    if form.validate():
+        with get_db_session() as db_session:
+            products = search_products(
+                db_session,
+                form.name.data,
+                form.description.data,
+                form.min_price.data,
+                form.max_price.data,
+                form.brand_name.data,
+                form.category_name.data
+            )
+            brands = db_session.query(Brand).all()
+            categories = db_session.query(Category).all()
 
-        products = search_products(
-            db_session,
-            name,
-            description,
-            min_price,
-            max_price,
-            brand_name,
-            category_name)
-        brands = db_session.query(Brand).all()
-        categories = db_session.query(Category).all()
-
-        return render_template('products_buyer.html', products=products, brands=brands, categories=categories,
-                               selected_brand=brand_name, selected_category=category_name)
+            return render_template('products_buyer.html', products=products, brands=brands, categories=categories,
+                                   selected_brand=form.brand_name.data, selected_category=form.category_name.data)
+    else:
+        flash('Invalid search parameters.', 'danger')
+        return redirect(url_for('main.index'))
 
 
 @main_routes.route('/filter_brands', methods=['GET'])
 @login_required
 @role_required('buyer')
 def filter_brands():
-    with get_db_session() as db_session:
-        search_term = validate_and_sanitize(
-            request.args.get('search_term', ''),
-            value_type='string',
-            min_value=0,
-            max_value=255,
-            error_message='Invalid search term.',
-            is_html=True
-        )
-        brands = db_session.query(Brand).filter(Brand.name.ilike(f'%{search_term}%')).all()
-        return jsonify([brand.name for brand in brands])
+    form = FilterBrandsForm(request.args)
+    if form.validate():
+        with get_db_session() as db_session:
+            brands = db_session.query(Brand).filter(Brand.name.ilike(f'%{form.search_term.data}%')).all()
+            return jsonify([brand.name for brand in brands])
+    else:
+        return jsonify({'error': 'Invalid search term'}), 400
 
 
 @main_routes.route('/filter_categories', methods=['GET'])
 @login_required
 @role_required('buyer')
 def filter_categories():
-    with get_db_session() as db_session:
-        search_term = validate_and_sanitize(
-            request.args.get('search_term', ''),
-            value_type='string',
-            min_value=1,
-            max_value=255,
-            error_message='Invalid search term.',
-            is_html=True
-        )
-        categories = db_session.query(Category).filter(Category.name.ilike(f'%{search_term}%')).all()
-        return jsonify([category.name for category in categories])
+    form = FilterCategoriesForm(request.args)
+    if form.validate():
+        with get_db_session() as db_session:
+            categories = db_session.query(Category).filter(Category.name.ilike(f'%{form.search_term.data}%')).all()
+            return jsonify([category.name for category in categories])
+    else:
+        return jsonify({'error': 'Invalid search term'}), 400
+
+
+def search_products(db_session, name, description, min_price, max_price, brand_name, category_name):
+    query = db_session.query(Product)
+
+    if name:
+        query = query.filter(Product.name.ilike(f"%{name}%"))
+    if description:
+        query = query.filter(Product.description.ilike(f"%{description}%"))
+    if min_price is not None:
+        query = query.filter(Product.price >= min_price)
+    if max_price is not None:
+        query = query.filter(Product.price <= max_price)
+    if brand_name:
+        query = query.join(Brand).filter(Brand.name.ilike(f"%{brand_name}%"))
+    if category_name:
+        query = query.join(Category).filter(Category.name.ilike(f"%{category_name}%"))
+
+    return query.all()
 
 
 '''
