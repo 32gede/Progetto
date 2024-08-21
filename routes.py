@@ -846,7 +846,8 @@ def update_orders():
 @login_required
 @role_required('buyer')
 def search_product():
-    form = SearchProductForm(request.args)
+    form = SearchProductForm(request.args)  # Create the form instance with request arguments
+
     if form.validate():
         with get_db_session() as db_session:
             products = search_products(
@@ -861,9 +862,15 @@ def search_product():
             brands = db_session.query(Brand).all()
             categories = db_session.query(Category).all()
 
-            return render_template('products_buyer.html', products=products, brands=brands, categories=categories,
-                                   selected_brand=form.brand_name.data, selected_category=form.category_name.data)
+            return render_template(
+                'products_buyer.html',
+                products=products,
+                brands=brands,
+                categories=categories,
+                form=form  # Pass the form to the template
+            )
     else:
+        # If the form is not valid, redirect or handle the error accordingly
         flash('Invalid search parameters.', 'danger')
         return redirect(url_for('main.index'))
 
