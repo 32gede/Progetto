@@ -667,15 +667,12 @@ def checkout():
     form = CheckoutForm()
 
     with get_db_session() as db_session:
-        # Ottieni gli articoli del carrello dell'utente
         cart_items = db_session.query(CartItem).filter_by(user_id=current_user.id).all()
 
         if form.validate_on_submit():
-            print("Form validated successfully.")
-
             if not cart_items:
-                flash('Il carrello è vuoto. Non puoi completare l\'ordine.', 'warning')
-                return redirect(url_for('main.view_products_buyer'))
+                flash('Il carrello è vuoto.', 'danger')
+                return redirect(url_for('main.cart'))
 
             # Raggruppa gli articoli del carrello per venditore
             items_by_seller = {}
@@ -693,7 +690,6 @@ def checkout():
                 new_order = Order(user_id=current_user.id, total=total)
                 db_session.add(new_order)
                 db_session.commit()
-                print(f"Order {new_order.id} created.")
 
                 # Aggiungi gli articoli all'ordine, aggiorna l'inventario e rimuovi dal carrello
                 for item in items:
@@ -716,13 +712,8 @@ def checkout():
 
             db_session.commit()
             flash('Ordine completato con successo!', 'success')
-            return redirect(url_for('main.manage_orders'))  # Reindirizza alla pagina di gestione degli ordini
+            return redirect(url_for('main.order_history'))  # Reindirizza alla pagina della cronologia degli ordini
 
-        else:
-            print("Form validation failed or GET request.")
-            print(form.errors)  # Stampa gli errori del modulo per il debug
-
-        # In caso di errore nella validazione del form, ricarichiamo la pagina di checkout
         user_buyer = db_session.query(User).filter_by(id=current_user.id).first()
         return render_template('checkout.html', cart_items=cart_items, user_buyer=user_buyer, form=form)
 
@@ -732,18 +723,52 @@ def checkout():
 @role_required('buyer')
 def complete_order():
     with get_db_session() as db_session:
-        user_buyer = db_session.query(User).filter_by(id=current_user.id).first()
-        if user_buyer:
-            address = user_buyer.address
-            city = user_buyer.city
-            if not address or not city:
-                flash('Indirizzo o città non disponibili.', 'danger')
-                return redirect(url_for('main.checkout'))
-            # Logic to complete the order using address and city
-            flash('Ordine completato con successo.', 'success')
-        else:
-            flash('Errore durante il completamento dell\'ordine.', 'danger')
-    return redirect(url_for('main.checkout'))
+        user_buyer = db_session.query(UserBuyer).filter_by(id=current_user.id).first()
+        cart_items = db_session.query(CartItem).filter_by(user_id=current_user.id).all()
+
+        if not cart_items:
+            flash('Il carrello è vuoto.', 'danger')
+            return redirect(url_for('main.cart'))
+
+        # Raggruppa gli articoli del carrello per venditore
+        items_by_seller = {}
+        for item in cart_items:
+            seller_id = item.product.seller_id
+            if seller_id not in items_by_seller:
+                items_by_seller[seller_id] = []
+            items_by_seller[seller_id].append(item)
+
+        # Crea un ordine separato per ogni venditore
+        for seller_id, items in items_by_seller.items():
+            total = sum(item.product.price * item.quantity for item in items)
+
+            # Crea un nuovo ordine per questo venditore
+            new_order = Order(user_id=current_user.id, total=total)
+            db_session.add(new_order)
+            db_session.commit()
+
+            # Aggiungi gli articoli all'ordine, aggiorna l'inventario e rimuovi dal carrello
+            for item in items:
+                order_item = OrderItem(
+                    order_id=new_order.id,
+                    product_id=item.product_id,
+                    quantity=item.quantity,
+                    price=item.product.price
+                )
+                db_session.add(order_item)
+
+                # Aggiorna l'inventario
+                product = db_session.query(Product).filter_by(id=item.product_id).first()
+                if product.quantity < item.quantity:
+                    flash('Quantità insufficiente per il prodotto: {}'.format(product.name), 'danger')
+                    return redirect(url_for('main.cart'))
+                product.quantity -= item.quantity
+
+                db_session.delete(item)
+
+        db_session.commit()
+        flash('Ordine completato con successo!', 'success')
+        return redirect(url_for('main.order_history'))  # Reindirizza alla pagina della cronologia degli ordini
 
 
 @main_routes.route('/update_address', methods=['POST'])
