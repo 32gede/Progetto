@@ -24,14 +24,14 @@ class User(UserMixin, Base):
     # New fields
     name: Mapped[str] = mapped_column(String(255), nullable=True)
     username: Mapped[str] = mapped_column(String(255), nullable=True, unique=True)
-    address: Mapped[str] = mapped_column(String(255), nullable=True)
-    city: Mapped[str] = mapped_column(String(255), nullable=True)
 
     seller: Mapped["UserSeller"] = relationship("UserSeller", uselist=False, back_populates="user", lazy='joined') # Eager loading
     buyer: Mapped["UserBuyer"] = relationship("UserBuyer", uselist=False, back_populates="user")
     reviews: Mapped[list["Review"]] = relationship("Review", back_populates="user")
     cart_items: Mapped["CartItem"] = relationship("CartItem", back_populates="user")
     orders: Mapped["Order"] = relationship("Order", back_populates="user")
+    address_id: Mapped[int] = mapped_column(Integer, ForeignKey('addresses.id'), nullable=True)
+    address: Mapped["Address"] = relationship("Address", back_populates="users")
 
     @property
     def password_hash(self):
@@ -51,6 +51,18 @@ class User(UserMixin, Base):
     def gravatar(self, size):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
         return f'https://www.gravatar.com/avatar/{digest}?d=identicon&s={size}'
+
+
+class Address(Base):
+    __tablename__ = 'addresses'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
+    address: Mapped[str] = mapped_column(String(255), nullable=False)
+    city: Mapped[str] = mapped_column(String(255), nullable=False)
+
+    # Relazioni con users e orders
+    users: Mapped[list["User"]] = relationship("User", back_populates="address")
+    orders: Mapped[list["Order"]] = relationship("Order", back_populates="address")
 
 
 class UserSeller(Base):
@@ -152,6 +164,8 @@ class Order(Base):
 
     user: Mapped["User"] = relationship("User", back_populates="orders")
     order_items: Mapped[list["OrderItem"]] = relationship("OrderItem", back_populates="order")
+    address_id: Mapped[int] = mapped_column(Integer, ForeignKey('addresses.id'), nullable=True)
+    address: Mapped["Address"] = relationship("Address", back_populates="orders")
 
     def update_status_based_on_time(self):
         if self.status == 'Confermato' and self.confirmed_at:
