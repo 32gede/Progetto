@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from markupsafe import escape
 from sqlalchemy import desc
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import joinedload
 from werkzeug.utils import secure_filename
 from functools import wraps
 from flask_login import login_user, login_required, current_user, logout_user
@@ -14,7 +15,7 @@ from datetime import datetime
 from collegamento_drive import carica_imm
 # IMPORT FROM OTHER FILES #
 
-from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem
+from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem, Address
 from database import get_db_session
 from form import ProductForm, ProfileForm, RegistrationForm, LoginForm, ReviewForm, AddToCartForm, EditCartForm, \
     RemoveFromCartForm, ConfirmOrderForm, CheckoutForm, FilterCategoriesForm, FilterBrandsForm, SearchProductForm
@@ -54,65 +55,6 @@ def role_required(*roles):
         return decorated_function
 
     return decorator
-
-
-def validate_and_sanitize(value, value_type='string', min_value=None, max_value=None, allowed_chars_pattern=None,
-                          error_message="Invalid value", is_html=False):
-    """
-    Validate and sanitize the input value based on the type and constraints provided.
-
-    :param value: The input value to be validated and sanitized.
-    :param value_type: Type of value ('string', 'int', 'float').
-    :param min_value: Minimum acceptable value (used for 'int' and 'float').
-    :param max_value: Maximum acceptable value (used for 'int' and 'float').
-    :param allowed_chars_pattern: Regex pattern to validate string characters.
-    :param error_message: Error message to be returned if validation fails.
-    :param is_html: Whether to sanitize HTML content.
-    :return: Validated and sanitized value.
-    :raises ValueError: If the input value fails validation.
-    """
-    if value is None:
-        if value_type in ['int', 'float']:
-            return None
-        else:
-            raise ValueError(f"{error_message}: Value cannot be None.")
-
-    value = escape(value)
-
-    if value_type == 'string':
-        # Sanitize HTML if required
-        if is_html:
-            value = bleach.clean(value, tags=ALLOWED_TAGS, strip=True)
-        # Validate string length and allowed characters
-        value = value.strip()
-        if len(value) < (min_value or 0) or len(value) > (max_value or 255):
-            raise ValueError(f"{error_message}: Length should be between {min_value} and {max_value} characters.")
-        if allowed_chars_pattern and not re.match(allowed_chars_pattern, value):
-            raise ValueError(f"{error_message}: Contains invalid characters.")
-        return value
-
-    elif value_type == 'int':
-        # Validate and sanitize integer
-        try:
-            int_value = int(value)
-            if (min_value is not None and int_value < min_value) or (max_value is not None and int_value > max_value):
-                raise ValueError(error_message)
-            return int_value
-        except ValueError:
-            raise ValueError(error_message)
-
-    elif value_type == 'float':
-        # Validate and sanitize float
-        try:
-            float_value = float(value)
-            if (min_value is not None and float_value < min_value) or (
-                    max_value is not None and float_value > max_value):
-                raise ValueError(error_message)
-            return float_value
-        except ValueError:
-            raise ValueError(error_message)
-    else:
-        raise ValueError("Invalid value_type specified. Must be 'string', 'int', or 'float'.")
 
 
 # MAIN ROUTES #
@@ -219,41 +161,55 @@ def profile_view():
 @login_required
 @role_required('buyer', 'seller')
 def edit_profile():
-    form = ProfileForm(obj=current_user)
+    with get_db_session() as db_session:
+        # Recupera l'utente corrente
+        user = db_session.query(User).filter_by(id=current_user.id).first()
 
-    if form.validate_on_submit():
-        with get_db_session() as db_session:
-            user = db_session.query(User).filter_by(id=current_user.id).first()
+        # Prepopola il form con i dati dell'utente
+        form = ProfileForm(obj=user)
 
-            if user:
-                # Process the file upload
-                file = request.files.get('avatar')
+        if user.address:
+            form.address.data = user.address.address
+            form.city.data = user.address.city
 
-                if file and allowed_file(file.filename):
-                    filename = secure_filename(file.filename)
-                    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+        if form.validate_on_submit():
+            # Processa il caricamento dell'immagine avatar
+            file = request.files.get('avatar')
 
-                    try:
-                        file.save(file_path)
-                        user.avatar = carica_imm(file_path, filename)
-                        db_session.commit()  # Ensure commit here to save avatar changes
-                        flash('Your profile has been updated.', 'success')
-                    except Exception as e:
-                        db_session.rollback()  # Rollback in case of error
-                        flash(f'Failed to update the profile: {e}', 'error')
-                else:
-                    flash('Invalid file type.', 'error')
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
 
-                # Update user information
                 try:
-                    user.username = form.username.data
-                    user.name = form.name.data
-                    user.city = form.city.data
-                    user.address = form.address.data
-                    db_session.commit()
+                    file.save(file_path)
+                    user.avatar = carica_imm(file_path, filename)
+                    db_session.commit()  # Ensure commit here to save avatar changes
+                    flash('Your profile has been updated.', 'success')
                 except Exception as e:
-                    db_session.rollback()
+                    db_session.rollback()  # Rollback in case of error
                     flash(f'Failed to update the profile: {e}', 'error')
+            else:
+                flash('Invalid file type.', 'error')
+
+            # Aggiorna le informazioni dell'utente
+            try:
+                user.username = form.username.data
+                user.name = form.name.data
+
+                if user.address:
+                    user.address.address = form.address.data
+                    user.address.city = form.city.data
+                else:
+                    new_address = Address(address=form.address.data, city=form.city.data)
+                    db_session.add(new_address)
+                    db_session.commit()
+                    user.address = new_address
+
+                db_session.commit()
+                flash('Profile updated successfully!', 'success')
+            except Exception as e:
+                db_session.rollback()
+                flash(f'Failed to update the profile: {e}', 'error')
 
     return render_template('edit_profile.html', form=form)
 

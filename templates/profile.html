@@ -12,28 +12,28 @@
 
             <div class="card-body">
                 <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" value="{{ current_user.email }}" readonly>
-                </div>
-
-                <div class="mb-3">
                     <label for="username" class="form-label">Username</label>
-                    <input type="text" class="form-control" id="username" value="{{ current_user.username }}" readonly>
+                    <input type="text" class="form-control" id="username" value="{{ user.username }}" readonly>
                 </div>
 
-                <div class="mb-3">
+                <div>
                     <label for="name" class="form-label">Full Name</label>
                     <input type="text" class="form-control" id="name" value="{{ current_user.name }}" readonly>
                 </div>
 
                 <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" value="{{ user.email }}" readonly>
+                </div>
+
+                <div class="mb-3">
                     <label for="address" class="form-label">Address</label>
-                    <input type="text" class="form-control" id="address" value="{{ current_user.address }}" readonly>
+                    <input type="text" class="form-control" id="address" value="{{ user.address.address }}" readonly>
                 </div>
 
                 <div class="mb-3">
                     <label for="city" class="form-label">City</label>
-                    <input type="text" class="form-control" id="city" value="{{ current_user.city }}" readonly>
+                    <input type="text" class="form-control" id="city" value="{{ user.address.city }}" readonly>
                 </div>
 
                 <div class="mb-3">

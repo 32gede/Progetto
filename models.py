@@ -64,6 +64,12 @@ class Address(Base):
     users: Mapped[list["User"]] = relationship("User", back_populates="address")
     orders: Mapped[list["Order"]] = relationship("Order", back_populates="address")
 
+    def __repr__(self):
+        return f"Address({self.address}, {self.city})"
+
+    def __str__(self):
+        return f"{self.address}, {self.city}"
+
 
 class UserSeller(Base):
     __tablename__ = 'user_sellers'
