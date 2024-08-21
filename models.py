@@ -160,7 +160,7 @@ class Order(Base):
                 self.status = 'Spedito, consegna prevista entro 3 giorni'
             # Aggiorna lo stato a "Consegnato" dopo 5 giorni
             if datetime.utcnow() >= self.confirmed_at + timedelta(days=5):
-                self.status = "Conservator"
+                self.status = "Consegnato"
 
 
 class OrderItem(Base):
