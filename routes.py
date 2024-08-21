@@ -820,12 +820,9 @@ def manage_orders():
         else:
             orders = []
 
-        # Fetch the buyer's address and city for each order
+        # Fetch the buyer's email for each order
         for order in orders:
-            order.user = db_session.query(User).filter_by(id=order.user_id).first()
-
-        # Aggiorna lo stato degli ordini
-        update_order_status()
+            order.buyer_email = db_session.query(User.email).filter_by(id=order.user_id).scalar()
 
         return render_template('manage_orders.html', orders=orders, form=form)
 
