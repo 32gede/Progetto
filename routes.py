@@ -18,7 +18,8 @@ from collegamento_drive import carica_imm
 from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem, Address
 from database import get_db_session
 from form import ProductForm, ProfileForm, RegistrationForm, LoginForm, ReviewForm, AddToCartForm, EditCartForm, \
-    RemoveFromCartForm, ConfirmOrderForm, CheckoutForm, FilterCategoriesForm, FilterBrandsForm, SearchProductForm
+    RemoveFromCartForm, ConfirmOrderForm, CheckoutForm, FilterCategoriesForm, FilterBrandsForm, SearchProductForm, \
+    RemoveReviewForm
 
 # DEFINE BLUEPRINT #
 import logging
@@ -476,25 +477,31 @@ def edit_review(product_id, review_id):
         if form.validate_on_submit():
             review.rating = form.rating.data
             review.comment = form.comment.data
+
+            # Aggiorna il rating del venditore
             seller = product.seller
             seller_reviews = db_session.query(Review).join(Product).filter(Product.seller_id == seller.id).all()
             seller_rating = sum(review.rating for review in seller_reviews) / len(seller_reviews)
             seller.seller_rating = seller_rating
+
             db_session.commit()
             flash('Review updated successfully.')
             return redirect(url_for('main.view_product', product_id=product.id))
 
+        # Prepopola il form con i dati della recensione
         form.rating.data = review.rating
         form.comment.data = review.comment
 
-        return render_template('edit_review.html', form=form, product=product)
+        # Passa anche la review al template
+        return render_template('edit_review.html', form=form, product=product, review=review)
 
 
 @main_routes.route('/product/<int:product_id>/remove_review/<int:review_id>', methods=['GET', 'POST'])
 @login_required
 @role_required('buyer', 'seller')
 def remove_review(product_id, review_id):
-    form = ReviewForm()
+    form = RemoveReviewForm()
+
     if form.validate_on_submit():
         with get_db_session() as db_session:
             product = db_session.query(Product).filter_by(id=product_id).first()
@@ -525,8 +532,8 @@ def remove_review(product_id, review_id):
             flash('Review deleted successfully.')
             return redirect(url_for('main.view_product', product_id=product_id))
 
+    print("Form Errors: ", form.errors)
     return render_template('remove_review.html', form=form)
-
 
 # CART AND ORDER ROUTES #
 

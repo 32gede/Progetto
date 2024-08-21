@@ -122,6 +122,8 @@ class ReviewForm(FlaskForm):
     comment = TextAreaField('Comment', validators=[DataRequired(), Length(min=1, max=3000)])
     submit = SubmitField('Submit')
 
+class RemoveReviewForm(FlaskForm):
+    submit = SubmitField('Remove')
 
 class AddToCartForm(FlaskForm):
     quantity = IntegerField('Quantity', validators=[
