@@ -10,23 +10,17 @@
         </div>
         <div class="card-body">
             <h5>Indirizzo di spedizione</h5>
-            {% if user_buyer.address and user_buyer.city %}
-                <p>Indirizzo: {{ user_buyer.address }}</p>
-                <p>Città: {{ user_buyer.city }}</p>
-            {% else %}
-                <p>Indirizzo non disponibile.</p>
-            {% endif %}
 
             <!-- Form per aggiornare l'indirizzo -->
             <form method="POST" action="{{ url_for('main.update_address') }}">
                 {{ form.hidden_tag() }}
                 <div class="mb-3">
                     {{ form.address.label(class="form-label") }}
-                    {{ form.address(class="form-control", value=user_buyer.address) }}
+                    {{ form.address(class="form-control", value=user_buyer.address.address) }}
                 </div>
                 <div class="mb-3">
                     {{ form.city.label(class="form-label") }}
-                    {{ form.city(class="form-control", value=user_buyer.city) }}
+                    {{ form.city(class="form-control", value=user_buyer.address.city) }}
                 </div>
                 <button type="submit" class="btn btn-secondary btn-block">Aggiorna Indirizzo</button>
             </form>

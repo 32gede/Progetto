@@ -174,6 +174,7 @@ def edit_profile():
         # Prepopulate the form with the user's data
         form = ProfileForm(obj=user)
 
+
         if form.validate_on_submit():
             # Process the avatar image upload
             file = request.files.get('avatar')
@@ -197,10 +198,9 @@ def edit_profile():
             try:
                 user.username = form.username.data
                 user.name = form.name.data
+
                 if user.address:
-                    print('sono qua')
                     user.address.address = form.address.data
-                    print(form.address.data)
                     user.address.city = form.city.data
                 else:
                     new_address = Address(address=form.address.data, city=form.city.data)
@@ -213,6 +213,11 @@ def edit_profile():
             except Exception as e:
                 db_session.rollback()
                 flash(f'Failed to update the profile: {e}', 'error')
+            return profile_view()
+
+        if user.address:
+            form.address.data = user.address.address
+            form.city.data = user.address.city
 
     return render_template('edit_profile.html', form=form)
 
@@ -525,6 +530,7 @@ def remove_review(product_id, review_id):
         flash('Review deleted successfully.')
     return redirect(url_for('main.view_product', product_id=product_id))
 
+
 # CART AND ORDER ROUTES #
 
 @main_routes.route('/cart')
@@ -733,8 +739,8 @@ def update_address():
         with get_db_session() as db_session:
             user_buyer = db_session.query(User).filter_by(id=current_user.id).first()
             if user_buyer:
-                user_buyer.user.address = form.address.data
-                user_buyer.user.city = form.city.data
+                user_buyer.address.address = form.address.data
+                user_buyer.address.city = form.city.data
                 db_session.commit()
                 flash('Indirizzo aggiornato con successo.', 'success')
             else:
@@ -748,7 +754,7 @@ def update_address():
 def order_history():
     with get_db_session() as db_session:
         # Recupera gli ordini dell'utente
-        orders = db_session.query(Order).filter_by(user_id=current_user.id).all()
+        orders = db_session.query(Order).filter_by(user_id=current_user.id).order_by(Order.created_at.asc()).all()
 
         # Carica anche gli articoli per ciascun ordine
         for order in orders:
