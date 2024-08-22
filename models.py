@@ -80,14 +80,6 @@ class UserSeller(Base):
     products: Mapped[list["Product"]] = relationship("Product", back_populates="seller")
 
 
-class UserBuyer(Base):
-    __tablename__ = 'user_buyers'
-
-    id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), primary_key=True)
-    buyer_rating: Mapped[int] = mapped_column(Integer, nullable=False)
-    user: Mapped["User"] = relationship("User", back_populates="buyer")
-
-
 # -------------- Prodotti:
 
 class Product(Base):
