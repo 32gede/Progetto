@@ -623,6 +623,7 @@ def edit_cart(item_id):
     return render_template('cart.html', form=form)
 
 
+# Update the checkout route
 @main_routes.route('/checkout', methods=['GET', 'POST'])
 @login_required
 @role_required('buyer')
@@ -637,6 +638,10 @@ def checkout():
                 flash('Il carrello è vuoto.', 'danger')
                 return redirect(url_for('main.cart'))
 
+            # Use the default address if no address is provided
+            address = form.address.data or current_user.address.address
+            city = form.city.data or current_user.address.city
+
             # Raggruppa gli articoli del carrello per venditore
             items_by_seller = {}
             for item in cart_items:
@@ -650,7 +655,7 @@ def checkout():
                 total = sum(item.product.price * item.quantity for item in items)
 
                 # Crea un nuovo ordine per questo venditore
-                new_order = Order(user_id=current_user.id, total=total)
+                new_order = Order(user_id=current_user.id, total=total, address_id=current_user.address.id)
                 db_session.add(new_order)
                 db_session.commit()
 
@@ -679,8 +684,7 @@ def checkout():
 
         user_buyer = db_session.query(User).filter_by(id=current_user.id).first()
         return render_template('checkout.html', cart_items=cart_items, user_buyer=user_buyer, form=form)
-
-
+# Update the complete_order route
 @main_routes.route('/complete_order', methods=['POST'])
 @login_required
 @role_required('buyer')
@@ -692,6 +696,10 @@ def complete_order():
         if not cart_items:
             flash('Il carrello è vuoto.', 'danger')
             return redirect(url_for('main.cart'))
+
+        # Use the default address if no address is provided
+        address = user_buyer.address.address
+        city = user_buyer.address.city
 
         # Raggruppa gli articoli del carrello per venditore
         items_by_seller = {}
@@ -706,7 +714,7 @@ def complete_order():
             total = sum(item.product.price * item.quantity for item in items)
 
             # Crea un nuovo ordine per questo venditore
-            new_order = Order(user_id=current_user.id, total=total)
+            new_order = Order(user_id=current_user.id, total=total, address_id=user_buyer.address.id)
             db_session.add(new_order)
             db_session.commit()
 
@@ -732,7 +740,6 @@ def complete_order():
         db_session.commit()
         flash('Ordine completato con successo!', 'success')
         return redirect(url_for('main.order_history'))  # Reindirizza alla pagina della cronologia degli ordini
-
 
 @main_routes.route('/update_address', methods=['POST'])
 @login_required
