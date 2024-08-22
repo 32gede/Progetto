@@ -18,7 +18,7 @@
                 {% if product.seller.seller_rating != 0 %}
                     <p><strong>Rating:</strong> {{ product.seller.seller_rating }}</p>
                 {% else %}
-                    <p class="text-danger">This seller has no sales</p>
+                    <p class="text-danger">This seller has no rating</p>
                 {% endif %}
                 <p>
                     {% if product.quantity == 0 %}
