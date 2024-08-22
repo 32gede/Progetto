@@ -523,7 +523,11 @@ def remove_review(product_id, review_id):
         # Update seller's rating
         seller = product.seller
         seller_reviews = db_session.query(Review).join(Product).filter(Product.seller_id == seller.id).all()
-        seller_rating = sum(r.rating for r in seller_reviews) / len(seller_reviews)
+        if seller_reviews:
+            seller_rating = sum(review.rating for review in seller_reviews) / len(seller_reviews)
+        else:
+            seller_rating = 0  # Imposta il rating a 0 se non ci sono più recensioni
+
         seller.seller_rating = seller_rating
 
         db_session.commit()
