@@ -26,7 +26,6 @@ class User(UserMixin, Base):
     username: Mapped[str] = mapped_column(String(255), nullable=True, unique=True)
 
     seller: Mapped["UserSeller"] = relationship("UserSeller", uselist=False, back_populates="user", lazy='joined') # Eager loading
-
     reviews: Mapped[list["Review"]] = relationship("Review", back_populates="user")
     cart_items: Mapped["CartItem"] = relationship("CartItem", back_populates="user")
     orders: Mapped["Order"] = relationship("Order", back_populates="user")

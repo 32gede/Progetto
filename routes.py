@@ -113,9 +113,6 @@ def registration():
                 if form.role.data == "seller":
                     new_seller = UserSeller(id=new_user.id, seller_rating=0)
                     db_session.add(new_seller)
-                elif form.role.data == "buyer":
-                    new_buyer = UserBuyer(id=new_user.id, buyer_rating=0)
-                    db_session.add(new_buyer)
                 db_session.commit()
                 print("User committed")  # Debugging line
                 return redirect(url_for('main.login'))
@@ -328,27 +325,21 @@ def add_product():
 @main_routes.route('/remove_product/<int:product_id>', methods=['POST'])
 @login_required
 def remove_product(product_id):
-    form = ProductForm()
+    with get_db_session() as db_session:
+        product = db_session.query(Product).filter_by(id=product_id).first()
 
-    if form.validate_on_submit():
-        with get_db_session() as db_session:
-            product = db_session.query(Product).filter_by(id=product_id).first()
-
-            if not product:
-                flash('Product not found.')
-                return redirect(url_for('main.view_products_seller'))
-
-            if product.seller_id != current_user.id:
-                flash('Unauthorized action.')
-                return redirect(url_for('main.view_products_seller'))
-
-            db_session.delete(product)
-            db_session.commit()
-            flash('Product deleted successfully.')
+        if not product:
+            flash('Product not found.')
             return redirect(url_for('main.view_products_seller'))
-    else:
-        flash('Invalid form submission.')
-        return redirect(url_for('main.view_products_seller'))
+
+        if product.seller_id != current_user.id:
+            flash('Unauthorized action.')
+            return redirect(url_for('main.view_products_seller'))
+
+        db_session.delete(product)
+        db_session.commit()
+        flash('Product deleted successfully.')
+    return redirect(url_for('main.view_products_seller'))
 
 
 @main_routes.route('/product/<int:product_id>/edit', methods=['GET', 'POST'])
@@ -504,44 +495,38 @@ def edit_review(product_id, review_id):
         return render_template('edit_review.html', form=form, product=product, review=review)
 
 
-@main_routes.route('/product/<int:product_id>/remove_review/<int:review_id>', methods=['GET', 'POST'])
+@main_routes.route('/product/<int:product_id>/remove_review/<int:review_id>', methods=['POST'])
 @login_required
 @role_required('buyer', 'seller')
 def remove_review(product_id, review_id):
-    form = RemoveReviewForm()
+    with get_db_session() as db_session:
+        product = db_session.query(Product).filter_by(id=product_id).first()
 
-    if form.validate_on_submit():
-        with get_db_session() as db_session:
-            product = db_session.query(Product).filter_by(id=product_id).first()
-
-            if not product:
-                flash('Product not found.')
-                return redirect(url_for('main.view_product', product_id=product_id))
-
-            review = db_session.query(Review).filter_by(id=review_id).first()
-
-            if not review:
-                flash('Review not found.')
-                return redirect(url_for('main.view_product', product_id=product_id))
-
-            if review.user_id != current_user.id and product.seller_id != current_user.id:
-                flash('Unauthorized action.')
-                return redirect(url_for('main.view_product', product_id=product_id))
-
-            db_session.delete(review)
-
-            # Update seller's rating
-            seller = product.seller
-            seller_reviews = db_session.query(Review).join(Product).filter(Product.seller_id == seller.id).all()
-            seller_rating = sum(r.rating for r in seller_reviews) / len(seller_reviews)
-            seller.seller_rating = seller_rating
-
-            db_session.commit()
-            flash('Review deleted successfully.')
+        if not product:
+            flash('Product not found.')
             return redirect(url_for('main.view_product', product_id=product_id))
 
-    print("Form Errors: ", form.errors)
-    return render_template('remove_review.html', form=form)
+        review = db_session.query(Review).filter_by(id=review_id).first()
+
+        if not review:
+            flash('Review not found.')
+            return redirect(url_for('main.view_product', product_id=product_id))
+
+        if review.user_id != current_user.id and product.seller_id != current_user.id:
+            flash('Unauthorized action.')
+            return redirect(url_for('main.view_product', product_id=product_id))
+
+        db_session.delete(review)
+
+        # Update seller's rating
+        seller = product.seller
+        seller_reviews = db_session.query(Review).join(Product).filter(Product.seller_id == seller.id).all()
+        seller_rating = sum(r.rating for r in seller_reviews) / len(seller_reviews)
+        seller.seller_rating = seller_rating
+
+        db_session.commit()
+        flash('Review deleted successfully.')
+    return redirect(url_for('main.view_product', product_id=product_id))
 
 # CART AND ORDER ROUTES #
 
@@ -694,7 +679,7 @@ def checkout():
 @role_required('buyer')
 def complete_order():
     with get_db_session() as db_session:
-        user_buyer = db_session.query(UserBuyer).filter_by(id=current_user.id).first()
+        user_buyer = db_session.query(User).filter_by(id=current_user.id).first()
         cart_items = db_session.query(CartItem).filter_by(user_id=current_user.id).all()
 
         if not cart_items:
@@ -749,7 +734,7 @@ def update_address():
     form = CheckoutForm()
     if form.validate_on_submit():
         with get_db_session() as db_session:
-            user_buyer = db_session.query(UserBuyer).filter_by(id=current_user.id).first()
+            user_buyer = db_session.query(User).filter_by(id=current_user.id).first()
             if user_buyer:
                 user_buyer.user.address = form.address.data
                 user_buyer.user.city = form.city.data
