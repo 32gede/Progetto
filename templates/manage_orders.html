@@ -36,7 +36,7 @@
                                     <td>{{ item.price }} €</td>
                                     <td>{{ item.price * item.quantity }} €</td>
                                     <td>{{ order.status }}</td>
-                                    <td>{{ order.user.address }}, {{ order.user.city }}</td>
+                                    <td>{{ order.address.address }}, {{ order.address.city }}</td>
                                     <td>{{ order.buyer_email }}</td>
                                     <td>
                                         {% if order.status == 'In attesa' %}
