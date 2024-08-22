@@ -1,26 +1,8 @@
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileRequired, FileAllowed
-from wtforms import StringField, DecimalField, IntegerField, SelectField, TextAreaField, SubmitField, FloatField
-from wtforms.fields.simple import SubmitField, PasswordField, HiddenField
-from wtforms.validators import DataRequired, NumberRange, Length, Optional, ValidationError, Regexp, Email, EqualTo
-import re
-import bleach
-from markupsafe import escape
-
-'''
-ALLOWED_TAGS = ['b', 'i', 'u', 'a', 'p', 'strong', 'em']  # Define allowed HTML tags for sanitization
-
-        if self.value_type == 'string':
-            if self.is_html:
-                value = bleach.clean(value, tags=ALLOWED_TAGS, strip=True)
-            value = value.strip()
-            if len(value) < (self.min_value or 0) or len(value) > (self.max_value or 255):
-                raise ValidationError(
-                    f"{self.error_message}: Length should be between {self.min_value} and {self.max_value} characters.")
-            if self.allowed_chars_pattern and not re.match(self.allowed_chars_pattern, value):
-                raise ValidationError(f"{self.error_message}: Contains invalid characters.")
-            field.data = value
-'''
+from flask_wtf.file import FileField, FileAllowed
+from wtforms import StringField, DecimalField, IntegerField, SelectField, TextAreaField, FloatField
+from wtforms.fields.simple import SubmitField, PasswordField
+from wtforms.validators import DataRequired, NumberRange, Length, Optional, Email, EqualTo
 
 
 class ProductForm(FlaskForm):

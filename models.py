@@ -1,9 +1,9 @@
 from hashlib import md5
 
-from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, event, Float, LargeBinary, Text
+from sqlalchemy import String, Integer, ForeignKey, DateTime, Float, Text
 from sqlalchemy.orm import relationship, declarative_base, Mapped, mapped_column
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_login import UserMixin
 from datetime import datetime, timedelta
 
 Base = declarative_base()

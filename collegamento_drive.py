@@ -1,6 +1,5 @@
 from googleapiclient.http import MediaFileUpload
 from Google import Create_Service
-import os
 
 
 def carica_imm(file_path, file_name):

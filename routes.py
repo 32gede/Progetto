@@ -1,16 +1,10 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify, current_app
-from markupsafe import escape
 from sqlalchemy import desc
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload
 from werkzeug.utils import secure_filename
 from functools import wraps
 from flask_login import login_user, login_required, current_user, logout_user
 import os
-import sys
-import bleach
-from bleach.sanitizer import ALLOWED_TAGS
-import re
 from datetime import datetime
 from collegamento_drive import carica_imm
 # IMPORT FROM OTHER FILES #
