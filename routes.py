@@ -113,9 +113,6 @@ def registration():
                 if form.role.data == "seller":
                     new_seller = UserSeller(id=new_user.id, seller_rating=0)
                     db_session.add(new_seller)
-                elif form.role.data == "buyer":
-                    new_buyer = UserBuyer(id=new_user.id, buyer_rating=0)
-                    db_session.add(new_buyer)
                 db_session.commit()
                 print("User committed")  # Debugging line
                 return redirect(url_for('main.login'))
