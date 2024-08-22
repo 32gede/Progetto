@@ -754,7 +754,7 @@ def update_address():
 def order_history():
     with get_db_session() as db_session:
         # Recupera gli ordini dell'utente
-        orders = db_session.query(Order).filter_by(user_id=current_user.id).order_by(Order.created_at.asc()).all()
+        orders = db_session.query(Order).filter_by(user_id=current_user.id).order_by(Order.created_at.desc()).all()
 
         # Carica anche gli articoli per ciascun ordine
         for order in orders:
@@ -775,7 +775,7 @@ def manage_orders():
 
         if seller:
             seller_products = [product.id for product in seller.products]
-            orders = db_session.query(Order).join(OrderItem).filter(OrderItem.product_id.in_(seller_products)).all()
+            orders = db_session.query(Order).join(OrderItem).filter(OrderItem.product_id.in_(seller_products)).order_by(Order.created_at.desc()).all()
         else:
             orders = []
 

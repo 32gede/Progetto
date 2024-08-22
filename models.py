@@ -167,10 +167,10 @@ class Order(Base):
     def update_status_based_on_time(self):
         if self.status == 'Confermato' and self.confirmed_at:
             # Aggiorna lo stato a "Spedito" dopo 2 giorni
-            if datetime.utcnow() >= self.confirmed_at + timedelta(days=2):
+            if datetime.utcnow() >= self.confirmed_at + timedelta(days=5):
                 self.status = 'Spedito, consegna prevista entro 3 giorni'
             # Aggiorna lo stato a "Consegnato" dopo 5 giorni
-            if datetime.utcnow() >= self.confirmed_at + timedelta(days=5):
+            if datetime.utcnow() >= self.confirmed_at + timedelta(days=15):
                 self.status = "Consegnato"
 
 
