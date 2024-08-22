@@ -692,7 +692,7 @@ def complete_order():
             flash('Il carrello è vuoto.', 'danger')
             return redirect(url_for('main.cart'))
 
-        # Use the default address if no address is provided
+        # Use the latest address associated with the user
         address = user_buyer.address.address
         city = user_buyer.address.city
 
@@ -734,8 +734,7 @@ def complete_order():
 
         db_session.commit()
         flash('Ordine completato con successo!', 'success')
-        return redirect(url_for('main.order_history'))  # Reindirizza alla pagina della cronologia degli ordini
-
+        return redirect(url_for('main.order_history'))
 @main_routes.route('/update_address', methods=['POST'])
 @login_required
 @role_required('buyer')
@@ -745,12 +744,18 @@ def update_address():
         with get_db_session() as db_session:
             user_buyer = db_session.query(User).filter_by(id=current_user.id).first()
             if user_buyer:
-                user_buyer.address.address = form.address.data
-                user_buyer.address.city = form.city.data
+                # Create a new address
+                new_address = Address(address=form.address.data, city=form.city.data)
+                db_session.add(new_address)
                 db_session.commit()
-                flash('Indirizzo aggiornato con successo.', 'success')
+
+                # Associate the new address with the user
+                user_buyer.address_id = new_address.id
+                db_session.commit()
+
+                flash('Indirizzo aggiunto con successo.', 'success')
             else:
-                flash('Errore durante l\'aggiornamento dell\'indirizzo.', 'danger')
+                flash('Errore durante l\'aggiunta dell\'indirizzo.', 'danger')
     return redirect(url_for('main.checkout'))
 
 
