@@ -64,6 +64,36 @@
         margin-left: 0.5em;
         cursor: pointer;
     }
+
+    .compressed .col {
+        max-height: 40px;  /* Riduce l'altezza delle colonne dei filtri */
+        overflow: hidden;
+        padding: 5px;      /* Riduce il padding per un aspetto più compatto */
+        font-size: 12px;   /* Riduce la dimensione del testo */
+    }
+
+    .compressed input {
+        height: 30px;      /* Riduce l'altezza dei campi di input */
+        font-size: 12px;
+    }
+
+    .compressed .list-group {
+        max-height: 40px;  /* Riduce l'altezza della lista */
+        overflow-y: hidden;
+    }
+
+    .compressed .list-group-item {
+        font-size: 12px;
+        padding: 5px;
+    }
+
+    /* Stile per il filtro quando espanso */
+    .compressed .col:hover,
+    .compressed .col:focus-within {
+        max-height: 200px;  /* Aumenta l'altezza delle colonne quando si interagisce */
+        overflow: visible;
+    }
+
 </style>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
