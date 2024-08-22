@@ -15,11 +15,8 @@
                 <div class="col">
                     <button type="submit" class="btn btn-primary">Search</button>
                 </div>
-                <div class="col">
-                    <button type="button" class="btn btn-secondary" id="filter-toggle">Filter</button>
-                </div>
             </div>
-            <div class="row mb-3" id="filter-options" style="display: none;">
+            <div class="row mb-3" id="filter-options" class="compressed">
                 <div class="col"></div>
                 <div class="col">
                     {{ form.description.label(class="sr-only") }}
@@ -76,7 +73,7 @@
     <script>
         document.getElementById('filter-toggle').addEventListener('click', function() {
             var filterOptions = document.getElementById('filter-options');
-            filterOptions.style.display = filterOptions.style.display === 'none' ? 'block' : 'none';
+            filterOptions.classList.toggle('compressed');
         });
 
         function addFilterTag(name, value) {
