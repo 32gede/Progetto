@@ -168,18 +168,14 @@ def profile_view():
 @role_required('buyer', 'seller')
 def edit_profile():
     with get_db_session() as db_session:
-        # Recupera l'utente corrente
+        # Retrieve the current user
         user = db_session.query(User).filter_by(id=current_user.id).first()
 
-        # Prepopola il form con i dati dell'utente
+        # Prepopulate the form with the user's data
         form = ProfileForm(obj=user)
 
-        if user.address:
-            form.address.data = user.address.address
-            form.city.data = user.address.city
-
         if form.validate_on_submit():
-            # Processa il caricamento dell'immagine avatar
+            # Process the avatar image upload
             file = request.files.get('avatar')
 
             if file and allowed_file(file.filename):
@@ -197,13 +193,14 @@ def edit_profile():
             else:
                 flash('Invalid file type.', 'error')
 
-            # Aggiorna le informazioni dell'utente
+            # Update the user's information
             try:
                 user.username = form.username.data
                 user.name = form.name.data
-
                 if user.address:
+                    print('sono qua')
                     user.address.address = form.address.data
+                    print(form.address.data)
                     user.address.city = form.city.data
                 else:
                     new_address = Address(address=form.address.data, city=form.city.data)
