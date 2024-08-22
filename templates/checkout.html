@@ -22,11 +22,11 @@
                 {{ form.hidden_tag() }}
                 <div class="mb-3">
                     {{ form.address.label(class="form-label") }}
-                    {{ form.address(class="form-control", value=user_buyer.address) }}
+                    {{ form.address(class="form-control", value=user_buyer.address.address) }}
                 </div>
                 <div class="mb-3">
                     {{ form.city.label(class="form-label") }}
-                    {{ form.city(class="form-control", value=user_buyer.city) }}
+                    {{ form.city(class="form-control", value=user_buyer.address.city) }}
                 </div>
                 <button type="submit" class="btn btn-secondary btn-block">Aggiorna Indirizzo</button>
             </form>
