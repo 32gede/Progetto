@@ -15,7 +15,7 @@ from datetime import datetime
 from collegamento_drive import carica_imm
 # IMPORT FROM OTHER FILES #
 
-from models import User, UserSeller, UserBuyer, Product, Brand, Category, Review, CartItem, Order, OrderItem, Address
+from models import User, UserSeller, Product, Brand, Category, Review, CartItem, Order, OrderItem, Address
 from database import get_db_session
 from form import ProductForm, ProfileForm, RegistrationForm, LoginForm, ReviewForm, AddToCartForm, EditCartForm, \
     RemoveFromCartForm, ConfirmOrderForm, CheckoutForm, FilterCategoriesForm, FilterBrandsForm, SearchProductForm, \
