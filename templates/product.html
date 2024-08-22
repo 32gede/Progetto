@@ -6,7 +6,7 @@
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1>{{ product.name }}</h1>
-        <a href="{% if (current_user.role) == 'seller' %}{{ url_for('main.view_products_seller') }}{% else %}{{ url_for('main.view_products_buyer') }}{% endif %}" class="btn btn-secondary">Back to Products</a>
+        <a href="{% if current_user.role == 'seller' %}{{ url_for('main.view_products_seller') }}{% else %}{{ url_for('main.view_products_buyer') }}{% endif %}" class="btn btn-secondary">Back to Products</a>
     </div>
 
     <div class="row">
@@ -33,7 +33,7 @@
 
             {% if current_user.role == 'buyer' and product.quantity > 0 %}
                 <form method="POST" action="{{ url_for('main.add_to_cart', product_id=product.id) }}">
-                    {{ form.hidden_tag() }}  <!-- Include CSRF token -->
+                    {{ form.hidden_tag() }}
                     <div class="d-flex align-items-center mb-3">
                         <label for="quantity" class="form-label me-2">Quantity:</label>
                         <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ product.quantity }}" class="form-control me-2" required>
@@ -46,9 +46,14 @@
             <img src="https://drive.google.com/thumbnail?id={{ product.image }}" alt="image" class="img-thumbnail mb-3" width="200">
         </div>
         {% if current_user.role == 'seller' %}
+            <form method="POST" action="{{ url_for('main.remove_product', product_id=product.id) }}" style="display:inline;">
+                {{ form.hidden_tag() }}
+                <button type="submit" class="btn btn-danger btn-block">Delete Product</button>
+            </form>
             <a href="{{ url_for('main.edit_product', product_id=product.id) }}" class="btn btn-primary btn-block">Edit Product</a>
         {% endif %}
     </div>
+
     <!-- Reviews Section -->
     <div class="mt-5">
         <div class="d-flex justify-content-between align-items-center">
@@ -62,11 +67,7 @@
                 {% for review in product.reviews %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <div>
-                            {% if review.user is not string %}
-                                <strong>{{ review.user.email }}</strong> <br>
-                            {% else %}
-                                <strong>{{ review.user }}</strong> <br>
-                            {% endif %}
+                            <strong>{{ review.user.email }}</strong> <br>
                             <strong>Rating:</strong> {{ review.rating }}<br>
                             <strong>Comment:</strong> {{ review.comment }}
                         </div>
@@ -75,14 +76,14 @@
                                 <a href="{{ url_for('main.edit_review', product_id=product.id, review_id=review.id) }}" class="btn btn-secondary btn-sm" title="Edit Review">
                                     <i class="fa fa-pencil" style="font-size:16px"></i>
                                 </a>
-                                <form method="POST" action="{{ url_for('main.remove_review', product_id=product.id, review_id=review.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this review?');">
+                                <form method="POST" action="{{ url_for('main.remove_review', product_id=product.id, review_id=review.id) }}" style="display:inline;">
                                     {{ form.hidden_tag() }}
                                     <button type="submit" class="btn btn-danger btn-sm" title="Delete Review">
                                         <i class="fa fa-trash" style="font-size:16px"></i>
                                     </button>
                                 </form>
                             {% elif current_user.role == 'seller' %}
-                                <form method="POST" action="{{ url_for('main.remove_review', product_id=product.id, review_id=review.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this review?');">
+                                <form method="POST" action="{{ url_for('main.remove_review', product_id=product.id, review_id=review.id) }}" style="display:inline;">
                                     {{ form.hidden_tag() }}
                                     <button type="submit" class="btn btn-danger btn-sm" title="Delete Review">
                                         <i class="fa fa-trash" style="font-size:16px"></i>
