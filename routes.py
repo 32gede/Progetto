@@ -90,15 +90,21 @@ def registration():
         with get_db_session() as db_session:
             existing_user = db_session.query(User).filter_by(email=form.email.data).first()
             if not existing_user:
+                # Create a new address instance
+                new_address = Address(
+                    address=form.address.data,
+                    city=form.city.data
+                )
+                db_session.add(new_address)
+                db_session.commit()
+
                 new_user = User(
                     name=form.name.data,
                     username=form.username.data,
                     email=form.email.data,
                     password=form.password.data,
                     role=form.role.data,
-                    address=form.address.data,
-                    city=form.city.data,
-                    avatar=form.avatar_choice.data
+                    address=new_address  # Assign the address instance
                 )
                 new_user.password_hash = form.password.data  # Hash the password
                 print("New user created")  # Debugging line
