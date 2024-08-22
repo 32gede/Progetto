@@ -733,8 +733,8 @@ def update_address():
         with get_db_session() as db_session:
             user_buyer = db_session.query(User).filter_by(id=current_user.id).first()
             if user_buyer:
-                user_buyer.user.address = form.address.data
-                user_buyer.user.city = form.city.data
+                user_buyer.address.address = form.address.data
+                user_buyer.address.city = form.city.data
                 db_session.commit()
                 flash('Indirizzo aggiornato con successo.', 'success')
             else:
