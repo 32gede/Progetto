@@ -174,6 +174,7 @@ def edit_profile():
         # Prepopulate the form with the user's data
         form = ProfileForm(obj=user)
 
+
         if form.validate_on_submit():
             # Process the avatar image upload
             file = request.files.get('avatar')
@@ -197,10 +198,9 @@ def edit_profile():
             try:
                 user.username = form.username.data
                 user.name = form.name.data
+
                 if user.address:
-                    print('sono qua')
                     user.address.address = form.address.data
-                    print(form.address.data)
                     user.address.city = form.city.data
                 else:
                     new_address = Address(address=form.address.data, city=form.city.data)
@@ -213,6 +213,11 @@ def edit_profile():
             except Exception as e:
                 db_session.rollback()
                 flash(f'Failed to update the profile: {e}', 'error')
+            return profile_view()
+
+        if user.address:
+            form.address.data = user.address.address
+            form.city.data = user.address.city
 
     return render_template('edit_profile.html', form=form)
 
@@ -524,6 +529,7 @@ def remove_review(product_id, review_id):
         db_session.commit()
         flash('Review deleted successfully.')
     return redirect(url_for('main.view_product', product_id=product_id))
+
 
 # CART AND ORDER ROUTES #
 
