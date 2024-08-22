@@ -63,6 +63,7 @@ def role_required(*roles):
 
 @main_routes.route('/')
 def index():
+    update_order_status()
     with get_db_session() as db_session:
         products = db_session.query(Product).order_by(desc(Product.insert_date)).limit(5).all()
         return render_template('index.html', products=products)
@@ -825,14 +826,6 @@ def update_order_status():
             order.update_status_based_on_time()
         db_session.commit()
 
-
-@main_routes.route('/admin/update_orders', methods=['POST'])
-@login_required
-@role_required('admin')  # Assicurati che solo l'admin possa fare questo
-def update_orders():
-    update_order_status()
-    flash('Stato degli ordini aggiornato con successo.', 'success')
-    return redirect(url_for('main.manage_orders'))
 
 
 # SEARCH AND FILTER ROUTES #
