@@ -155,7 +155,15 @@ def logout():
 @login_required
 @role_required('buyer', 'seller')
 def profile_view():
-    return render_template('profile.html')
+    form = ProductForm()  # Create a form instance
+    with get_db_session() as db_session:
+        user = db_session.query(User).options(joinedload(User.address)).filter_by(id=current_user.id).first()
+
+    # Check if user exists and render the template accordingly
+    if not user:
+        return render_template('profile.html', error="No user found.", form=form)
+
+    return render_template('profile.html', user=user, form=form)
 
 
 @main_routes.route('/profile/edit', methods=['GET', 'POST'])
