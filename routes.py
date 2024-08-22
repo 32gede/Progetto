@@ -692,9 +692,12 @@ def complete_order():
             flash('Il carrello è vuoto.', 'danger')
             return redirect(url_for('main.cart'))
 
-        # Use the latest address associated with the user
-        address = user_buyer.address.address
-        city = user_buyer.address.city
+        # Use the new address if provided, otherwise use the default address from the profile
+        address_id = session.pop('new_address_id', None)
+        if address_id:
+            address = db_session.query(Address).filter_by(id=address_id).first()
+        else:
+            address = user_buyer.address
 
         # Raggruppa gli articoli del carrello per venditore
         items_by_seller = {}
@@ -709,27 +712,14 @@ def complete_order():
             total = sum(item.product.price * item.quantity for item in items)
 
             # Crea un nuovo ordine per questo venditore
-            new_order = Order(user_id=current_user.id, total=total, address_id=user_buyer.address.id)
+            new_order = Order(user_id=current_user.id, total=total, address_id=address.id)
             db_session.add(new_order)
             db_session.commit()
 
             # Aggiungi gli articoli all'ordine, aggiorna l'inventario e rimuovi dal carrello
             for item in items:
-                order_item = OrderItem(
-                    order_id=new_order.id,
-                    product_id=item.product_id,
-                    quantity=item.quantity,
-                    price=item.product.price
-                )
+                order_item = OrderItem(order_id=new_order.id, product_id=item.product.id, quantity=item.quantity, price=item.product.price)
                 db_session.add(order_item)
-
-                # Aggiorna l'inventario
-                product = db_session.query(Product).filter_by(id=item.product_id).first()
-                if product.quantity < item.quantity:
-                    flash('Quantità insufficiente per il prodotto: {}'.format(product.name), 'danger')
-                    return redirect(url_for('main.cart'))
-                product.quantity -= item.quantity
-
                 db_session.delete(item)
 
         db_session.commit()
@@ -742,20 +732,11 @@ def update_address():
     form = CheckoutForm()
     if form.validate_on_submit():
         with get_db_session() as db_session:
-            user_buyer = db_session.query(User).filter_by(id=current_user.id).first()
-            if user_buyer:
-                # Create a new address
-                new_address = Address(address=form.address.data, city=form.city.data)
-                db_session.add(new_address)
-                db_session.commit()
-
-                # Associate the new address with the user
-                user_buyer.address_id = new_address.id
-                db_session.commit()
-
-                flash('Indirizzo aggiunto con successo.', 'success')
-            else:
-                flash('Errore durante l\'aggiunta dell\'indirizzo.', 'danger')
+            new_address = Address(address=form.address.data, city=form.city.data)
+            db_session.add(new_address)
+            db_session.commit()
+            # Store the new address ID in the session for later use
+            session['new_address_id'] = new_address.id
     return redirect(url_for('main.checkout'))
 
 

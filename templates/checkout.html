@@ -1,3 +1,4 @@
+<!-- templates/checkout.html -->
 {% extends "base.html" %}
 
 {% block title %}Checkout - E-commerce{% endblock %}
@@ -11,18 +12,18 @@
         <div class="card-body">
             <h5>Indirizzo di spedizione</h5>
 
-            <!-- Form per aggiornare l'indirizzo -->
+            <!-- Form per aggiungere un nuovo indirizzo -->
             <form method="POST" action="{{ url_for('main.update_address') }}">
                 {{ form.hidden_tag() }}
                 <div class="mb-3">
                     {{ form.address.label(class="form-label") }}
-                    {{ form.address(class="form-control", value=user_buyer.address.address) }}
+                    {{ form.address(class="form-control") }}
                 </div>
                 <div class="mb-3">
                     {{ form.city.label(class="form-label") }}
-                    {{ form.city(class="form-control", value=user_buyer.address.city) }}
+                    {{ form.city(class="form-control") }}
                 </div>
-                <button type="submit" class="btn btn-secondary btn-block">Aggiorna Indirizzo</button>
+                <button type="submit" class="btn btn-secondary btn-block">Aggiungi Nuovo Indirizzo</button>
             </form>
             <hr>
 
