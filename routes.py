@@ -671,7 +671,7 @@ def checkout():
 @role_required('buyer')
 def complete_order():
     with get_db_session() as db_session:
-        user_buyer = db_session.query(UserBuyer).filter_by(id=current_user.id).first()
+        user_buyer = db_session.query(User).filter_by(id=current_user.id).first()
         cart_items = db_session.query(CartItem).filter_by(user_id=current_user.id).all()
 
         if not cart_items:
@@ -726,7 +726,7 @@ def update_address():
     form = CheckoutForm()
     if form.validate_on_submit():
         with get_db_session() as db_session:
-            user_buyer = db_session.query(UserBuyer).filter_by(id=current_user.id).first()
+            user_buyer = db_session.query(User).filter_by(id=current_user.id).first()
             if user_buyer:
                 user_buyer.user.address = form.address.data
                 user_buyer.user.city = form.city.data
