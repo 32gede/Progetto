@@ -763,6 +763,11 @@ def order_history():
         # Recupera gli ordini dell'utente
         orders = db_session.query(Order).filter_by(user_id=current_user.id).order_by(Order.created_at.desc()).all()
 
+        # Aggiorna lo stato degli ordini in base al tempo
+        for order in orders:
+            order.update_status_based_on_time()
+        db_session.commit()
+
         # Carica anche gli articoli per ciascun ordine
         for order in orders:
             order.items = db_session.query(OrderItem).filter_by(order_id=order.id).all()
@@ -770,8 +775,6 @@ def order_history():
         # Supponiamo che il tempo di spedizione stimato sia di 5 giorni lavorativi
         estimated_delivery_days = 5
         return render_template('order_history.html', orders=orders, estimated_delivery_days=estimated_delivery_days)
-
-
 @main_routes.route('/seller/orders')
 @login_required
 @role_required('seller')
