@@ -37,7 +37,9 @@ login_manager.login_view = 'main.login'
 @login_manager.user_loader
 def load_user(user_id):
     with get_db_session() as db_session:
-        return db_session.get(User, int(user_id))  # Cambiato query().get() con Session.get()
+        user = db_session.get(User, int(user_id))
+        db_session.expunge(user)  # Detach the user instance from the session
+        return user
 
 
 app.register_blueprint(main_routes)

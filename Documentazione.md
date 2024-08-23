@@ -1,11 +1,31 @@
 # Documentazione del Progetto
 
+#### Table of Contents
+
+1. [Introduzione](#Introduzione)
+2. [Struttura del Progetto](#Struttura-del-Progetto)
+2. [Funzionalità principali](#Funzionalità-principali)
+3. [Progettazione concettuale e logica della basi di dati](#Progettazione-concettuale-e-logica-della-basi-di-dati)
+4. [Query principali](#Query-principali)
+5. [Principali scelte progettuali](#Principali-scelte-progettuali)
+6. [Sicurezza](#Sicurezza)
+7. [Contributo al progetto (appendice)](#Contributo-al-progetto-(appendice))
+8. [Considerazioni Finali e Miglioramenti Futuri](#Considerazioni-Finali-e-Miglioramenti-Futuri)
+
+---
+
+<a name="Introduzione" /></a>
+
 ## Introduzione
 L’obiettivo del progetto è lo sviluppo di una web application che si interfaccia con un database relazionale, consentendo agli utenti di interagire con prodotti, ordini e recensioni in un contesto di e-commerce. L'applicazione è stata sviluppata in Python, utilizzando il framework Flask per la gestione del backend e SQLAlchemy come ORM per l'interazione con il database. 
 
-La scelta del DBMS è ricaduta su PostgreSQL per la sua robustezza e scalabilità, particolarmente adatta a gestire un'applicazione web con operazioni di lettura e scrittura frequenti. Inoltre, l'utilizzo di Flask, una delle librerie più leggere e flessibili per lo sviluppo web in Python, ha permesso un rapido sviluppo e iterazione dell'applicazione. 
+La scelta del DBMS è ricaduta su PostgreSQL per la sua robustezza e scalabilità, particolarmente adatta a gestire un'applicazione web con operazioni di lettura e scrittura frequenti.
 
 Questa documentazione si propone di illustrare le principali funzionalità dell'applicazione, la progettazione concettuale e logica del database, le query SQL implementate, le scelte progettuali adottate, e altre informazioni tecniche rilevanti per comprendere il progetto. Nella sezione finale, verrà anche chiarito il contributo di ciascun membro del gruppo.
+
+---
+
+<a name="Struttura-del-Progetto" /></a>
 
 ## Struttura del Progetto
 Il progetto è organizzato secondo la seguente struttura:
@@ -18,6 +38,10 @@ Il progetto è organizzato secondo la seguente struttura:
 - **`templates/`**: Contiene i file HTML utilizzati per la visualizzazione delle pagine web, inclusi layout, form e pagine specifiche per utenti autenticati e non autenticati.
 - **`Google.py`**: Contiene il codice per l'autenticazione con Google.
 - **`collegamento_google.py`**: Contiene il codice per il collegamento con Google.
+
+---
+
+<a name="Funzionalità-principali" /></a>
 
 ## Funzionalità principali
 
@@ -51,6 +75,10 @@ I venditori possono visualizzare e gestire gli ordini ricevuti, mentre gli acqui
 
 Gli utenti possono lasciare recensioni e valutazioni sui prodotti acquistati. Questo sistema aiuta altri utenti a prendere decisioni informate sugli acquisti, basandosi su esperienze reali.
 
+---
+
+<a name="Progettazione-concettuale-e-logica-della-basi-di-dati" /></a>
+
 ## Progettazione concettuale e logica della basi di dati
 
 La progettazione del database è stata effettuata utilizzando la notazione ER e successivamente trasformata in uno schema logico che implementa le tabelle del database. La progettazione è stata guidata dai requisiti funzionali dell'applicazione, con particolare attenzione all'integrità referenziale e alla normalizzazione.
@@ -59,7 +87,7 @@ La progettazione del database è stata effettuata utilizzando la notazione ER e 
 
 Il diagramma ER rappresenta le entità principali, le loro relazioni e gli attributi associati. Le entità includono User, Product, Order, OrderItem e Review.
 
-![Diagramma ER](https://github.com/32gede/Progetto/blob/main/Schema%20ER.png)
+![Diagramma ER](https://github.com/32gede/Progetto/blob/main/Schema%20DB.png)
 
 ### Schema Logico
 
@@ -119,30 +147,71 @@ CREATE TABLE reviews (
 );
 ```
 
+---
+
+<a name="Query-principali" /></a>
+
 ## Query principali
 
 Le query SQL utilizzate all'interno dell'applicazione sono progettate per soddisfare i requisiti funzionali e ottimizzare le prestazioni del database. Di seguito sono riportate alcune delle query più significative.
 
 ### Query per ottenere i prodotti di un venditore
 
+```python
+products = db_session.query(Product).filter_by(seller_id=current_user.id).all()
+```
 ```sql
 SELECT * FROM products WHERE seller_id = :seller_id;
 ```
-Questa query consente ai venditori di visualizzare tutti i prodotti che hanno inserito nel sistema, fornendo una panoramica completa del loro inventario.
-
+Questa query è fondamentale per i venditori, poiché consente loro di visualizzare tutti i prodotti che hanno messo in vendita. È essenziale per la gestione dell'inventario e per monitorare le vendite.
 ### Query per ottenere gli ordini di un utente
 
+```python
+orders = db_session.query(Order).filter_by(user_id=current_user.id).order_by(Order.created_at.desc()).all()```
+```
 ```sql
 SELECT * FROM orders WHERE user_id = :user_id;
 ```
-Questa query recupera tutti gli ordini effettuati da un utente specifico, permettendo agli acquirenti di visualizzare la cronologia dei loro acquisti.
-
+Questa query permette agli utenti di visualizzare i loro ordini, fornendo una panoramica dello stato degli acquisti e delle consegne. È cruciale per migliorare l'esperienza utente e per il servizio clienti.
 ### Query per ottenere le recensioni di un prodotto
 
+```python
+reviews = sorted(product.reviews, key=lambda review: review.created_at, reverse=True)
+```
 ```sql
 SELECT * FROM reviews WHERE product_id = :product_id;
 ```
-Questa query recupera tutte le recensioni associate a un determinato prodotto, fornendo un feedback prezioso per i potenziali acquirenti.
+Le recensioni sono importanti per gli acquirenti per prendere decisioni informate. Questa query consente di raccogliere feedback sui prodotti, migliorando la trasparenza e la fiducia nel marketplace
+
+### Query per cercare prodotti in base a criteri specifici
+
+```python
+products = search_products(
+    db_session,
+    form.name.data,
+    form.description.data,
+    form.min_price.data,
+    form.max_price.data,
+    form.brand_name.data,
+    form.category_name.data
+)
+```
+```sql
+SELECT * FROM products
+JOIN brands ON products.brand_id = brands.id
+JOIN categories ON products.category_id = categories.id
+WHERE (:name IS NULL OR products.name ILIKE '%' || :name || '%')
+AND (:description IS NULL OR products.description ILIKE '%' || :description || '%')
+AND (:min_price IS NULL OR products.price >= :min_price)
+AND (:max_price IS NULL OR products.price <= :max_price)
+AND (:brand_name IS NULL OR brands.name ILIKE '%' || :brand_name || '%')
+AND (:category_name IS NULL OR categories.name ILIKE '%' || :category_name || '%');
+```
+Questa query complessa permette agli utenti di cercare prodotti in base a vari criteri come nome, descrizione, prezzo, marca e categoria. È essenziale per migliorare la funzionalità di ricerca e filtraggio dei prodotti.
+
+---
+
+<a name="Principali-scelte-progettuali" /></a>
 
 ## Principali scelte progettuali
 
@@ -150,23 +219,132 @@ Questa query recupera tutte le recensioni associate a un determinato prodotto, f
 
 La progettazione del database prevede l'uso di chiavi esterne per garantire l'integrità referenziale tra le tabelle. Inoltre, la validazione dei dati viene effettuata sia a livello di database che a livello di applicazione per assicurare la correttezza dei dati.
 
-* **Chiavi esterne**: Le chiavi esterne collegano le tabelle users, products, orders, order_items e reviews per garantire che le relazioni tra le entità siano mantenute in modo coerente.
-* **Validazione dei dati**: Viene implementata una validazione rigorosa dei dati, inclusi controlli sui campi obbligatori, vincoli di unicità e limiti sui valori numerici.
+* ### **Chiavi esterne**
+Le chiavi esterne collegano le tabelle users, products, orders, order_items e reviews per garantire che le relazioni tra le entità siano mantenute in modo coerente.
+* ### **Validazione dei dati**
+Viene implementata una validazione rigorosa dei dati, inclusi controlli sui campi obbligatori, vincoli di unicità e limiti sui valori numerici.  Questo viene effettuato sia a livello di database che a livello di applicazione per garantire la coerenza dei dati.
+    In particolare questo viene fatto tramite il modulo Flask-WTF, che fornisce un'interfaccia per la validazione dei dati inseriti dagli utenti nei form. 
+    Ad esempio, la validazione dell'email viene effettuata per garantire che l'utente inserisca un indirizzo email valido, mentre la validazione della password viene utilizzata per garantire che la password soddisfi i requisiti. Questo è un esempio preso dal codice di come vengono gestiti i dati:  
+```python
+class RegistrationForm(FlaskForm):
+    email = StringField('Email', validators=[
+    DataRequired(message='Email is required.'),
+    Email(message='Invalid email address.'),
+    Length(min=3, max=255, message='Email must be between 3 and 255 characters.')
+])
+password = PasswordField('Password', validators=[
+    DataRequired(message='Password is required.'),
+    Length(min=1, max=128, message='Password must be between 1 and 128 characters.')
+])
+# Altre validazioni per il nome, l'indirizzo, ecc.
+```
+* ### Transazioni nel Sistema
 
+Le transazioni vengono utilizzate per garantire l'integrità dei dati durante le operazioni di aggiornamento o inserimento, assicurando che le modifiche siano eseguite in modo atomico e consistente. Nel contesto di un'applicazione web, una transazione consente di raggruppare più operazioni di database in un'unica unità di lavoro, assicurando che tutte le operazioni vengano completate con successo prima di confermare (commit) le modifiche nel database. Se una qualsiasi delle operazioni fallisce, tutte le modifiche vengono annullate (rollback), mantenendo il database in uno stato coerente.
+
+#### Codice Python per la gestione delle transazioni
+
+Ecco un esempio di gestione delle transazioni in Python, utilizzando SQLAlchemy all'interno di un'applicazione Flask:
+
+```python
+# in database.py 
+# Funzione per ottenere una sessione del database con supporto per le transazioni
+@contextmanager
+def get_db_session():
+    session = Session()
+    try:
+        yield session
+        session.commit()  # Conferma tutte le modifiche se nessuna eccezione viene sollevata
+    except Exception:
+        session.rollback()  # Annulla tutte le modifiche se c'è un'eccezione
+        raise
+    finally:
+        session.close()  # Chiude la sessione del database
+
+# in routes.py
+# Esempio di utilizzo delle transazioni per aggiungere un nuovo prodotto al database
+@main_routes.route('/product/add', methods=['GET', 'POST'])
+@login_required
+@role_required('seller')
+def add_product():
+    form = ProductForm()
+
+    with get_db_session() as db_session:
+        # Recupera i marchi e le categorie dal database
+
+        if form.validate_on_submit():
+            try:
+            # Crea un nuovo prodotto con i dati del form
+
+            except Exception as e:
+                # Gestisce eventuali errori durante l'aggiunta del prodotto
+                db_session.rollback()  # Rollback in caso di errore
+                flash(str(e), 'error')
+                return redirect(url_for('main.add_product'))
+
+            flash('Product added successfully!', 'success')
+            return redirect(url_for('main.view_products_seller'))
+
+    return render_template('add_product.html', form=form, brands=brands, categories=categories)
+```
+* ### **Trigger SQL nel Sistema**  
+I trigger sono utilizzati nel database per garantire che l'integrità dei dati sia mantenuta durante le operazioni critiche come aggiornamenti, inserimenti e cancellazioni.   
+Abbiamo optato per i seguetni trigger:
+* **Assegnazione e Validazione del Ruolo**: Il trigger trg_validate_and_assign_role assegna automaticamente un ruolo predefinito agli utenti e impedisce l'assegnazione di ruoli non validi, garantendo che i dati degli utenti siano sempre corretti.
+* **Gestione dell'Inventario**: Il trigger trg_manage_inventory_on_order gestisce automaticamente l'inventario, riducendo la quantità disponibile durante gli acquisti e ripristinandola in caso di cancellazione, prevenendo così vendite eccessive e garantendo la disponibilità corretta dei prodotti.
+* **Aggiornamento Valutazione del Venditore**: Il trigger trg_update_seller_rating aggiorna automaticamente la valutazione media di un venditore in base alle recensioni dei suoi prodotti, aiutando a mantenere valutazioni accurate e aggiornate.
+* **Aggiornamento Stato dell'Ordine**: Il trigger trg_auto_update_order_status aggiorna automaticamente lo stato degli ordini in base alle tempistiche, migliorando l'efficienza del flusso di lavoro degli ordini e riducendo la necessità di intervento manuale.
+* **Prevenzione Cancellazione Prodotti**: Il trigger trg_prevent_product_deletion_if_active_orders impedisce la cancellazione di prodotti che hanno ordini attivi, proteggendo l'integrità dei dati e prevenendo errori di gestione dell'inventario.  
+
+Di seguito viene illustrato illustrato il trigger manage_inventory_on_order():
+
+    
+```sql
+CREATE OR REPLACE FUNCTION manage_inventory_on_order() RETURNS TRIGGER AS $$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        IF NEW.quantity > (SELECT quantity FROM products WHERE id = NEW.product_id) THEN
+            RAISE EXCEPTION 'Insufficient inventory for product_id %', NEW.product_id;
+        END IF;
+        UPDATE products SET quantity = quantity - NEW.quantity WHERE id = NEW.product_id;
+    ELSIF TG_OP = 'DELETE' THEN
+        UPDATE products SET quantity = quantity + OLD.quantity WHERE id = OLD.product_id;
+    ELSIF TG_OP = 'UPDATE' THEN
+        IF NEW.quantity > OLD.quantity THEN
+            IF (NEW.quantity - OLD.quantity) > (SELECT quantity FROM products WHERE id = NEW.product_id) THEN
+                RAISE EXCEPTION 'Insufficient inventory for product_id %', NEW.product_id;
+            END IF;
+            UPDATE products SET quantity = quantity - (NEW.quantity - OLD.quantity) WHERE id = NEW.product_id;
+        ELSIF NEW.quantity < OLD.quantity THEN
+            UPDATE products SET quantity = quantity + (OLD.quantity - NEW.quantity) WHERE id = OLD.product_id;
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER manage_inventory_trigger
+AFTER INSERT OR UPDATE OR DELETE ON orders
+FOR EACH ROW EXECUTE FUNCTION manage_inventory_on_order();
+```
 ### Definizione di ruoli e politiche di autorizzazione
 
 L'applicazione implementa un sistema di ruoli che distingue tra acquirenti, venditori e amministratori. Le politiche di autorizzazione sono definite per garantire che solo gli utenti con i permessi appropriati possano accedere a determinate funzionalità.
 
 * **Acquirenti**: Possono visualizzare i prodotti, aggiungerli al carrello e completare gli acquisti.
 * **Venditori**: Possono aggiungere, modificare e rimuovere i prodotti, nonché gestire gli ordini ricevuti.
-* **Amministratori**: Hanno accesso completo a tutte le funzionalità dell'applicazione, inclusa la gestione degli utenti e dei ruoli.
 
 ### Uso di indici
 
-L'applicazione utilizza indici su colonne frequentemente utilizzate, come `email` e `product_id`, per migliorare le prestazioni delle query.. Ad esempio, la ricerca di prodotti o la verifica delle credenziali durante il login sono operazioni critiche che devono essere eseguite rapidamente, e l'uso di indici consente di ridurre significativamente i tempi di risposta.
+L'applicazione utilizza indici su colonne frequentemente utilizzate, come `email` e `product_id`, per migliorare le prestazioni delle query.   
+Ad esempio, la ricerca di prodotti o la verifica delle credenziali durante il login sono operazioni critiche che devono essere eseguite rapidamente, e l'uso di indici consente di ridurre significativamente i tempi di risposta.
 
 * **Indice su email**: L'indice sull'email nella tabella users accelera le operazioni di autenticazione e recupero degli utenti.
 * **Indice su seller_id**: Facilita la ricerca rapida dei prodotti per venditore, migliorando le prestazioni della gestione dell'inventario.
+
+---
+
+<a name="Sicurezza" /></a>
 
 ## Sicurezza
 
@@ -176,36 +354,29 @@ La sicurezza è una priorità fondamentale per l'applicazione, con diverse misur
 
 - **Validazione dei Dati**: Tutti i dati inseriti dagli utenti sono validati per prevenire attacchi di tipo SQL injection e XSS. Inoltre, vengono utilizzati token CSRF per proteggere i form da attacchi CSRF.
 
+- **Gestione delle Sessioni**: Le sessioni degli utenti sono gestite in modo sicuro utilizzando Flask-Login, che fornisce un sistema di autenticazione robusto e sicuro. Le sessioni vengono crittografate e firmate per prevenire attacchi di session hijacking.
+
+- **Protezione da Sql Injection**: L'applicazione utilizza SQLAlchemy per interagire con il database, che offre una protezione integrata contro gli attacchi di SQL injection. Le query parametriche vengono utilizzate per evitare l'iniezione di codice SQL dannoso.
+
 - **Protezione CSRF e Gestione dei Form**: Tutti i form dell'applicazione sono gestiti tramite Flask-WTF, che offre protezione contro attacchi CSRF. Questo è particolarmente importante in un'applicazione di e-commerce dove le transazioni devono essere sicure.
 
-- **Sicurezza e Autenticazione**: L'applicazione utilizza Flask-Login per la gestione degli accessi, con un sistema di ruoli che distingue tra acquirenti e venditori. Questo garantisce che solo gli utenti autorizzati possano accedere a determinate funzionalità.
+- **Sicurezza e Autenticazione**: L'applicazione utilizza Flask-Login per la gestione degli accessi in contemporanea con un sistema di ruoli che distingue tra acquirenti e venditori. Questo garantisce che solo gli utenti autorizzati possano accedere a determinate funzionalità.
 
-- **Utilizzo di Talisman per la Sicurezza**: Sebbene non abilitato di default, l'applicazione è predisposta per l'uso di Flask-Talisman per aggiungere ulteriori livelli di sicurezza, come le Content Security Policy (CSP) che proteggono contro attacchi XSS.
+---
 
-
-## Ulteriori informazioni
-
-### Scelte tecnologiche
-
-L'applicazione è stata sviluppata utilizzando un insieme di tecnologie moderne, che sono state scelte per la loro robustezza e facilità di utilizzo.
-
-* **Linguaggio di programmazione**: Python, scelto per la sua sintassi chiara e l'ampia disponibilità di librerie.
-* **Framework web**: Flask, un microframework leggero che consente una rapida prototipazione e sviluppo.
-* **ORM**: SQLAlchemy, utilizzato per l'interazione con il database e la gestione delle relazioni tra le tabelle.
-* **Database**: SQLite è stato utilizzato per lo sviluppo e il testing, grazie alla sua semplicità e portabilità.
-
-### Deployment e gestione delle dipendenze
-
-* **Gestione delle dipendenze**: Viene utilizzato pip e venv per gestire le dipendenze del progetto, garantendo che l'ambiente di sviluppo sia isolato e riproducibile.
-* **Deployment**: L'applicazione è stata progettata per essere facilmente distribuita su server come Heroku o AWS, con supporto per configurazioni specifiche come file .env per le variabili di ambiente.
+<a name="Contributo-al-progetto-(appendice)"></a>
 
 ## Contributo al progetto (appendice)
 
 Il progetto è stato sviluppato collaborativamente dai membri del team, con ogni membro che ha contribuito in modo significativo alle varie fasi del progetto.
 
-* **Membro 1**: Ha guidato il design del database, creando lo schema logico e implementando le query principali. Inoltre, ha documentato l'intero processo di progettazione e scelte implementative.
-* **Membro 2**: Ha sviluppato il backend dell'applicazione, implementando le API, gestendo l'autenticazione, l'autorizzazione e la gestione degli ordini.
-* **Membro 3**: Ha sviluppato il frontend, implementando le interfacce utente, integrando il design con il backend e eseguendo i test e il debug per assicurare che l'applicazione funzionasse correttamente su diverse piattaforme e dispositivi.
+* **Alessandro Sartori**: Ha guidato il design del database, creando lo schema logico e implementando le query principali. Inoltre, ha documentato l'intero processo di progettazione e scelte implementative.
+* **Federico Riato**: Ha sviluppato il backend dell'applicazione, implementando le API, gestendo l'autenticazione, l'autorizzazione e la gestione degli ordini.
+* **Federico Vedovotto**: Ha sviluppato il frontend, implementando le interfacce utente, integrando il design con il backend e eseguendo i test e il debug per assicurare che l'applicazione funzionasse correttamente su diverse piattaforme e dispositivi.
+
+---
+
+<a name="Considerazioni-Finali-e-Miglioramenti-Futuri"></a>
 
 ## Considerazioni Finali e Miglioramenti Futuri
 
