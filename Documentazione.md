@@ -59,7 +59,7 @@ La progettazione del database è stata effettuata utilizzando la notazione ER e 
 
 Il diagramma ER rappresenta le entità principali, le loro relazioni e gli attributi associati. Le entità includono User, Product, Order, OrderItem e Review.
 
-![Diagramma ER](https://raw.githubusercontent.com/username/projectname/branch/path/to/img.png)
+![Diagramma ER](https://github.com/32gede/Progetto/blob/main/Schema%20ER.png)
 
 ### Schema Logico
 
