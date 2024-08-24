@@ -9,6 +9,7 @@
 4. [Query principali](#Query-principali)
 5. [Principali scelte progettuali](#Principali-scelte-progettuali)
 6. [Sicurezza](#Sicurezza)
+7. [Ulteriori informazioni](#Ulteriori-informazioni)
 7. [Contributo al progetto (appendice)](#Contributo-al-progetto-(appendice))
 8. [Considerazioni Finali e Miglioramenti Futuri](#Considerazioni-Finali-e-Miglioramenti-Futuri)
 
@@ -21,7 +22,7 @@ L’obiettivo del progetto è lo sviluppo di una web application che si interfac
 
 La scelta del DBMS è ricaduta su PostgreSQL per la sua robustezza e scalabilità, particolarmente adatta a gestire un'applicazione web con operazioni di lettura e scrittura frequenti.
 
-Questa documentazione si propone di illustrare le principali funzionalità dell'applicazione, la progettazione concettuale e logica del database, le query SQL implementate, le scelte progettuali adottate, e altre informazioni tecniche rilevanti per comprendere il progetto. Nella sezione finale, verrà anche chiarito il contributo di ciascun membro del gruppo.
+Questa documentazione si propone di illustrare le principali funzionalità dell'applicazione, la progettazione concettuale e logica del database, le query SQL implementate, le scelte progettuali adottate, e altre informazioni tecniche rilevanti. Nella sezione finale, verrà anche chiarito il contributo di ciascun membro del gruppo.
 
 ---
 
@@ -223,8 +224,9 @@ La progettazione del database prevede l'uso di chiavi esterne per garantire l'in
 Le chiavi esterne collegano le tabelle users, products, orders, order_items e reviews per garantire che le relazioni tra le entità siano mantenute in modo coerente.
 * ### **Validazione dei dati**
 Viene implementata una validazione rigorosa dei dati, inclusi controlli sui campi obbligatori, vincoli di unicità e limiti sui valori numerici.  Questo viene effettuato sia a livello di database che a livello di applicazione per garantire la coerenza dei dati.
-    In particolare questo viene fatto tramite il modulo Flask-WTF, che fornisce un'interfaccia per la validazione dei dati inseriti dagli utenti nei form. 
-    Ad esempio, la validazione dell'email viene effettuata per garantire che l'utente inserisca un indirizzo email valido, mentre la validazione della password viene utilizzata per garantire che la password soddisfi i requisiti. Questo è un esempio preso dal codice di come vengono gestiti i dati:  
+In particolare questo viene fatto tramite il modulo Flask-WTF, che fornisce un'interfaccia per la validazione dei dati inseriti dagli utenti nei form.   
+
+Ad esempio, la validazione dell'email viene effettuata per garantire che l'utente inserisca un indirizzo email valido, mentre la validazione della password viene utilizzata per garantire che la password soddisfi i requisiti. Questo è un esempio preso dal codice di come vengono gestiti i dati:  
 ```python
 class RegistrationForm(FlaskForm):
     email = StringField('Email', validators=[
@@ -248,16 +250,12 @@ Ecco un esempio di gestione delle transazioni in Python, utilizzando SQLAlchemy 
 
 ```python
 # in database.py 
-# Funzione per ottenere una sessione del database con supporto per le transazioni
+# Funzione per ottenere una sessione del database
 @contextmanager
 def get_db_session():
-    session = Session()
+    session = Session() # Crea una nuova sessione del database
     try:
-        yield session
-        session.commit()  # Conferma tutte le modifiche se nessuna eccezione viene sollevata
-    except Exception:
-        session.rollback()  # Annulla tutte le modifiche se c'è un'eccezione
-        raise
+        yield session # Restituisce la sessione del database all'applicazione per l'utilizzo
     finally:
         session.close()  # Chiude la sessione del database
 
@@ -269,16 +267,16 @@ def get_db_session():
 def add_product():
     form = ProductForm()
 
-    with get_db_session() as db_session:
+    with get_db_session() as db_session: # Ottiene una sessione del database per l'operazione di aggiunta del prodotto 
         # Recupera i marchi e le categorie dal database
 
         if form.validate_on_submit():
             try:
             # Crea un nuovo prodotto con i dati del form
-
+                session.commit()  # Conferma tutte le modifiche se nessuna eccezione viene sollevata
             except Exception as e:
                 # Gestisce eventuali errori durante l'aggiunta del prodotto
-                db_session.rollback()  # Rollback in caso di errore
+                db_session.rollback()  # Rollback in caso di errore, annullando tutte le modifiche 
                 flash(str(e), 'error')
                 return redirect(url_for('main.add_product'))
 
@@ -290,13 +288,13 @@ def add_product():
 * ### **Trigger SQL nel Sistema**  
 I trigger sono utilizzati nel database per garantire che l'integrità dei dati sia mantenuta durante le operazioni critiche come aggiornamenti, inserimenti e cancellazioni.   
 Abbiamo optato per i seguetni trigger:
-* **Assegnazione e Validazione del Ruolo**: Il trigger trg_validate_and_assign_role assegna automaticamente un ruolo predefinito agli utenti e impedisce l'assegnazione di ruoli non validi, garantendo che i dati degli utenti siano sempre corretti.
-* **Gestione dell'Inventario**: Il trigger trg_manage_inventory_on_order gestisce automaticamente l'inventario, riducendo la quantità disponibile durante gli acquisti e ripristinandola in caso di cancellazione, prevenendo così vendite eccessive e garantendo la disponibilità corretta dei prodotti.
-* **Aggiornamento Valutazione del Venditore**: Il trigger trg_update_seller_rating aggiorna automaticamente la valutazione media di un venditore in base alle recensioni dei suoi prodotti, aiutando a mantenere valutazioni accurate e aggiornate.
-* **Aggiornamento Stato dell'Ordine**: Il trigger trg_auto_update_order_status aggiorna automaticamente lo stato degli ordini in base alle tempistiche, migliorando l'efficienza del flusso di lavoro degli ordini e riducendo la necessità di intervento manuale.
-* **Prevenzione Cancellazione Prodotti**: Il trigger trg_prevent_product_deletion_if_active_orders impedisce la cancellazione di prodotti che hanno ordini attivi, proteggendo l'integrità dei dati e prevenendo errori di gestione dell'inventario.  
+* **Assegnazione e Validazione del Ruolo**: Il trigger **trg_validate_and_assign_role** assegna automaticamente un ruolo predefinito agli utenti e impedisce l'assegnazione di ruoli non validi, garantendo che i dati degli utenti siano sempre corretti.
+* **Gestione dell'Inventario**: Il trigger **trg_manage_inventory_on_order** gestisce automaticamente l'inventario, riducendo la quantità disponibile durante gli acquisti e ripristinandola in caso di cancellazione, prevenendo così vendite eccessive e garantendo la disponibilità corretta dei prodotti.
+* **Aggiornamento Valutazione del Venditore**: Il trigger **trg_update_seller_rating** aggiorna automaticamente la valutazione media di un venditore in base alle recensioni dei suoi prodotti, aiutando a mantenere valutazioni accurate e aggiornate.
+* **Aggiornamento Stato dell'Ordine**: Il trigger **trg_auto_update_order_status** aggiorna automaticamente lo stato degli ordini in base alle tempistiche, migliorando l'efficienza del flusso di lavoro degli ordini e riducendo la necessità di intervento manuale.
+* **Prevenzione Cancellazione Prodotti**: Il trigger **trg_prevent_product_deletion_if_active_orders** impedisce la cancellazione di prodotti che hanno ordini attivi, proteggendo l'integrità dei dati e prevenendo errori di gestione dell'inventario.  
 
-Di seguito viene illustrato illustrato il trigger manage_inventory_on_order():
+Di seguito viene illustrato illustrato il trigger **manage_inventory_on_order()**:
 
     
 ```sql
@@ -364,15 +362,34 @@ La sicurezza è una priorità fondamentale per l'applicazione, con diverse misur
 
 ---
 
+<a name="Ulteriori-informazioni" /></a>
+
+## Ulteriori informazioni
+
+### Connessione al Database
+
+Per la connessione al database, abbiamo utilizzato la seguente stringa di connessione:
+
+```python
+DATABASE_URL = 'postgresql://Progetto_owner:pQxVqHj8hG7R@ep-aged-snow-a24c6vx8.eu-central-1.aws.neon.tech/Progetto?sslmode=require'
+```
+
+Abbiamo optato per Neon Console, che ci ha permesso di avere un database  PostgreSQL online. Questo ha facilitato la collaborazione tra i membri del gruppo, consentendo a tutti e tre di lavorare insieme sullo stesso database in tempo reale.
+
+
+---
+
 <a name="Contributo-al-progetto-(appendice)"></a>
 
 ## Contributo al progetto (appendice)
 
-Il progetto è stato sviluppato collaborativamente dai membri del team, con ogni membro che ha contribuito in modo significativo alle varie fasi del progetto.
+Il progetto è stato sviluppato attraverso una collaborazione stretta e continua tra tutti i membri del team. Sebbene ciascuno di noi abbia avuto aree di responsabilità specifiche, spesso abbiamo lavorato insieme, supportandoci a vicenda nelle diverse fasi dello sviluppo.
 
-* **Alessandro Sartori**: Ha guidato il design del database, creando lo schema logico e implementando le query principali. Inoltre, ha documentato l'intero processo di progettazione e scelte implementative.
-* **Federico Riato**: Ha sviluppato il backend dell'applicazione, implementando le API, gestendo l'autenticazione, l'autorizzazione e la gestione degli ordini.
-* **Federico Vedovotto**: Ha sviluppato il frontend, implementando le interfacce utente, integrando il design con il backend e eseguendo i test e il debug per assicurare che l'applicazione funzionasse correttamente su diverse piattaforme e dispositivi.
+* **Alessandro Sartori**: Ha avuto la responsabilità principale per il design del database, occupandosi della creazione dello schema logico e dell'implementazione delle query principali. Inoltre, ha curato gli aspetti legati alla sicurezza dell'applicazione, garantendo l'integrità e la protezione dei dati.
+* **Federico Riato**: Ha guidato lo sviluppo del backend dell'applicazione, concentrandosi sull'implementazione delle API, sull'autenticazione e autorizzazione degli utenti, e sulla gestione dei prodotti all'interno del sistema.
+* **Federico Vedovotto**: Ha svolto un ruolo chiave nello sviluppo del frontend, progettando e implementando le interfacce utente. È stato anche responsabile della gestione degli ordini e della procedura di checkout, assicurando un'esperienza utente fluida e intuitiva.
+
+Abbiamo collaborato frequentemente, aiutandoci l'un l'altro nelle varie aree del progetto, lavorando insieme per superare le sfide e garantire la coerenza e l'efficacia complessiva dell'applicazione.
 
 ---
 
@@ -380,4 +397,4 @@ Il progetto è stato sviluppato collaborativamente dai membri del team, con ogni
 
 ## Considerazioni Finali e Miglioramenti Futuri
 
-Il progetto, pur essendo stato sviluppato con tecnologie robuste e ben integrate, potrebbe beneficiare di ulteriori miglioramenti, come l'implementazione di un sistema di caching per ridurre i tempi di caricamento delle pagine più pesanti, e l'integrazione di sistemi di pagamento reali per rendere l'applicazione pronta per l'uso in ambienti di produzione.
+Il progetto, pur essendo stato sviluppato con tecnologie robuste e ben integrate, potrebbe beneficiare di ulteriori miglioramenti, come l'implementazione di un sistema di caching per ridurre i tempi di caricamento delle pagine più pesanti. Un altro possibile miglioramento futuro è l'integrazione di sistemi di pagamento reali, utilizzando API come Stripe o PayPal, per rendere l'applicazione pronta per l'uso in ambienti di produzione. Inoltre, l'introduzione di un sistema di raccomandazione basato su machine learning potrebbe arricchire ulteriormente l'esperienza utente, offrendo suggerimenti personalizzati basati sulla cronologia degli acquisti e delle ricerche degli utenti.
