@@ -1,105 +1,15 @@
 ## Trigger
 
-1. [ ] **Aggiornamento del livello di inventario**:
-   - Quando viene effettuato un ordine, ridurre la quantità del prodotto ordinato dal livello di inventario.
-   - Se un ordine viene annullato, ripristinare la quantità del prodotto nel livello di inventario.
-   - Se un ordine viene rimborsato, ripristinare la quantità del prodotto nel livello di inventario.
-   - Se un ordine viene cancellato, ripristinare la quantità del prodotto nel livello di inventario.
-
-2. [ ] **Verifica del ruolo utente alla registrazione**:
-   - Assicurarsi che il ruolo assegnato a un utente sia valido (es. 'buyer' o 'seller').
-   - Assegnare automaticamente il ruolo di 'buyer' a un nuovo utente.
-   - Assegnare automaticamente il ruolo di 'seller' a un nuovo utente che ha completato la registrazione come venditore.
-   - Impedire agli utenti di registrarsi con ruoli non validi.
-   - Impedire agli utenti di modificare il proprio ruolo.
-   - Impedire agli utenti di eliminare il proprio account se ci sono ordini in corso.
-   - Impedire agli utenti di eliminare il proprio account se ci sono prodotti in vendita.
-   - Impedire agli utenti di eliminare il proprio account se ci sono pagamenti in sospeso.
-   
-3. [ ] **Aggiornamento della valutazione del venditore**:
-   - Quando viene aggiunta una recensione per un prodotto, aggiornare la valutazione media del venditore.
-
-4. [ ] **Aggiornamento della valutazione dell'acquirente**:
-   - Quando un venditore lascia una valutazione per un acquirente (es. comportamento durante la transazione), aggiornare la valutazione media dell'acquirente.
-
-5. [ ] **Notifiche sugli ordini**:
-   - Inviare una notifica all'utente quando lo stato di un ordine viene aggiornato (es. da 'in lavorazione' a 'spedito').
-   - Inviare una notifica all'utente quando un ordine viene consegnato.
-   - Inviare una notifica all'utente quando un ordine viene annullato.
-   - Inviare una notifica all'utente quando un ordine viene rimborsato.
-   - Inviare una notifica all'utente quando un ordine viene cancellato.
-   - Inviare una notifica all'utente quando un ordine viene completato.
-   - Inviare una notifica all'utente quando un ordine viene pagato.
-   - Inviare una notifica all'utente quando un ordine viene spedito.
-
-6. [ ] **Rimozione di prodotti**:
-   - Prima di eliminare un prodotto, verificare che non ci siano ordini in corso per quel prodotto. In caso affermativo, impedire la rimozione.
-   - Prima di eliminare un prodotto, verificare che non ci siano recensioni associate a quel prodotto. In caso affermativo, impedire la rimozione.
-   - Prima di eliminare un prodotto, verificare che non ci siano pagamenti in sospeso per quel prodotto. In caso affermativo, impedire la rimozione.
-   - Prima di eliminare un prodotto, verificare che non ci siano prodotti in vendita associati a quel prodotto. In caso affermativo, impedire la rimozione.
-
-7. [ ] **Verifica della disponibilità del prodotto**:
-   - Prima di aggiungere un prodotto al carrello, verificare che il prodotto sia ancora disponibile in quantità sufficiente.
-   - Prima di effettuare un ordine, verificare che tutti i prodotti siano ancora disponibili in quantità sufficiente.
-   - Prima di effettuare un pagamento, verificare che tutti i prodotti siano ancora disponibili in quantità sufficiente.
-   - Prima di effettuare un pagamento, verificare che il prezzo totale dell'ordine sia corretto.
-   - Prima di effettuare un pagamento, verificare che l'indirizzo di fatturazione dell'utente sia valido.
-   - Prima di effettuare un pagamento, verificare che l'indirizzo di spedizione dell'utente sia valido.
-   - Prima di effettuare un pagamento, verificare che il metodo di pagamento dell'utente sia valido.
-   - Prima di effettuare un pagamento, verificare che la valuta dell'importo totale dell'ordine sia corretta.
-   - Prima di effettuare un pagamento, verificare che l'utente abbia abbastanza fondi per coprire l'importo totale dell'ordine.
-   - Prima di effettuare un pagamento, verificare che l'utente abbia un credito sufficiente per coprire l'importo totale dell'ordine.
-
-8. [ ] **Aggiornamento del prezzo del prodotto**: 
-   - Quando il prezzo di un prodotto viene aggiornato, aggiornare il prezzo di tutti gli ordini che contengono quel prodotto.
-   - Quando il prezzo di un prodotto viene aggiornato, aggiornare il prezzo di tutti i prodotti in vendita che corrispondono a quel prodotto.
-   - Quando il prezzo di un prodotto viene aggiornato, aggiornare il prezzo di tutti i prodotti nel carrello che corrispondono a quel prodotto.
-   - Quando il prezzo di un prodotto viene aggiornato, aggiornare il prezzo di tutti i prodotti nei pagamenti in sospeso che corrispondono a quel prodotto.
-
-9. [ ] **Calcolo del totale ordine**:
-   - Calcolare automaticamente l'importo totale di un ordine in base ai prodotti aggiunti al carrello.
-
-10. [ ] **Notifiche di rimborso**:
-    - Inviare una notifica all'utente quando viene emesso un rimborso per un ordine.
-    - Inviare una notifica all'utente quando un ordine viene rimborsato.
-    - Inviare una notifica all'utente quando un ordine viene annullato.
-    - Inviare una notifica all'utente quando un ordine viene cancellato.
-    - Inviare una notifica all'utente quando un ordine viene completato.
-    - Inviare una notifica all'utente quando un ordine viene pagato.
-    - Inviare una notifica all'utente quando un ordine viene spedito.
-    - Inviare una notifica all'utente quando un ordine viene consegnato.
-
-11. [ ] **Aggiornamento dello stato dell'ordine**:
-    - Quando viene effettuato un pagamento, aggiornare lo stato dell'ordine da 'in attesa' a 'pagato'.
-    - Quando un ordine viene spedito, aggiornare lo stato dell'ordine da 'pagato' a 'spedito'.
-    - Quando un ordine viene consegnato, aggiornare lo stato dell'ordine da 'spedito' a 'consegnato'.
-    - Quando un ordine viene rimborsato, aggiornare lo stato dell'ordine da 'pagato' a 'rimborsato'.
-    - Quando un ordine viene annullato, aggiornare lo stato dell'ordine da 'pagato' a 'annullato'.
-    - Quando un ordine viene cancellato, aggiornare lo stato dell'ordine da 'pagato' a 'cancellato'.
-    - Quando un ordine viene completato, aggiornare lo stato dell'ordine da 'consegnato' a 'completato'.
-
-12. [ ] **Controllo del limite di credito**:
-    - Impedire agli utenti di effettuare ordini se superano il loro limite di credito.
-    - Impedire agli utenti di effettuare pagamenti se superano il loro limite di credito.
-    - Impedire agli utenti di effettuare ordini se superano il loro limite di credito.
-
-13. [ ] **Calcolo del totale speso**:
-    - Calcolare automaticamente l'importo totale speso da un utente in base ai suoi ordini.
-
-14. [ ] **Aggiornamento dello stato del pagamento**:
-    - Quando un ordine viene spedito, aggiornare lo stato del pagamento da 'in attesa' a 'completato'.
-    - Se un ordine viene annullato, aggiornare lo stato del pagamento da 'in attesa' a 'annullato'.
-    - Se un ordine viene consegnato, aggiornare lo stato del pagamento da 'completato' a 'consegnato'.
-    - Se un ordine viene rimborsato, aggiornare lo stato del pagamento da 'completato' a 'rimborsato'.
-    - Se un ordine viene cancellato, aggiornare lo stato del pagamento da 'completato' a 'cancellato'.
-
-15. [ ] **Aggiornamento dello stato del prodotto**:
-    - Quando un ordine viene spedito, aggiornare lo stato del prodotto da 'disponibile' a 'in transito'.
-    - Quando un ordine viene consegnato, aggiornare lo stato del prodotto da 'in transito' a 'consegnato'.
-    - Se un ordine viene cancellato, aggiornare lo stato del prodotto da 'in transito' a 'disponibile'.
-    - Se un ordine viene rimborsato, aggiornare lo stato del prodotto da 'in transito' a 'disponibile'.
-    - Se un ordine viene annullato, aggiornare lo stato del prodotto da 'in transito' a 'disponibile'.
-    - Se un prodotto viene eliminato, aggiornare lo stato di tutti gli ordini che contengono quel prodotto a 'prodotto non disponibile'.
+1. [x] **Trigger per la validazione e assegnazione del ruolo**:
+    - **Descrizione**: Questo trigger assegna automaticamente il ruolo di 'buyer' agli utenti che non specificano un ruolo durante l'inserimento o l'aggiornamento. Inoltre, verifica che il ruolo assegnato sia valido (deve essere uno tra 'buyer', 'seller', 'admin').
+2. [x] **Trigger per la gestione dell'inventario sugli ordini**:
+    - **Descrizione**: Questo trigger gestisce automaticamente l'inventario dei prodotti quando viene effettuato un ordine, annullato o modificato. Riduce la quantità disponibile del prodotto in caso di ordine, e la ripristina se l'ordine viene cancellato o modificato.
+3. [x] **Trigger per aggiornare la valutazione del venditore**:
+    - **Descrizione**: Questo trigger aggiorna la valutazione media del venditore ogni volta che viene inserita, aggiornata o eliminata una recensione relativa a uno dei prodotti del venditore.
+4. [x] **Trigger per aggiornare automaticamente lo stato degli ordini**:
+    - **Descrizione**: Questo trigger aggiorna automaticamente lo stato di un ordine da 'confirmed' a 'shipped' o 'delivered' in base alla data di conferma e al tempo trascorso.
+5. [x] **Trigger per impedire la cancellazione dei prodotti con ordini attivi**:
+    - **Descrizione**: Questo trigger impedisce la cancellazione di un prodotto se esistono ordini attivi associati a quel prodotto.
 
 ## Check Constraint
 

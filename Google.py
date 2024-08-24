@@ -8,6 +8,18 @@ from googleapiclient.discovery import build
 
 
 def Create_Service(client_secret_file, api_name, api_version, *scopes):
+    """
+    Create a Google API service.
+
+    Args:
+        client_secret_file (str): Path to the client secret JSON file.
+        api_name (str): Name of the Google API service.
+        api_version (str): Version of the Google API service.
+        *scopes (str): Scopes required for the Google API service.
+
+    Returns:
+        googleapiclient.discovery.Resource: The Google API service resource object.
+    """
     print("Attempting to create Google Drive service...")
     print(f"Using client secret file: {client_secret_file}")
     print(f"Scopes: {scopes}")
@@ -64,11 +76,29 @@ def Create_Service(client_secret_file, api_name, api_version, *scopes):
 
 
 def convert_to_RFC_datetime(year=1900, month=1, day=1, hour=0, minute=0):
+    """
+    Convert a date and time to RFC 3339 format.
+
+    Args:
+        year (int): The year.
+        month (int): The month.
+        day (int): The day.
+        hour (int): The hour.
+        minute (int): The minute.
+
+    Returns:
+        str: The date and time in RFC 3339 format.
+    """
     dt = datetime.datetime(year, month, day, hour, minute, 0).isoformat() + 'Z'
     return dt
 
 
 def test_socket_connection():
+    """
+    Test the socket connection to www.google.com on port 80.
+
+    Prints the result of the connection attempt.
+    """
     try:
         sock = socket.create_connection(("www.google.com", 80))
         print("Connection successful")

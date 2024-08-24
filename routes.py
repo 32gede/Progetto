@@ -7,6 +7,8 @@ from flask_login import login_user, login_required, current_user, logout_user
 import os
 from datetime import datetime
 from collegamento_drive import carica_imm
+
+
 # IMPORT FROM OTHER FILES #
 
 from models import User, UserSeller, Product, Brand, Category, Review, CartItem, Order, OrderItem, Address
@@ -16,6 +18,7 @@ from form import ProductForm, ProfileForm, RegistrationForm, LoginForm, ReviewFo
     RemoveReviewForm
 
 # DEFINE BLUEPRINT #
+
 import logging
 
 logging.basicConfig()
@@ -26,15 +29,36 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 
 def allowed_file(filename):
+    """
+    Check if a file is allowed based on its extension.
+
+    Args:
+        filename (str): The name of the file.
+
+    Returns:
+        bool: True if the file is allowed, False otherwise.
+    """
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def ensure_upload_folder():
+    """
+    Ensure that the upload folder exists. Create it if it does not exist.
+    """
     if not os.path.exists(UPLOAD_FOLDER):
         os.makedirs(UPLOAD_FOLDER)
 
 
 def role_required(*roles):
+    """
+    Decorator to restrict access to routes based on user roles.
+
+    Args:
+        *roles: Variable length argument list of roles.
+
+    Returns:
+        function: The decorated function.
+    """
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
@@ -54,9 +78,14 @@ def role_required(*roles):
 
 # MAIN ROUTES #
 
-
 @main_routes.route('/')
 def index():
+    """
+    Route for the index page.
+
+    Returns:
+        str: Rendered template for the index page.
+    """
     update_order_status()
     if current_user.is_authenticated:
         with get_db_session() as db_session:
@@ -72,6 +101,12 @@ def index():
 
 @main_routes.route('/login', methods=['GET', 'POST'])
 def login():
+    """
+    Route for user login.
+
+    Returns:
+        str: Rendered template for the login page.
+    """
     form = LoginForm()
     if form.validate_on_submit():
         with get_db_session() as db_session:
@@ -88,6 +123,12 @@ def login():
 
 @main_routes.route('/registration', methods=['GET', 'POST'])
 def registration():
+    """
+    Route for user registration.
+
+    Returns:
+        str: Rendered template for the registration page.
+    """
     form = RegistrationForm()
 
     if form.validate_on_submit():
@@ -145,6 +186,12 @@ def registration():
 
 @main_routes.route('/check-username', methods=['POST'])
 def check_username():
+    """
+    Route to check if a username already exists.
+
+    Returns:
+        json: JSON response indicating if the username exists.
+    """
     data = request.get_json()
     username = data.get('username')
 
@@ -160,6 +207,12 @@ def check_username():
 @login_required
 @role_required('buyer', 'seller')
 def logout():
+    """
+    Route for user logout.
+
+    Returns:
+        str: Redirect to the index page.
+    """
     logout_user()  # Log out the user
     session.pop('id', None)  # Clear the session
     return redirect(url_for('main.index'))
@@ -169,6 +222,12 @@ def logout():
 @login_required
 @role_required('buyer', 'seller')
 def profile_view():
+    """
+    Route to view user profile.
+
+    Returns:
+        str: Rendered template for the profile page.
+    """
     form = ProductForm()  # Create a form instance
     with get_db_session() as db_session:
         user = db_session.query(User).options(joinedload(User.address)).filter_by(id=current_user.id).first()
@@ -184,6 +243,12 @@ def profile_view():
 @login_required
 @role_required('buyer', 'seller')
 def edit_profile():
+    """
+    Route to edit user profile.
+
+    Returns:
+        str: Rendered template for the edit profile page.
+    """
     with get_db_session() as db_session:
         # Retrieve the current user
         user = db_session.query(User).filter_by(id=current_user.id).first()
@@ -244,6 +309,12 @@ def edit_profile():
 @login_required
 @role_required('seller')
 def view_products_seller():
+    """
+    Route to view products for sellers.
+
+    Returns:
+        str: Rendered template for the seller's products page.
+    """
     form = ProductForm()  # Create a form instance
     with get_db_session() as db_session:
         products = db_session.query(Product).filter_by(seller_id=current_user.id).all()
@@ -259,6 +330,12 @@ def view_products_seller():
 @login_required
 @role_required('buyer')
 def view_products_buyer():
+    """
+    Route to view products for buyers.
+
+    Returns:
+        str: Rendered template for the buyer's products page.
+    """
     form = SearchProductForm(request.args)
     with get_db_session() as db_session:
         products = db_session.query(Product).all()
@@ -271,6 +348,15 @@ def view_products_buyer():
 @login_required
 @role_required('buyer', 'seller')
 def view_product(product_id):
+    """
+    Route to view a specific product.
+
+    Args:
+        product_id (int): The ID of the product.
+
+    Returns:
+        str: Rendered template for the product page.
+    """
     form = ProductForm()  # Create a form instance
     with get_db_session() as db_session:
         product = db_session.query(Product).filter_by(id=product_id).first()
@@ -283,6 +369,12 @@ def view_product(product_id):
 @login_required
 @role_required('seller')
 def add_product():
+    """
+    Route to add a new product.
+
+    Returns:
+        str: Rendered template for the add product page.
+    """
     form = ProductForm()
 
     with get_db_session() as db_session:
@@ -351,6 +443,15 @@ def add_product():
 @login_required
 @role_required('seller')
 def remove_product(product_id):
+    """
+    Route to remove a product.
+
+    Args:
+        product_id (int): The ID of the product.
+
+    Returns:
+        str: Redirect to the seller's products page.
+    """
     with get_db_session() as db_session:
         product = db_session.query(Product).filter_by(id=product_id).first()
 
@@ -378,6 +479,15 @@ def remove_product(product_id):
 @login_required
 @role_required('seller')
 def edit_product(product_id):
+    """
+    Route to edit a product.
+
+    Args:
+        product_id (int): The ID of the product.
+
+    Returns:
+        str: Rendered template for the edit product page.
+    """
     form = ProductForm()
     with get_db_session() as db_session:
         product = db_session.query(Product).filter_by(id=product_id).first()
@@ -443,6 +553,15 @@ def edit_product(product_id):
 @login_required
 @role_required('buyer', 'seller')
 def view_reviews(product_id):
+    """
+    Route to view reviews for a product.
+
+    Args:
+        product_id (int): The ID of the product.
+
+    Returns:
+        str: Rendered template for the reviews page.
+    """
     form = ReviewForm()
     with get_db_session() as db_session:
         product = db_session.query(Product).filter_by(id=product_id).first()
@@ -476,6 +595,15 @@ def view_reviews(product_id):
 @login_required
 @role_required('buyer')
 def add_review(product_id):
+    """
+    Route to add a review for a product.
+
+    Args:
+        product_id (int): The ID of the product.
+
+    Returns:
+        str: Rendered template for the add review page.
+    """
     form = ReviewForm()
     with get_db_session() as db_session:
         product = db_session.query(Product).filter_by(id=product_id).first()
@@ -511,6 +639,16 @@ def add_review(product_id):
 @login_required
 @role_required('buyer')
 def edit_review(product_id, review_id):
+    """
+    Route to edit a review for a product.
+
+    Args:
+        product_id (int): The ID of the product.
+        review_id (int): The ID of the review.
+
+    Returns:
+        Response: The rendered template for editing the review or a redirect response.
+    """
     form = ReviewForm()
     with get_db_session() as db_session:
         review = db_session.query(Review).filter_by(id=review_id, user_id=current_user.id,
@@ -526,7 +664,7 @@ def edit_review(product_id, review_id):
                 review.rating = form.rating.data
                 review.comment = form.comment.data
 
-                # Aggiorna il rating del venditore
+                # Update the seller's rating
                 seller = product.seller
                 seller_reviews = db_session.query(Review).join(Product).filter(Product.seller_id == seller.id).all()
                 seller_rating = sum(review.rating for review in seller_reviews) / len(seller_reviews)
@@ -541,11 +679,11 @@ def edit_review(product_id, review_id):
             flash('Review updated successfully.')
             return redirect(url_for('main.view_product', product_id=product.id))
 
-        # Prepopola il form con i dati della recensione
+        # Prepopulate the form with the review data
         form.rating.data = review.rating
         form.comment.data = review.comment
 
-        # Passa anche la review al template
+        # Pass the review to the template
         return render_template('edit_review.html', form=form, product=product, review=review)
 
 
@@ -553,6 +691,16 @@ def edit_review(product_id, review_id):
 @login_required
 @role_required('buyer', 'seller')
 def remove_review(product_id, review_id):
+    """
+    Route to remove a review for a product.
+
+    Args:
+        product_id (int): The ID of the product.
+        review_id (int): The ID of the review.
+
+    Returns:
+        Response: A redirect response to the product view.
+    """
     with get_db_session() as db_session:
         try:
             product = db_session.query(Product).filter_by(id=product_id).first()
@@ -573,13 +721,13 @@ def remove_review(product_id, review_id):
 
             db_session.delete(review)
 
-            # Update seller's rating
+            # Update the seller's rating
             seller = product.seller
             seller_reviews = db_session.query(Review).join(Product).filter(Product.seller_id == seller.id).all()
             if seller_reviews:
                 seller_rating = sum(review.rating for review in seller_reviews) / len(seller_reviews)
             else:
-                seller_rating = 0  # Imposta il rating a 0 se non ci sono più recensioni
+                seller_rating = 0  # Set rating to 0 if there are no more reviews
 
             seller.seller_rating = seller_rating
 
@@ -599,6 +747,12 @@ def remove_review(product_id, review_id):
 @login_required
 @role_required('buyer')
 def cart():
+    """
+    Route to view the cart.
+
+    Returns:
+        Response: The rendered template for the cart.
+    """
     form = EditCartForm()
     with get_db_session() as db_session:
         cart_items = db_session.query(CartItem).filter_by(user_id=current_user.id).all()
@@ -610,6 +764,15 @@ def cart():
 @login_required
 @role_required('buyer')
 def add_to_cart(product_id):
+    """
+    Route to add a product to the cart.
+
+    Args:
+        product_id (int): The ID of the product to add.
+
+    Returns:
+        Response: A redirect response to the cart or product view.
+    """
     form = AddToCartForm()
 
     # Print form data and validation status for debugging
@@ -655,6 +818,15 @@ def add_to_cart(product_id):
 @login_required
 @role_required('buyer')
 def remove_from_cart(item_id):
+    """
+    Route to remove an item from the cart.
+
+    Args:
+        item_id (int): The ID of the cart item to remove.
+
+    Returns:
+        Response: A redirect response to the cart view.
+    """
     form = RemoveFromCartForm()
     if form.validate_on_submit():
         with get_db_session() as db_session:
@@ -678,6 +850,15 @@ def remove_from_cart(item_id):
 @login_required
 @role_required('buyer')
 def edit_cart(item_id):
+    """
+    Route to edit the quantity of an item in the cart.
+
+    Args:
+        item_id (int): The ID of the cart item to edit.
+
+    Returns:
+        Response: A redirect response to the cart view.
+    """
     form = EditCartForm()
     if form.validate_on_submit():
         new_quantity = form.new_quantity.data
@@ -701,11 +882,16 @@ def edit_cart(item_id):
     return render_template('cart.html', form=form)
 
 
-# Update the checkout route
 @main_routes.route('/checkout', methods=['GET', 'POST'])
 @login_required
 @role_required('buyer')
 def checkout():
+    """
+    Route to handle the checkout process.
+
+    Returns:
+        Response: The rendered template for checkout or a redirect response.
+    """
     form = CheckoutForm()
 
     with get_db_session() as db_session:
@@ -721,7 +907,7 @@ def checkout():
                 address = form.address.data or current_user.address.address
                 city = form.city.data or current_user.address.city
 
-                # Raggruppa gli articoli del carrello per venditore
+                # Group cart items by seller
                 items_by_seller = {}
                 for item in cart_items:
                     seller_id = item.product.seller_id
@@ -729,16 +915,16 @@ def checkout():
                         items_by_seller[seller_id] = []
                     items_by_seller[seller_id].append(item)
 
-                # Crea un ordine separato per ogni venditore
+                # Create a separate order for each seller
                 for seller_id, items in items_by_seller.items():
                     total = sum(item.product.price * item.quantity for item in items)
 
-                    # Crea un nuovo ordine per questo venditore
+                    # Create a new order for this seller
                     new_order = Order(user_id=current_user.id, total=total, address_id=current_user.address.id)
                     db_session.add(new_order)
                     db_session.commit()
 
-                    # Aggiungi gli articoli all'ordine, aggiorna l'inventario e rimuovi dal carrello
+                    # Add items to the order, update inventory, and remove from cart
                     for item in items:
                         order_item = OrderItem(
                             order_id=new_order.id,
@@ -748,7 +934,7 @@ def checkout():
                         )
                         db_session.add(order_item)
 
-                        # Aggiorna l'inventario
+                        # Update inventory
                         product = db_session.query(Product).filter_by(id=item.product_id).first()
                         if product.quantity < item.quantity:
                             flash('Quantità insufficiente per il prodotto: {}'.format(product.name), 'danger')
@@ -764,7 +950,7 @@ def checkout():
                 return redirect(url_for('main.cart'))
 
             flash('Ordine completato con successo!', 'success')
-            return redirect(url_for('main.order_history'))  # Reindirizza alla pagina della cronologia degli ordini
+            return redirect(url_for('main.order_history'))  # Redirect to order history page
 
         user_buyer = db_session.query(User).filter_by(id=current_user.id).first()
         return render_template('checkout.html', cart_items=cart_items, user_buyer=user_buyer, form=form)
@@ -774,6 +960,12 @@ def checkout():
 @login_required
 @role_required('buyer')
 def complete_order():
+    """
+    Route to complete an order.
+
+    Returns:
+        Response: A redirect response to the order history view.
+    """
     with get_db_session() as db_session:
         try:
             user_buyer = db_session.query(User).filter_by(id=current_user.id).first()
@@ -790,7 +982,7 @@ def complete_order():
             else:
                 address = user_buyer.address
 
-            # Raggruppa gli articoli del carrello per venditore
+            # Group cart items by seller
             items_by_seller = {}
             for item in cart_items:
                 seller_id = item.product.seller_id
@@ -798,16 +990,16 @@ def complete_order():
                     items_by_seller[seller_id] = []
                 items_by_seller[seller_id].append(item)
 
-            # Crea un ordine separato per ogni venditore
+            # Create a separate order for each seller
             for seller_id, items in items_by_seller.items():
                 total = sum(item.product.price * item.quantity for item in items)
 
-                # Crea un nuovo ordine per questo venditore
+                # Create a new order for this seller
                 new_order = Order(user_id=current_user.id, total=total, address_id=address.id)
                 db_session.add(new_order)
                 db_session.commit()
 
-                # Aggiungi gli articoli all'ordine, aggiorna l'inventario e rimuovi dal carrello
+                # Add items to the order, update inventory, and remove from cart
                 for item in items:
                     order_item = OrderItem(order_id=new_order.id, product_id=item.product.id, quantity=item.quantity,
                                            price=item.product.price)
@@ -828,6 +1020,12 @@ def complete_order():
 @login_required
 @role_required('buyer')
 def update_address():
+    """
+    Route to update the address during checkout.
+
+    Returns:
+        Response: A redirect response to the checkout view.
+    """
     form = CheckoutForm()
     if form.validate_on_submit():
         with get_db_session() as db_session:
@@ -847,12 +1045,18 @@ def update_address():
 @login_required
 @role_required('buyer')
 def order_history():
+    """
+    Route to view the order history.
+
+    Returns:
+        Response: The rendered template for order history.
+    """
     with get_db_session() as db_session:
         try:
-            # Recupera gli ordini dell'utente
+            # Retrieve the user's orders
             orders = db_session.query(Order).filter_by(user_id=current_user.id).order_by(Order.created_at.desc()).all()
 
-            # Aggiorna lo stato degli ordini in base al tempo
+            # Update order status based on time
             for order in orders:
                 order.update_status_based_on_time()
 
@@ -862,11 +1066,11 @@ def order_history():
             flash(str(e), 'error')
             return redirect(url_for('main.index'))
 
-        # Carica anche gli articoli per ciascun ordine
+        # Load items for each order
         for order in orders:
             order.items = db_session.query(OrderItem).filter_by(order_id=order.id).all()
 
-        # Supponiamo che il tempo di spedizione stimato sia di 5 giorni lavorativi
+        # Assume estimated delivery time is 5 business days
         estimated_delivery_days = 5
         return render_template('order_history.html', orders=orders, estimated_delivery_days=estimated_delivery_days)
 
@@ -875,6 +1079,12 @@ def order_history():
 @login_required
 @role_required('seller')
 def manage_orders():
+    """
+    Route for sellers to manage their orders.
+
+    Returns:
+        Response: The rendered template for managing orders.
+    """
     form = ConfirmOrderForm()
     with get_db_session() as db_session:
         seller = db_session.query(UserSeller).filter_by(id=current_user.seller.id).first()
@@ -897,6 +1107,15 @@ def manage_orders():
 @login_required
 @role_required('seller')
 def confirm_order(order_id):
+    """
+    Route to confirm an order.
+
+    Args:
+        order_id (int): The ID of the order to confirm.
+
+    Returns:
+        Response: A redirect response to the manage orders view.
+    """
     form = ConfirmOrderForm()
     if form.validate_on_submit():
         with get_db_session() as db_session:
@@ -904,7 +1123,7 @@ def confirm_order(order_id):
                 order = db_session.query(Order).filter_by(id=order_id).first()
                 if order and order.status == 'In attesa':
                     order.status = 'Confermato'
-                    order.confirmed_at = datetime.utcnow()  # Assicurati di avere questo campo nella tua tabella
+                    order.confirmed_at = datetime.utcnow()  # Ensure this field exists in your table
                     db_session.commit()
                     flash('Ordine confermato con successo.', 'success')
                 else:
@@ -917,12 +1136,18 @@ def confirm_order(order_id):
 
 
 def update_order_status():
+    """
+    Update the status of all orders based on time.
+
+    This function retrieves all orders from the database and updates their status
+    based on the elapsed time since their creation.
+    """
     with get_db_session() as db_session:
         try:
-            orders = db_session.query(Order).all()  # Controlla tutti gli ordini
+            orders = db_session.query(Order).all()  # Retrieve all orders
             for order in orders:
                 order.update_status_based_on_time()
-            db_session.commi
+            db_session.commit()
         except Exception as e:
             db_session.rollback()
             flash(str(e), 'error')
@@ -934,6 +1159,15 @@ def update_order_status():
 @login_required
 @role_required('buyer')
 def search_product():
+    """
+    Route to search for products.
+
+    This route handles the search functionality for products based on various filters
+    such as name, description, price range, brand, and category.
+
+    Returns:
+        Response: The rendered template for the buyer's products page with the search results.
+    """
     form = SearchProductForm(request.args)  # Create the form instance with request arguments
 
     if form.validate():
@@ -967,6 +1201,14 @@ def search_product():
 @login_required
 @role_required('buyer')
 def filter_brands():
+    """
+    Route to filter brands based on a search term.
+
+    This route handles the filtering of brands by a search term provided by the user.
+
+    Returns:
+        json: JSON response containing the list of brand names that match the search term.
+    """
     form = FilterBrandsForm(request.args)
     if form.validate():
         with get_db_session() as db_session:
@@ -980,6 +1222,14 @@ def filter_brands():
 @login_required
 @role_required('buyer')
 def filter_categories():
+    """
+    Route to filter categories based on a search term.
+
+    This route handles the filtering of categories by a search term provided by the user.
+
+    Returns:
+        json: JSON response containing the list of category names that match the search term.
+    """
     form = FilterCategoriesForm(request.args)
     if form.validate():
         with get_db_session() as db_session:
@@ -990,6 +1240,21 @@ def filter_categories():
 
 
 def search_products(db_session, name, description, min_price, max_price, brand_name, category_name):
+    """
+    Search for products based on various filters.
+
+    Args:
+        db_session (Session): The database session.
+        name (str): The name of the product.
+        description (str): The description of the product.
+        min_price (float): The minimum price of the product.
+        max_price (float): The maximum price of the product.
+        brand_name (str): The name of the brand.
+        category_name (str): The name of the category.
+
+    Returns:
+        list: A list of products that match the search criteria.
+    """
     query = db_session.query(Product)
 
     if name:
