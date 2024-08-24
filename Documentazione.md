@@ -37,8 +37,10 @@ Il progetto è organizzato secondo la seguente struttura:
 - **`database.py`**: Contiene la configurazione della connessione al database, inclusa l'inizializzazione e la gestione delle sessioni.
 - **`forms.py`**: Definisce i form utilizzati nell'applicazione, validando i dati inseriti dagli utenti e garantendo la sicurezza tramite Flask-WTF.
 - **`templates/`**: Contiene i file HTML utilizzati per la visualizzazione delle pagine web, inclusi layout, form e pagine specifiche per utenti autenticati e non autenticati.
-- **`Google.py`**: Contiene il codice per l'autenticazione con Google.
-- **`collegamento_google.py`**: Contiene il codice per il collegamento con Google.
+
+I seguenti file sono stati utilizzati per implementare l'uploads di immagini ai prodotti:
+- **`Google.py`**: Contiene il codice per l'autenticazione con Google, inclusa la gestione del flusso OAuth 2.0, la richiesta di token di accesso e la verifica delle credenziali dell'utente.
+- **`collegamento_google.py`**: Contiene il codice per il collegamento con Google, gestendo l'integrazione con i servizi di Google per operazioni come la sincronizzazione dei dati e l'accesso alle API di Google.
 
 ---
 
